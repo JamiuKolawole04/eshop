@@ -3,6 +3,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 
 import { ErrorMiddleware } from "../../../packages/error-handler/error-middleware";
+import authRoutes from "./routes/auth.route";
 
 const host = process.env.HOST ?? "localhost";
 const port = process.env.PORT ? Number(process.env.PORT) : 6001;
@@ -24,6 +25,8 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send({ message: "Hello API" });
 });
+
+app.use("/api", authRoutes);
 
 app.use(ErrorMiddleware);
 
