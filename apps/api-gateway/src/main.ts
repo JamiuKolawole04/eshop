@@ -9,13 +9,14 @@ import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 
 const app = express();
+app.disable("x-powered-by");
 
 app.use(
   cors({
     origin: "http://localhost:3000",
     allowedHeaders: ["Authorization", "Content-Type"],
     credentials: true,
-  })
+  }),
 );
 
 app.use(morgan("dev"));
