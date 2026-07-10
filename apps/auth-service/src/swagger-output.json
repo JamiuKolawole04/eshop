@@ -1,0 +1,40 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Eshop Auth Service API",
+    "description": "Auth service for Eshop application",
+    "version": "1.0.0"
+  },
+  "host": ["localhost:6001"],
+  "basePath": "/",
+  "schemes": ["http"],
+  "paths": {
+    "/api/user-registration": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "example": "John Doe"
+                },
+                "email": {
+                  "example": "johndoe@gmail.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

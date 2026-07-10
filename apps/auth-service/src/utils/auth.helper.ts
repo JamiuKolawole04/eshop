@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
-
-import { ValidationError } from "../../../../packages/error-handler";
-import { sendMail } from "./sendMail";
-import { redis } from "../../../../packages/libs/redis";
 import { NextFunction } from "express";
+
+import { ValidationError } from "@packages/error-handler";
+import { sendMail } from "./sendMail";
+import { redis } from "@packages/libs/redis";
 
 const emailRegex = /^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/;
 
