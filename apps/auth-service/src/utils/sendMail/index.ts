@@ -21,6 +21,7 @@ const renderTemplate = (
 ): Promise<string> => {
   const templatePath = path.join(
     process.cwd(),
+    "apps",
     "auth-service",
     "src",
     "utils",

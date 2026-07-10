@@ -7,6 +7,7 @@ module.exports = {
     resolve: {
       alias: {
         "@packages": resolve(__dirname, "../../packages"),
+        "@generated": resolve(__dirname, "../../generated"),
       },
       extensions: [".ts", ".js", ".json"],
     },
