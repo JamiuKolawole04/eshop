@@ -16,9 +16,10 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "customConditions": ["@eshop/source"],
     "paths": {
-      "@packages/*": ["./packages/*"],
       "@generated/*": ["./generated/*"]
     }
   }

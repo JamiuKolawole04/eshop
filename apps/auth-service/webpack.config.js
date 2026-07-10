@@ -4,22 +4,21 @@ const { join, resolve } = require("node:path");
 module.exports = {
   output: {
     path: join(__dirname, "dist"),
-    resolve: {
-      alias: {
-        "@packages": resolve(__dirname, "../../packages"),
-        "@generated": resolve(__dirname, "../../generated"),
-      },
-      extensions: [".ts", ".js", ".json"],
-    },
     clean: true,
     ...(process.env.NODE_ENV !== "production" && {
       devtoolModuleFilenameTemplate: "[absolute-resource-path]",
     }),
   },
+  resolve: {
+    alias: {
+      "@generated": resolve(__dirname, "../../generated"),
+    },
+    extensions: [".ts", ".js", ".json"],
+  },
   plugins: [
     new NxAppWebpackPlugin({
       target: "node",
-      compiler: "tsc",
+      compiler: "swc",
       main: "./src/main.ts",
       tsConfig: "./tsconfig.app.json",
       assets: ["./src/assets"],

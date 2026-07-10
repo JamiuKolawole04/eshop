@@ -3,8 +3,8 @@ import express, { Response } from "express";
 import cookieParser from "cookie-parser";
 import swaggerUI from "swagger-ui-express";
 
-import { ErrorMiddleware } from "@packages/error-handler/error-middleware";
 import authRoutes from "./routes/auth.route";
+import { ErrorMiddleware } from "@packages/error-handler";
 
 const swaggerDocument = require("./swagger-output.json");
 

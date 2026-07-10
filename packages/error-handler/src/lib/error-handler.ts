@@ -1,13 +1,13 @@
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly isOperational: boolean;
-  public readonly details?: any;
+  public readonly details?: unknown;
 
   constructor(
     message: string,
     statusCode: number,
-    isOperational: boolean = true,
-    details?: any
+    isOperational = true,
+    details?: unknown,
   ) {
     super(message);
     this.statusCode = statusCode;
@@ -24,7 +24,7 @@ export class NotFoundError extends AppError {
 }
 
 export class ValidationError extends AppError {
-  constructor(message = "Invalid request data", details?: any) {
+  constructor(message = "Invalid request data", details?: unknown) {
     super(message, 400, true, details);
   }
 }
@@ -42,13 +42,16 @@ export class ForbiddenError extends AppError {
 }
 
 export class DatabaseError extends AppError {
-  constructor(message = "Database Error", details?: any) {
+  constructor(message = "Database Error", details?: unknown) {
     super(message, 500, true, details);
   }
 }
 
 export class RateLimitError extends AppError {
-  constructor(message = "Too many requests, please try again later.") {
-    super(message, 429);
+  constructor(
+    message = "Too many requests, please try again later.",
+    details?: unknown,
+  ) {
+    super(message, 429, true, details);
   }
 }
