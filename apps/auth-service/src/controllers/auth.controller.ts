@@ -42,7 +42,11 @@ export const userRegistration = async (
 };
 
 export const verifyUser = async (
-  req: Request<{}, {}, Partial<Users & { otp: string }>>,
+  req: Request<
+    Record<string, string>,
+    Record<string, string>,
+    Partial<Users & { otp: string }>
+  >,
   res: Response,
   next: NextFunction,
 ) => {
