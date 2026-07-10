@@ -23,6 +23,7 @@
     "morgan": "^1.10.1",
     "nodemailer": "^9.0.3",
     "prisma": "^7.0.0",
+    "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
@@ -62,6 +63,7 @@
     "webpack-cli": "^5.1.4"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ]
 }
