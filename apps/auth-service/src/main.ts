@@ -2,17 +2,11 @@ import cors from "cors";
 import express, { type Response } from "express";
 import cookieParser from "cookie-parser";
 import swaggerUI from "swagger-ui-express";
-import path from "node:path";
-import fs from "node:fs";
 
 import authRoutes from "./routes/auth.route";
 import { ErrorMiddleware } from "@packages/error-handler";
 
-const swaggerPath = path.join(
-  process.cwd(),
-  "apps/auth-service/src/swagger-output.json",
-);
-const swaggerDocument = JSON.parse(fs.readFileSync(swaggerPath, "utf-8"));
+const swaggerDocument = require("./swagger-output.json");
 
 const host = process.env.HOST ?? "localhost";
 const port = process.env.PORT ? Number(process.env.PORT) : 6001;
