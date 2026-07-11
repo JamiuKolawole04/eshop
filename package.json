@@ -60,6 +60,7 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "20.19.9",
     "@types/swagger-ui-express": "^4.1.8",
+    "baseline-browser-mapping": "^2.10.42",
     "concurrently": "^10.0.3",
     "esbuild": "^0.19.2",
     "eslint": "^9.8.0",
