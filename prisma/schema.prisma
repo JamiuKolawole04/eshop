@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  // output   = "../generated/prisma"
+  output   = "../packages/prisma/src/lib/generated"
 }
 
 datasource db {
@@ -25,7 +26,7 @@ model Users {
   password  String?
   following String[]
   avatar    Images?
-  imagesId  String?   @db.ObjectId
+  imagesId  String?  @db.ObjectId
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

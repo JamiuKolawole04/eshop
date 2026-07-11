@@ -8,6 +8,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "../../generated/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "references": []
 }

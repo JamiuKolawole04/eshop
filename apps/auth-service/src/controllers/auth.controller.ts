@@ -8,9 +8,8 @@ import {
   validateRegistrationData,
   verifyOtp,
 } from "../utils/auth.helper";
-import { prisma } from "@packages/prisma";
+import { prisma, Users } from "@packages/prisma";
 import { ValidationError } from "@packages/error-handler";
-import { Users } from "@generated/prisma/client";
 
 export const userRegistration = async (
   req: Request,
