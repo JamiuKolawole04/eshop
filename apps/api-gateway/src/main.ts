@@ -27,11 +27,10 @@ app.set("trust proxy", 1);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: (req: any) => (req.user ? 1000 : 100),
+  max: (req) => (req.user ? 1000 : 100),
   message: "Too many requests, please try again later!",
   standardHeaders: true,
   legacyHeaders: true,
-  keyGenerator: (req) => req.ip!,
 });
 app.use(limiter);
 app.use("/", proxy("http://localhost:6001"));
