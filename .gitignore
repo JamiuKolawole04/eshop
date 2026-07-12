@@ -46,4 +46,5 @@ Thumbs.db
 test-output
 
 /generated/prisma
+packages/prisma/src/lib/generated/
 .env
