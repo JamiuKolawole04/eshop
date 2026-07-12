@@ -79,3 +79,18 @@ export const verifyUser = async (
     return next(error);
   }
 };
+
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      throw new ValidationError("Email and password are required");
+    }
+  } catch (error) {
+    return next(error);
+  }
+};
