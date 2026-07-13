@@ -23,6 +23,9 @@
     },
     {
       "path": "./packages/prisma"
+    },
+    {
+      "path": "./packages/cookies"
     }
   ]
 }
