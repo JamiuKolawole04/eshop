@@ -42,6 +42,7 @@ const server = app.listen(port, host, () => {
   console.log(`Auth service is running at http://${host}:${port}/api`);
   console.log(`Swagger docs available at http://${host}:${port}/api-docs`);
   
+  
 });
 
 server.on("error", console.error);
