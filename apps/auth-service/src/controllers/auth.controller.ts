@@ -87,8 +87,12 @@ export const login = async (
 ) => {
   try {
     const { email, password } = req.body;
+    // if (!email || !password) {
+    //   throw new ValidationError("Email and password are required");
+    // }
+
     if (!email || !password) {
-      throw new ValidationError("Email and password are required");
+      return next(new ValidationError("Email and password are required"))  
     }
   } catch (error) {
     return next(error);
