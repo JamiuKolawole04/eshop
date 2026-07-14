@@ -29,6 +29,13 @@ export class ValidationError extends AppError {
   }
 }
 
+export class ConflictError extends AppError {
+  constructor(message = "Resource conflict", details?: unknown) {
+    super(message, 409, true, details);
+  }
+}
+
+
 export class AuthError extends AppError {
   constructor(message = "Unauthorized") {
     super(message, 401);

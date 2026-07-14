@@ -4,13 +4,15 @@ import jwt from "jsonwebtoken"
 
 import {
   checkOtpRestrictions,
+  handleForgotPassword,
   sendOtp,
   trackOtpRequests,
   validateRegistrationData,
+  verifyForgotPasswordOtp,
   verifyOtp,
 } from "../utils/auth.helper";
 import { prisma, Users } from "@packages/prisma";
-import { AuthError, ValidationError } from "@packages/error-handler";
+import { AuthError, ConflictError, NotFoundError, ValidationError } from "@packages/error-handler";
 import {setCookie} from "@packages/cookies"
 
 export const userRegistration = async (
@@ -27,7 +29,7 @@ export const userRegistration = async (
     });
 
     if (existingUser) {
-      throw new ValidationError("User already exists");
+      throw new ConflictError("User already exists.");
     }
 
     await checkOtpRestrictions(email);
@@ -55,7 +57,7 @@ export const verifyUser = async (
     const { email, otp, password, name } = req.body;
 
     if (!email || !otp || !password || !name) {
-      throw new ValidationError("All fields are required");
+      throw new ValidationError("All fields are required.");
     }
 
     const existingUser = await prisma.users.findUnique({
@@ -63,7 +65,7 @@ export const verifyUser = async (
     });
 
     if (existingUser) {
-      throw new ValidationError("User already exists");
+      throw new ConflictError("User already exists.");
     }
 
     await verifyOtp(email, otp);
@@ -75,7 +77,7 @@ export const verifyUser = async (
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully!",
+      message: "User registered successfully.",
     });
   } catch (error) {
     return next(error);
@@ -91,18 +93,18 @@ export const login = async (
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return next(new ValidationError("Email and password are required"))  
+      return next(new ValidationError("Email and password are required."))  
     }
 
     const user = await prisma.users.findUnique({where: {email}});
 
     if (!user || !user.password) {
-      throw new AuthError("User does not exist!");
+      throw new AuthError("Invalid credentials");
     }
 
     const isMatch = await compare(password, user.password);
     if (!isMatch) {
-      throw new AuthError("Invalid credentials");
+      throw new AuthError("Invalid credentials.");
     }
 
     const accessToken = jwt.sign({
@@ -128,3 +130,46 @@ export const login = async (
     return next(error);
   }
 };
+
+
+export const userForgotPassword = async (req: Request,res: Response,next: NextFunction) => {
+  await handleForgotPassword(req, res, next, "user")
+}
+
+export const verifyUserForgotPassword = async (req: Request,res: Response,next: NextFunction) => {
+  await verifyForgotPasswordOtp(req, res, next)
+}
+
+export const resetUserPassword = async (req: Request,res: Response,next: NextFunction) => {
+  try {
+    const {email, newPassword} = req.body
+    if (!email || !newPassword) {
+      throw new ValidationError("Email and new password are required.")
+    }
+
+    const user = await prisma.users.findUnique({where: {email}})
+
+    if (!user) {
+      throw new NotFoundError("User not found.")
+    }
+
+    const isSamePassword = await compare(newPassword, user.password || "")
+    if (isSamePassword) {
+      throw new ValidationError("New password cannot be the same as the current password.")
+    }
+
+    const hashedPassword = await hash(newPassword, 10)
+
+    await prisma.users.update({
+      where: {email},
+      data: {password: hashedPassword}
+    })
+
+    res.status(200).json({
+      message: "Password reset successfully! Please login with your new password."
+    })
+
+  } catch (error) {
+    next(error)
+  }
+}

@@ -20,6 +20,9 @@
       "path": "../../packages/redis/tsconfig.lib.json"
     },
     {
+      "path": "../../packages/cookies/tsconfig.lib.json"
+    },
+    {
       "path": "../../packages/error-handler/tsconfig.lib.json"
     },
     {
