@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "npx nx run-many --target=serve --all",
-    "auth-docs": "node apps/auth-service/src/swagger.js"
+    "auth-docs": "node apps/auth-service/src/swagger.js",
+    "user-ui": "npx nx dev user-ui"
   },
   "private": true,
   "dependencies": {
@@ -26,8 +27,11 @@
     "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
+    "next": "~16.0.1",
     "nodemailer": "^9.0.3",
     "prisma": "6.19",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1"
   },
@@ -40,6 +44,7 @@
     "@nx/express": "^22.1.1",
     "@nx/jest": "22.1.1",
     "@nx/js": "22.1.1",
+    "@nx/next": "^22.1.1",
     "@nx/node": "22.1.1",
     "@nx/web": "22.1.1",
     "@nx/webpack": "22.1.1",
@@ -59,7 +64,10 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "20.19.9",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@types/swagger-ui-express": "^4.1.8",
+    "autoprefixer": "10.4.13",
     "baseline-browser-mapping": "^2.10.42",
     "concurrently": "^10.0.3",
     "esbuild": "^0.19.2",
@@ -71,7 +79,9 @@
     "jsonc-eslint-parser": "^2.1.0",
     "nodemon": "^3.1.14",
     "nx": "22.1.1",
+    "postcss": "8.4.38",
     "react-refresh": "^0.10.0",
+    "tailwindcss": "3.4.3",
     "ts-jest": "^29.4.0",
     "ts-node": "10.9.1",
     "tsc-alias": "^1.9.0",
