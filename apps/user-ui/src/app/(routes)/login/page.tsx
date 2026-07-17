@@ -1,11 +1,12 @@
 "use client";
 
-import { GoogleSignInButton } from "@/shared/components/googleButton";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+
+import { GoogleSignInButton } from "@/shared/components/googleButton";
 
 type FormData = {
   email: string;
@@ -132,6 +133,10 @@ const Page = () => {
             >
               Login
             </button>
+
+            {serverError && (
+              <p className="text-red-500 text-sm mt-2">{serverError}</p>
+            )}
           </form>
         </div>
       </div>
