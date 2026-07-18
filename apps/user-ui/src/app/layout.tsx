@@ -1,9 +1,10 @@
 // @ts-expect-error: allow importing CSS module without type declarations
 import "./global.css";
-import Header from "@/shared/widgets/header";
 import { Poppins, Roboto } from "next/font/google";
 
-import QueryProvider from "@/shared/context/query-provider";
+import Providers from "@/shared/context/providers";
+import Header from "@/shared/widgets/header";
+
 
 export const metadata = {
   title: "Welcome to user-ui",
@@ -30,10 +31,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${roboto.variable} ${poppins.variable}`}>
-        <QueryProvider>
+        <Providers>
           <Header />
           {children}
-        </QueryProvider>
+        </Providers>
       </body>
     </html>
   );

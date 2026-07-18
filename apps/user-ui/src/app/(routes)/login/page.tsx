@@ -115,7 +115,7 @@ const Page = () => {
             <div className="relative">
               <input
                 type={isPasswordVisible ? "text" : "password"}
-                placeholder="support@doe.com"
+                placeholder="**********"
                 className="w-full p-2 border border-gray-300 outline-0 !rounded mb-1"
                 {...register("password", {
                   required: "Passowrd is required",

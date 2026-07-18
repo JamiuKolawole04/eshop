@@ -8,10 +8,15 @@ import axios, { AxiosError } from "axios";
 import { toast } from "react-hot-toast";
 import { useMutation } from "@tanstack/react-query";
 
+type FormData = {
+  email: string;
+  password: string;
+};
+
 const Page = () => {
   const router = useRouter();
 
-  const [step, setStep] = useState<"email" | "otp" | "reset">("email");
+  const [step, setStep] = useState<"email" | "otp" | "reset">("reset");
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [userEmail, setUserEmail] = useState<string>("");
   const [canResend, setCanResend] = useState<boolean>(true);
@@ -59,7 +64,7 @@ const Page = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<FormData>();
 
   const requestOtpMutation = useMutation({
     mutationFn: async ({ email }: { email: string }) => {
@@ -286,8 +291,8 @@ const Page = () => {
                   New Password
                 </label>
                 <input
-                  type="text"
-                  placeholder="support@doe.com"
+                  type="password"
+                  placeholder="**********"
                   className="w-full p-2 border border-gray-300 outline-0 !rounded mb-1"
                   {...register("password", {
                     required: "Passowrd is required",
@@ -297,6 +302,23 @@ const Page = () => {
                     },
                   })}
                 />
+                {errors.password && (
+                  <p className="text-red-500 text-sm">
+                    {String(errors.password.message)}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={resetPasswordMutation.isPending}
+                  className="w-full mt-4 text-base cursor-pointer bg-black text-white py-2 rounded-lg"
+                >
+                  {resetPasswordMutation.isPending ? "Resetting ..." : "Reset"}
+                </button>
+
+                {serverError && (
+                  <p className="text-red-500 text-sm mt-2">{serverError}</p>
+                )}
               </form>
             </Fragment>
           )}
