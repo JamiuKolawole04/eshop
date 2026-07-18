@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios, { AxiosError } from "axios";
+import { useMutation } from "@tanstack/react-query";
 
 import { GoogleSignInButton } from "@/shared/components/googleButton";
-import { useMutation } from "@tanstack/react-query";
 
 type FormData = {
   email: string;
@@ -151,7 +151,7 @@ const Page = () => {
                 Remember Me
               </label>
 
-              <Link href="/forot-password" className="text-blue-500 text-sm">
+              <Link href="/forgot-password" className="text-blue-500 text-sm">
                 Forgot Password
               </Link>
             </div>
@@ -161,7 +161,7 @@ const Page = () => {
               disabled={loginMutation.isPending}
               className="w-full text-base cursor-pointer bg-black text-white py-2 rounded-lg"
             >
-              {loginMutation.isPaused ? "Loggin in ..." : "Login"}
+              {loginMutation.isPending ? "Loggin in ..." : "Login"}
             </button>
 
             {serverError && (

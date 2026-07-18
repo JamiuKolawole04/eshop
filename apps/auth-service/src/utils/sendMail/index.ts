@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import path from "node:path";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
