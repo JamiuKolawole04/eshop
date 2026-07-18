@@ -3,6 +3,8 @@ import "./global.css";
 import Header from "@/shared/widgets/header";
 import { Poppins, Roboto } from "next/font/google";
 
+import QueryProvider from "@/shared/context/query-provider";
+
 export const metadata = {
   title: "Welcome to user-ui",
   description: "Eshop",
@@ -28,8 +30,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${roboto.variable} ${poppins.variable}`}>
-        <Header />
-        {children}
+        <QueryProvider>
+          <Header />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

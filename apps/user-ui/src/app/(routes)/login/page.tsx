@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import axios, { AxiosError } from "axios";
 
 import { GoogleSignInButton } from "@/shared/components/googleButton";
+import { useMutation } from "@tanstack/react-query";
 
 type FormData = {
   email: string;
@@ -15,6 +17,7 @@ type FormData = {
 
 const Page = () => {
   const router = useRouter();
+
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
@@ -25,10 +28,36 @@ const Page = () => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit = (data: FormData) => {};
+  const loginMutation = useMutation({
+    mutationFn: async (data: FormData) => {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_SERVER_URI}/api/auth/users/register`,
+        data,
+        { withCredentials: true },
+      );
+
+      return response.data;
+    },
+    onSuccess: () => {
+      setServerError(null);
+      router.push("/");
+    },
+
+    onError: (error: AxiosError) => {
+      const errorMessage =
+        (error.response?.data as { message?: string })?.message ||
+        "Invalid credentials";
+
+      setServerError(errorMessage);
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
+    loginMutation.mutate(data);
+  };
 
   return (
-    <div className="w-full py-10 min-h-[85vh] bg-[#f1f1f1]">
+    <div className="w-full py-10 min-h-[85vh] bg-[#f1f1f1] font-Poppins">
       <h1 className="text-4xl font-Poppins font-semibold text-black text-center">
         Login
       </h1>
@@ -129,9 +158,10 @@ const Page = () => {
 
             <button
               type="submit"
-              className="w-full text-lg cursor-pointer bg-black text-white py-2 rounded-lg"
+              disabled={loginMutation.isPending}
+              className="w-full text-base cursor-pointer bg-black text-white py-2 rounded-lg"
             >
-              Login
+              {loginMutation.isPaused ? "Loggin in ..." : "Login"}
             </button>
 
             {serverError && (
