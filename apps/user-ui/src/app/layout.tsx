@@ -1,12 +1,11 @@
-// @ts-expect-error: allow importing CSS module without type declarations
-import "./global.css";
 import { Poppins, Roboto } from "next/font/google";
+import { Metadata } from "next";
 
 import Providers from "@/shared/context/providers";
 import Header from "@/shared/widgets/header";
+import "./global.css";
 
-
-export const metadata = {
+export const metadata: Metadata = {
   title: "Welcome to user-ui",
   description: "Eshop",
 };

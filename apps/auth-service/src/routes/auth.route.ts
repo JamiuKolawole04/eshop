@@ -10,6 +10,8 @@ import {
   verifyUser,
   verifyUserForgotPassword,
 } from "../controllers/auth.controller";
+import { isAuthenticated } from "@packages/middleware";
+
 
 const router: Router = express.Router();
 
@@ -21,6 +23,6 @@ router.post("/auth/users/forgot-password", userForgotPassword);
 router.post("/auth/users/verify-forgot-password", verifyUserForgotPassword);
 router.post("/auth/users/reset-password", resetUserPassword);
 
-router.post("/auth/users/logged-in", getUser);
+router.post("/auth/users/logged-in",isAuthenticated,  getUser);
 
 export default router;

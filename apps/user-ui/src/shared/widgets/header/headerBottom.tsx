@@ -1,6 +1,5 @@
 "use client";
 
-import { navItems } from "@/configs/constants";
 import {
   AlignLeft,
   ChevronDown,
@@ -9,9 +8,14 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
+
+import { navItems } from "@/configs/constants";
+import { useUser } from "@/hooks/use-user";
 
 const HeaderBottom = () => {
+  const { user, isLoading } = useUser();
+
   const [show, setShow] = useState(false);
   const [isSticky, setIsSticky] = useState<boolean>(false);
 
@@ -28,6 +32,7 @@ const HeaderBottom = () => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   return (
     <div
       className={`w-full transition-all duration-300 ${isSticky ? "fixed top-0 left-0 z-[100] bg-white shadow-lg" : "relative"}`}
@@ -70,17 +75,40 @@ const HeaderBottom = () => {
             <div className="w-[80%] py-5 m-auto flex items-center justify-between">
               <div className="flex items-center gap-8">
                 <div className="flex items-center gap-2">
-                  <Link
-                    href="/login"
-                    className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]"
-                  >
-                    <User size={18} className="text-gray-600" />
-                  </Link>
+                  {!isLoading && user ? (
+                    <Fragment>
+                      <Link href="/profile">
+                        <User size={18} className="text-gray-600" />
+                      </Link>
 
-                  <Link href="/login">
-                    <span className="block font-medium text-sm font-Poppins">Hello,</span>
-                    <span className="font-semibold text-sm font-Poppins">Sign In</span>
-                  </Link>
+                      <Link href="/profile">
+                        <span className="block font-medium text-sm font-Poppins">
+                          Hello,
+                        </span>
+                        <span className="font-semibold text-sm font-Poppins">
+                          {user?.name.split(" ")[0]}
+                        </span>
+                      </Link>
+                    </Fragment>
+                  ) : (
+                    <Fragment>
+                      <Link
+                        href="/login"
+                        className="border-2 w-[40px] h-[40px] flex items-center justify-center rounded-full border-[#010f1c1a]"
+                      >
+                        <User size={18} className="text-gray-600" />
+                      </Link>
+
+                      <Link href="/login">
+                        <span className="block font-medium text-sm font-Poppins">
+                          Hello,
+                        </span>
+                        <span className="font-semibold text-sm font-Poppins">
+                          {isLoading ? "..." : "Sign In"}
+                        </span>
+                      </Link>
+                    </Fragment>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-5">
