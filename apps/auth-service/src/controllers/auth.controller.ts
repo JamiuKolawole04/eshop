@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { hash, compare } from "bcryptjs";
-import jwt from "jsonwebtoken"
+import jwt, { JsonWebTokenError } from "jsonwebtoken";
 
 import {
   checkOtpRestrictions,
@@ -12,8 +12,13 @@ import {
   verifyOtp,
 } from "../utils/auth.helper";
 import { prisma, Users } from "@packages/prisma";
-import { AuthError, ConflictError, NotFoundError, ValidationError } from "@packages/error-handler";
-import {setCookie} from "@packages/cookies"
+import {
+  AuthError,
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "@packages/error-handler";
+import { setCookie } from "@packages/cookies";
 
 export const userRegistration = async (
   req: Request,
@@ -93,10 +98,10 @@ export const login = async (
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return next(new ValidationError("Email and password are required."))  
+      return next(new ValidationError("Email and password are required."));
     }
 
-    const user = await prisma.users.findUnique({where: {email}});
+    const user = await prisma.users.findUnique({ where: { email } });
 
     if (!user || !user.password) {
       throw new AuthError("Invalid credentials");
@@ -107,13 +112,23 @@ export const login = async (
       throw new AuthError("Invalid credentials.");
     }
 
-    const accessToken = jwt.sign({
-      id: user.id, role: "user"
-    }, String(process.env.ACCESS_TOKEN_SECRET), {expiresIn: "15m"})
+    const accessToken = jwt.sign(
+      {
+        id: user.id,
+        role: "user",
+      },
+      String(process.env.ACCESS_TOKEN_SECRET),
+      { expiresIn: "15m" },
+    );
 
-     const refreshToken = jwt.sign({
-      id: user.id, role: "user"
-    }, String(process.env.REFRESH_TOKEN_SECRET), {expiresIn: "7d"})
+    const refreshToken = jwt.sign(
+      {
+        id: user.id,
+        role: "user",
+      },
+      String(process.env.REFRESH_TOKEN_SECRET),
+      { expiresIn: "7d" },
+    );
 
     setCookie(res, "access_token", accessToken);
     setCookie(res, "refresh_token", refreshToken);
@@ -123,53 +138,129 @@ export const login = async (
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
-      }
-    })
+        name: user.name,
+      },
+    });
   } catch (error) {
     return next(error);
   }
 };
 
-
-export const userForgotPassword = async (req: Request,res: Response,next: NextFunction) => {
-  await handleForgotPassword(req, res, next, "user")
-}
-
-export const verifyUserForgotPassword = async (req: Request,res: Response,next: NextFunction) => {
-  await verifyForgotPasswordOtp(req, res, next)
-}
-
-export const resetUserPassword = async (req: Request,res: Response,next: NextFunction) => {
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const {email, newPassword} = req.body
-    if (!email || !newPassword) {
-      throw new ValidationError("Email and new password are required.")
+    const refreshToken = req.cookies.refresh_token;
+
+    if (!refreshToken) {
+      throw new ValidationError("Unauthorized! No refresh token.");
     }
 
-    const user = await prisma.users.findUnique({where: {email}})
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET as string,
+    ) as { id: string; role: string };
+
+    if (!decoded || !decoded.id || decoded.role) {
+      throw new JsonWebTokenError("Forbidden! Invalid refresh token.");
+    }
+
+    const user = await prisma.users.findUnique({ where: { id: decoded.id } });
 
     if (!user) {
-      throw new NotFoundError("User not found.")
+      throw new AuthError("Forbidden! User/Seller not found.");
     }
 
-    const isSamePassword = await compare(newPassword, user.password || "")
-    if (isSamePassword) {
-      throw new ValidationError("New password cannot be the same as the current password.")
-    }
+    const newAccessToken = jwt.sign(
+      {
+        id: user.id,
+        role: "user",
+      },
+      String(process.env.ACCESS_TOKEN_SECRET),
+      { expiresIn: "15m" },
+    );
 
-    const hashedPassword = await hash(newPassword, 10)
-
-    await prisma.users.update({
-      where: {email},
-      data: {password: hashedPassword}
-    })
+    setCookie(res, "access_token", newAccessToken);
 
     res.status(200).json({
-      message: "Password reset successfully! Please login with your new password."
-    })
-
+      message: "Refresh token successful",
+      success: true,
+    });
   } catch (error) {
-    next(error)
+    return next(error);
   }
-}
+};
+
+export const userForgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  await handleForgotPassword(req, res, next, "user");
+};
+
+export const verifyUserForgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  await verifyForgotPasswordOtp(req, res, next);
+};
+
+export const resetUserPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      throw new ValidationError("Email and new password are required.");
+    }
+
+    const user = await prisma.users.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundError("User not found.");
+    }
+
+    const isSamePassword = await compare(newPassword, user.password || "");
+    if (isSamePassword) {
+      throw new ValidationError(
+        "New password cannot be the same as the current password.",
+      );
+    }
+
+    const hashedPassword = await hash(newPassword, 10);
+
+    await prisma.users.update({
+      where: { email },
+      data: { password: hashedPassword },
+    });
+
+    res.status(200).json({
+      message:
+        "Password reset successfully! Please login with your new password.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req.user;
+    res.status(201).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

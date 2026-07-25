@@ -29,6 +29,9 @@
     },
     {
       "path": "./apps/user-ui"
+    },
+    {
+      "path": "./packages/middleware"
     }
   ]
 }
