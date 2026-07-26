@@ -106,45 +106,61 @@ export const verifyOtp = async (email: string, otp: string) => {
   }
 
   await redis.del(`otp:${email}`, failedAttemptsKey);
+  await redis.del(`otp_request_count:${email}`);
 };
 
-export const handleForgotPassword = async (req: Request,res: Response,next: NextFunction, userType: "user" | "seller") => {
+export const handleForgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  userType: "user" | "seller",
+) => {
   try {
-    const {email} = req.body
+    const { email } = req.body;
 
     if (!email) {
-      throw new ValidationError("Email is required.")
+      throw new ValidationError("Email is required.");
     }
 
-    const user = userType === "user" && await prisma.users.findUnique({where: {email}});
+    const user =
+      userType === "user" &&
+      (await prisma.users.findUnique({ where: { email } }));
 
     if (!user) {
-      throw new NotFoundError(`${userType} not found.`)
+      throw new NotFoundError(`${userType} not found.`);
     }
 
-    await checkOtpRestrictions(email)
-    await trackOtpRequests(email)
+    await checkOtpRestrictions(email);
+    await trackOtpRequests(email);
 
-    await sendOtp(user.name, email, "forgot-password-user-email")
+    await sendOtp(user.name, email, "forgot-password-user-email");
 
-    res.status(200).json({message: "OTP sent to email. Please verify your account."})
-    
+    res
+      .status(200)
+      .json({ message: "OTP sent to email. Please verify your account." });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
-export const verifyForgotPasswordOtp = async (req: Request,res: Response,next: NextFunction) => {
+};
+export const verifyForgotPasswordOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const {email, otp} = req.body
+    const { email, otp } = req.body;
 
-  if (!email || !otp) {
-    throw new ValidationError("Email and OTP are required.")
-  }
+    if (!email || !otp) {
+      throw new ValidationError("Email and OTP are required.");
+    }
 
-    await verifyOtp(email, otp)
-    res.status(200).json({message: "OTP verified successfully. You can reset your password."})
+    await verifyOtp(email, otp);
+    res
+      .status(200)
+      .json({
+        message: "OTP verified successfully. You can reset your password.",
+      });
   } catch (error) {
-    next(error)
- 
+    next(error);
   }
-}
+};
