@@ -163,7 +163,7 @@ export const refreshToken = async (
       process.env.REFRESH_TOKEN_SECRET as string,
     ) as { id: string; role: string };
 
-    if (!decoded || !decoded.id || decoded.role) {
+    if (!decoded || !decoded.id || !decoded.role) {
       throw new JsonWebTokenError("Forbidden! Invalid refresh token.");
     }
 
@@ -256,11 +256,80 @@ export const getUser = async (
 ) => {
   try {
     const user = req.user;
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       user,
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const verifySeller = async (
+  req: Request<
+    Record<string, string>,
+    Record<string, string>,
+    Partial<Users & { otp: string }>
+  >,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email, otp, password, name, phone_number, country } = req.body;
+
+    if (!email || !otp || !password || !name || !phone_number || !country) {
+      throw new ValidationError("All fields are required.");
+    }
+
+    const existingUser = await prisma.users.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new ConflictError("Seller already exists.");
+    }
+
+    await verifyOtp(email, otp);
+    const hashedPassword = await hash(password, 10);
+
+    await prisma.users.create({
+      data: { name, email, password: hashedPassword },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Seller registered successfully.",
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const registerSeller = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    validateRegistrationData(req.body, "seller");
+
+    const { name, email } = req.body;
+    const existingUser = await prisma.users.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new ConflictError("Seller already exists.");
+    }
+
+    await checkOtpRestrictions(email);
+    await trackOtpRequests(email);
+    await sendOtp(name, email, "seller-activation-email");
+
+    res.status(200).json({
+      message: "OTP sent to email. Please verify your account.",
+    });
+  } catch (error) {
+    return next(error);
   }
 };

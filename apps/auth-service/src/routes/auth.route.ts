@@ -4,9 +4,11 @@ import {
   getUser,
   login,
   refreshToken,
+  registerSeller,
   resetUserPassword,
   userForgotPassword,
   userRegistration,
+  verifySeller,
   verifyUser,
   verifyUserForgotPassword,
 } from "../controllers/auth.controller";
@@ -21,6 +23,9 @@ router.post("/auth/users/refresh-token", refreshToken);
 router.post("/auth/users/forgot-password", userForgotPassword);
 router.post("/auth/users/verify-forgot-password", verifyUserForgotPassword);
 router.post("/auth/users/reset-password", resetUserPassword);
+
+router.post("/auth/sellers/register", registerSeller);
+router.post("/auth/sellers/verify", verifySeller);
 
 router.get("/auth/users/logged-in", isAuthenticated, getUser);
 
