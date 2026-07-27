@@ -123,8 +123,9 @@ export const handleForgotPassword = async (
     }
 
     const user =
-      userType === "user" &&
-      (await prisma.users.findUnique({ where: { email } }));
+      userType === "user"
+        ? await prisma.users.findUnique({ where: { email } })
+        : await prisma.sellers.findUnique({ where: { email } });
 
     if (!user) {
       throw new NotFoundError(`${userType} not found.`);
@@ -133,7 +134,13 @@ export const handleForgotPassword = async (
     await checkOtpRestrictions(email);
     await trackOtpRequests(email);
 
-    await sendOtp(user.name, email, "forgot-password-user-email");
+    await sendOtp(
+      user.name,
+      email,
+      userType === "user"
+        ? "forgot-password-user-email"
+        : "forgot-password-seller-email",
+    );
 
     res
       .status(200)
@@ -155,11 +162,9 @@ export const verifyForgotPasswordOtp = async (
     }
 
     await verifyOtp(email, otp);
-    res
-      .status(200)
-      .json({
-        message: "OTP verified successfully. You can reset your password.",
-      });
+    res.status(200).json({
+      message: "OTP verified successfully. You can reset your password.",
+    });
   } catch (error) {
     next(error);
   }

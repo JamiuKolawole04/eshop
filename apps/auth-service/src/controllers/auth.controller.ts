@@ -11,7 +11,7 @@ import {
   verifyForgotPasswordOtp,
   verifyOtp,
 } from "../utils/auth.helper";
-import { prisma, Users } from "@packages/prisma";
+import { Prisma, prisma, Sellers, Shops, Users } from "@packages/prisma";
 import {
   AuthError,
   ConflictError,
@@ -265,46 +265,6 @@ export const getUser = async (
   }
 };
 
-export const verifySeller = async (
-  req: Request<
-    Record<string, string>,
-    Record<string, string>,
-    Partial<Users & { otp: string }>
-  >,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const { email, otp, password, name, phone_number, country } = req.body;
-
-    if (!email || !otp || !password || !name || !phone_number || !country) {
-      throw new ValidationError("All fields are required.");
-    }
-
-    const existingUser = await prisma.users.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      throw new ConflictError("Seller already exists.");
-    }
-
-    await verifyOtp(email, otp);
-    const hashedPassword = await hash(password, 10);
-
-    await prisma.users.create({
-      data: { name, email, password: hashedPassword },
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "Seller registered successfully.",
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
-
 export const registerSeller = async (
   req: Request,
   res: Response,
@@ -314,11 +274,11 @@ export const registerSeller = async (
     validateRegistrationData(req.body, "seller");
 
     const { name, email } = req.body;
-    const existingUser = await prisma.users.findUnique({
+    const existingSeller = await prisma.users.findUnique({
       where: { email },
     });
 
-    if (existingUser) {
+    if (existingSeller) {
       throw new ConflictError("Seller already exists.");
     }
 
@@ -331,5 +291,85 @@ export const registerSeller = async (
     });
   } catch (error) {
     return next(error);
+  }
+};
+
+export const verifySeller = async (
+  req: Request<
+    Record<string, string>,
+    Record<string, string>,
+    Partial<Sellers & { otp: string }>
+  >,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email, otp, password, name, phone_number, country } = req.body;
+
+    if (!email || !otp || !password || !name || !phone_number || !country) {
+      throw new ValidationError("All fields are required.");
+    }
+
+    const existingUser = await prisma.sellers.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new ConflictError("Seller already exists.");
+    }
+
+    await verifyOtp(email, otp);
+    const hashedPassword = await hash(password, 10);
+
+    await prisma.sellers.create({
+      data: { name, email, password: hashedPassword, phone_number, country },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Seller registered successfully.",
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const createShop = async (
+  req: Request<Record<string, string>, Record<string, string>, Partial<Shops>>,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { name, bio, address, opening_hours, website, category, sellerId } =
+      req.body;
+
+    if (!name || !bio || !address || !category || !opening_hours || !sellerId) {
+      throw new ValidationError("All fields are required.");
+    }
+
+    const shopData: Prisma.ShopsUncheckedCreateInput = {
+      name,
+      bio,
+      address,
+      opening_hours,
+      category,
+      sellerId,
+    };
+
+    if (website && website.trim() !== "") {
+      shopData.website = website;
+    }
+
+    const shop = await prisma.shops.create({
+      data: shopData,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Shop created successfully.",
+      shop,
+    });
+  } catch (err) {
+    next(err);
   }
 };
