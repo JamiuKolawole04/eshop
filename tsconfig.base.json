@@ -18,6 +18,6 @@
     "target": "es2022",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "customConditions": ["@eshop/source"]
-  }
+    "customConditions": ["@eshop/source"],
+  },
 }

@@ -38,24 +38,23 @@ export const isAuthenticated = async (
         where: { id: decoded.id },
       });
 
-      (req as Request & { user: typeof account }).user = account;
+      req.user = account;
     } else if (decoded.role === "seller") {
       account = await prisma.sellers.findUnique({
         where: { id: decoded.id },
         include: { shop: true },
       });
 
-      (req as Request & { seller: typeof account }).seller = account;
+      req.seller = account;
     }
 
     if (!account) {
       return res.status(401).json({
-        message: "Account not found!",
+        message: "Account not found",
       });
     }
 
     req.role = decoded.role;
-
     return next();
   } catch {
     res.status(401).json({
