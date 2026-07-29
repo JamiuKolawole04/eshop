@@ -2,11 +2,14 @@ import express, { Router } from "express";
 
 import {
   createShop,
+  createtripeConnectLink,
+  getSeller,
   getUser,
   login,
   refreshToken,
   registerSeller,
   resetUserPassword,
+  sellerLogin,
   userForgotPassword,
   userRegistration,
   verifySeller,
@@ -25,11 +28,16 @@ router.post("/auth/users/forgot-password", userForgotPassword);
 router.post("/auth/users/verify-forgot-password", verifyUserForgotPassword);
 router.post("/auth/users/reset-password", resetUserPassword);
 
-router.get("/auth/users/logged-in", isAuthenticated, getUser);
+router.get("/auth/users/profile", isAuthenticated, getUser);
 
 router.post("/auth/sellers/register", registerSeller);
 router.post("/auth/sellers/verify", verifySeller);
+router.post("/auth/sellers/login", sellerLogin);
+// router.post("/auth/sellers/refresh-token", refreshToken);
+
+router.get("/auth/sellers/profile", isAuthenticated, getSeller);
 
 router.post("/shop", createShop);
+router.post("/stripe", createtripeConnectLink);
 
 export default router;

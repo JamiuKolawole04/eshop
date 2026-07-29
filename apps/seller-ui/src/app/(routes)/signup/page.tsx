@@ -7,7 +7,10 @@ import React, { Fragment, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
+import { SiStripe } from "react-icons/si";
+
 import { countries } from "@/utils/countries";
+import { CreateShop } from "@/shared/modules/auth/create-shop";
 
 type FormData = {
   name: string;
@@ -20,13 +23,15 @@ type FormData = {
 const Signup = () => {
   const router = useRouter();
 
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(3);
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
   const [canResend, setCanResend] = useState<boolean>(true);
   const [timer, setTimer] = useState(60);
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [showOtp, setShowOtp] = useState<boolean>(false);
-  const [userData, setUserData] = useState<FormData | null>(null);
+  const [sellerData, setSellerData] = useState<FormData | null>(null);
+  const [sellerId, setSellerId] = useState("");
+
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const {
@@ -60,7 +65,7 @@ const Signup = () => {
     },
 
     onSuccess: (_, formData) => {
-      setUserData(formData);
+      setSellerData(formData);
       setShowOtp(true);
       setCanResend(false);
       setTimer(60);
@@ -70,17 +75,18 @@ const Signup = () => {
 
   const verifyOtpMutation = useMutation({
     mutationFn: async () => {
-      if (!userData) return;
+      if (!sellerData) return;
 
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_SERVER_URI}/api/auth/sellers/verify`,
-        { ...userData, otp: otp.join("") },
+        { ...sellerData, otp: otp.join("") },
       );
 
       return response.data;
     },
-    onSuccess: () => {
-      router.push("/login");
+    onSuccess: (data) => {
+      setSellerId(data?.seller?.id);
+      setActiveStep(2);
     },
   });
 
@@ -110,8 +116,22 @@ const Signup = () => {
   };
 
   const resendOtp = () => {
-    if (userData) {
-      signupMutation.mutate(userData);
+    if (sellerData) {
+      signupMutation.mutate(sellerData);
+    }
+  };
+
+  const connectStripe = async () => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_SERVER_URI}`,
+        { sellerId },
+      );
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (err) {
+      console.log("Stripe connection error.", err);
     }
   };
 
@@ -346,6 +366,27 @@ const Signup = () => {
               </div>
             )}
           </Fragment>
+        )}
+        {activeStep === 2 && (
+          <CreateShop sellerId={sellerId} setActiveStep={setActiveStep} />
+        )}
+        {activeStep === 3 && (
+          <div className="text-center">
+            <h3 className="text-2xl font-semibold">Withdraw method</h3>
+
+            <br />
+
+            <button
+              className="w-full m-auto flex items-center justify-center gap-3 text-base bg-[#334155] text-white py-2 rounded-lg"
+              onClick={connectStripe}
+            >
+              Connect stripe
+              <SiStripe
+                className="bg-[#635bff] text-white rounded p-0.5"
+                size={17}
+              />
+            </button>
+          </div>
         )}
       </div>
     </div>
