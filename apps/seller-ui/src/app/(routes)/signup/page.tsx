@@ -2,7 +2,6 @@
 
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React, { Fragment, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
@@ -21,9 +20,7 @@ type FormData = {
 };
 
 const Signup = () => {
-  const router = useRouter();
-
-  const [activeStep, setActiveStep] = useState(3);
+  const [activeStep, setActiveStep] = useState(1);
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
   const [canResend, setCanResend] = useState<boolean>(true);
   const [timer, setTimer] = useState(60);

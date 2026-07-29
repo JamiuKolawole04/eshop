@@ -11,7 +11,10 @@
   "include": ["src/**/*.ts", "../types/src/express.d.ts"],
   "references": [
     {
-      "path": "../prisma/tsconfig.lib.json",
+      "path": "../prisma/tsconfig.lib.json"
     },
+    {
+      "path": "../error-handler/tsconfig.lib.json"
+    }
   ],
 }

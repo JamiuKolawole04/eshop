@@ -16,7 +16,7 @@ import {
   verifyUser,
   verifyUserForgotPassword,
 } from "../controllers/auth.controller";
-import { isAuthenticated, isUser } from "@packages/middleware";
+import { isAuthenticated, isSeller } from "@packages/middleware";
 
 const router: Router = express.Router();
 
@@ -35,7 +35,7 @@ router.post("/auth/sellers/verify", verifySeller);
 router.post("/auth/sellers/login", sellerLogin);
 // router.post("/auth/sellers/refresh-token", refreshToken);
 
-router.get("/auth/sellers/profile", isAuthenticated, isUser, getSeller);
+router.get("/auth/sellers/profile", isAuthenticated, isSeller, getSeller);
 
 router.post("/shop", createShop);
 router.post("/stripe", createtripeConnectLink);
