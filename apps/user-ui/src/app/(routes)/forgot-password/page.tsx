@@ -16,7 +16,7 @@ type FormData = {
 const Page = () => {
   const router = useRouter();
 
-  const [step, setStep] = useState<"email" | "otp" | "reset">("reset");
+  const [step, setStep] = useState<"email" | "otp" | "reset">("email");
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [userEmail, setUserEmail] = useState<string>("");
   const [canResend, setCanResend] = useState<boolean>(true);

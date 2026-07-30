@@ -104,7 +104,8 @@ const HeaderBottom = () => {
                           Hello,
                         </span>
                         <span className="font-semibold text-sm font-Poppins">
-                          {isLoading ? "..." : "Sign In"}
+                          {/*{isLoading ? "..." : "Sign In"}*/}
+                          Sign In
                         </span>
                       </Link>
                     </Fragment>

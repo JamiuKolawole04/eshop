@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/utils/axiosInstance";
 
 const fetchUser = async () => {
-  const response = await axiosInstance.get("/api/auth/users/logged-in");
+  const response = await axiosInstance.get("/api/auth/users/profile");
   return response.data.user;
 };
 
@@ -14,7 +14,7 @@ export const useUser = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["user"],
+    queryKey: ["user-profile"],
     queryFn: fetchUser,
     staleTime: 1000 * 60 * 5,
     retry: 1,
