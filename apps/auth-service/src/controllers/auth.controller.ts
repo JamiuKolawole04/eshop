@@ -184,7 +184,7 @@ export const refreshToken = async (
 
     if (decoded.role === "user") {
       account = await prisma.users.findUnique({ where: { id: decoded.id } });
-    } else if (account === "seller") {
+    } else if (decoded.role === "seller") {
       account = await prisma.sellers.findUnique({
         where: { id: decoded.id },
         include: { shop: true },
