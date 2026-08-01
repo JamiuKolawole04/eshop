@@ -9,6 +9,7 @@ import {
   ColorSelector,
   CustomSpecifications,
   Input,
+  CustomProperties,
 } from "@packages/components";
 
 const Page = () => {
@@ -223,6 +224,10 @@ const Page = () => {
 
               <div className="mt-2">
                 <CustomSpecifications control={control} errors={errors} />
+              </div>
+
+              <div className="mt-2">
+                <CustomProperties control={control} errors={errors} />
               </div>
             </div>
           </div>
