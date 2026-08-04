@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Plus, X } from "lucide-react";
 
-import { Input } from "./input.js";
+import { Input } from "./input";
 
 const CustomProperties = ({ control, errors }: any) => {
   const [properties, setProperties] = useState<
@@ -43,7 +43,7 @@ const CustomProperties = ({ control, errors }: any) => {
 
             return (
               <div className="mt-2">
-                <label className="block font-semibold text-gray-300 mb-1">
+                <label className="block font-semibold text-gray-300 mb-1 text-sm">
                   Custom Properties
                 </label>
 
@@ -55,7 +55,7 @@ const CustomProperties = ({ control, errors }: any) => {
                       className="border border-gray-700 p-3 rounded-lg bg-gray-900"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-white font-medium">
+                        <span className="text-white font-medium text-sm">
                           {property.label}
                         </span>
                         <button
@@ -77,7 +77,7 @@ const CustomProperties = ({ control, errors }: any) => {
                         />
                         <button
                           type="button"
-                          className="px-3 py-1 bg-blue-500 text-white rounded-md"
+                          className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm"
                           onClick={() => addValue(index)}
                         >
                           Add
@@ -88,7 +88,7 @@ const CustomProperties = ({ control, errors }: any) => {
                         {property.values.map((value, i) => (
                           <span
                             key={i}
-                            className="px-2 py-1 bg-gray-700 text-white rounded-md"
+                            className="px-2 py-1 bg-gray-700 text-white rounded-md text-sm"
                           >
                             {value}
                           </span>
@@ -107,7 +107,7 @@ const CustomProperties = ({ control, errors }: any) => {
 
                     <button
                       type="button"
-                      className="px-3 py-2 bg-blue-500 text-white rounded-md flex items-center gap-1"
+                      className="px-3 py-2 bg-blue-500 text-white rounded-md flex items-center gap-1 text-sm"
                       onClick={addProperty}
                     >
                       <Plus size={16} /> Add

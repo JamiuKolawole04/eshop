@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { useFieldArray, Controller } from "react-hook-form";
-
-import { Input } from "./input.js";
 import { PlusCircle, Trash2 } from "lucide-react";
+
+import { Input } from "./input";
 
 const _ReactReference = React;
 

@@ -6,11 +6,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
+  Input,
   ColorSelector,
   CustomSpecifications,
-  Input,
   CustomProperties,
-} from "@packages/components";
+} from "@packages/ui";
 
 const Page = () => {
   const {

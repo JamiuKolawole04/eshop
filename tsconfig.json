@@ -40,7 +40,7 @@
       "path": "./packages/types"
     },
     {
-      "path": "./packages/components"
+      "path": "./packages/ui"
     }
   ]
 }
