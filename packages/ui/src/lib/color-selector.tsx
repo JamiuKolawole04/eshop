@@ -64,7 +64,7 @@ const ColorSelector = ({ control, errors }: any) => {
                 <input
                   type="color"
                   value={newColor}
-                  onChange={(e) => setNewColor(e.target.value)}
+                  onChange={(e: any) => setNewColor(e.target.value)}
                   className="w-10 h-10 p-0 border-none cursor-pointer"
                 />
 

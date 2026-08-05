@@ -4,9 +4,9 @@ import cors from "cors";
 import proxy from "express-http-proxy";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
-// import swaggerUI from "swagger-ui-express";
-// import axios from "axios";
 import cookieParser from "cookie-parser";
+
+import { initializeConfig } from "./libs/initializeSiteConfig";
 
 const app = express();
 app.disable("x-powered-by");
@@ -33,6 +33,8 @@ const limiter = rateLimit({
   legacyHeaders: true,
 });
 app.use(limiter);
+
+app.use("/api/products", proxy("http://localhost:6002"));
 app.use("/", proxy("http://localhost:6001"));
 
 app.use("/assets", express.static(path.join(__dirname, "assets")));
@@ -42,7 +44,14 @@ app.get("/gateway-health", (req, res) => {
 });
 
 const port = process.env.PORT || 8080;
-const server = app.listen(port, () => {
+const server = app.listen(port, async () => {
   console.log(`Listening at http://localhost:${port}/api`);
+
+  try {
+    await initializeConfig();
+    console.log("site config initialized");
+  } catch (err) {
+    console.log("Failed to inialize site config:", err);
+  }
 });
 server.on("error", console.error);

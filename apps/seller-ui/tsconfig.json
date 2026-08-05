@@ -45,7 +45,7 @@
   ],
   "references": [
     {
-      "path": "../../packages/components"
+      "path": "../../packages/ui"
     }
   ],
 }

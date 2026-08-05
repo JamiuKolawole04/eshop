@@ -17,6 +17,7 @@ module.exports = {
     "./src/**/*.{ts,tsx,jsx,jsx}",
     "../seller-ui/src/**/*.{js,ts,jsx,tsx}",
     "../../packages/components/**/*.{js,ts,jsx,tsx}",
+    "../../packages/ui/**/*.{js,ts,jsx,tsx}",
     //     ...createGlobPatternsForDependencies(__dirname)
   ],
   theme: {
