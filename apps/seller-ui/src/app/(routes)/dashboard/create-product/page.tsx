@@ -92,7 +92,10 @@ const Page = () => {
 
   const handleSaveDraft = () => {};
   return (
-    <form className="w-full mx-auto p-8 shadow-md rounded-lg text-white">
+    <form
+      className="w-full mx-auto p-8 shadow-md rounded-lg text-white"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <h2 className="text-2xl py-2 font-semibold font-Poppins">
         Create Product
       </h2>

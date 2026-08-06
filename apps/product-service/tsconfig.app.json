@@ -10,10 +10,13 @@
   "exclude": [],
   "references": [
     {
-      "path": "../../packages/error-handler/tsconfig.lib.json",
+      "path": "../../packages/middleware/tsconfig.lib.json"
     },
     {
-      "path": "../../packages/prisma/tsconfig.lib.json",
+      "path": "../../packages/error-handler/tsconfig.lib.json"
     },
+    {
+      "path": "../../packages/prisma/tsconfig.lib.json"
+    }
   ],
 }

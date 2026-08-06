@@ -36,6 +36,10 @@ export const createDiscountCode = async (
   try {
     const { public_name, discountType, discountValue, discountCode } = req.body;
 
+    if (!public_name || !discountType || !discountValue || !discountCode) {
+      throw new ValidationError("All fields are required!");
+    }
+
     const isDiscountCodeExist = await prisma.discount_codes.findUnique({
       where: {
         discountCode,
