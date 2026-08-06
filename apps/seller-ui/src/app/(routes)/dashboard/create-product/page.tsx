@@ -26,9 +26,9 @@ const Page = () => {
     formState: { errors },
   } = useForm();
   const [openImageModal, setOpenImageModal] = useState(false);
-  const [isChanged, setIsChanges] = useState<boolean>(false);
+  const [isChanged, setIsChanges] = useState<boolean>(true);
   const [images, setImages] = useState<(File | null)[]>([null]);
-  // const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["categories"],
@@ -89,6 +89,8 @@ const Page = () => {
 
     setValue("images", images);
   };
+
+  const handleSaveDraft = () => {};
   return (
     <form className="w-full mx-auto p-8 shadow-md rounded-lg text-white">
       <h2 className="text-2xl py-2 font-semibold font-Poppins">
@@ -505,6 +507,26 @@ const Page = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6 flex justify-end gap-3">
+        {isChanged && (
+          <button
+            type="button"
+            className="px-4 py-2 bg-gray-700 text-white rounded-md text-sm"
+            onClick={handleSaveDraft}
+          >
+            Save Draft
+          </button>
+        )}
+
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm"
+          disabled={loading}
+        >
+          {loading ? "Creating..." : "Create"}
+        </button>
       </div>
     </form>
   );
