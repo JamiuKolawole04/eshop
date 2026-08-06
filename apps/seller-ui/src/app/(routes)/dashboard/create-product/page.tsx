@@ -1,6 +1,5 @@
 "use client";
 
-import { ImagePlaceholder } from "@/shared/component/image-placeholder";
 import { ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -15,6 +14,8 @@ import {
   SizeSelector,
 } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
+import { AllDiscountCodeResponseType } from "@/types/api.type";
+import { ImagePlaceholder } from "@/shared/component/image-placeholder";
 
 const Page = () => {
   const {
@@ -47,6 +48,16 @@ const Page = () => {
 
   const categories = data?.categories || [];
   const subCategoriesData = data?.subCategories || [];
+
+  const { data: discountCodes = [], isLoading: isDiscountLoading } = useQuery({
+    queryKey: ["shop-discounts"],
+    queryFn: async () => {
+      const res = await axiosInstance.get<AllDiscountCodeResponseType>(
+        `/api/products/discount-code`,
+      );
+      return res?.data?.discount_codes || [];
+    },
+  });
 
   const selectedCategory = watch("category");
   const regularPrice = watch("regular_price");
@@ -91,6 +102,7 @@ const Page = () => {
   };
 
   const handleSaveDraft = () => {};
+
   return (
     <form
       className="w-full mx-auto p-8 shadow-md rounded-lg text-white"
@@ -383,7 +395,7 @@ const Page = () => {
                   name="detailed_description"
                   control={control}
                   rules={{
-                    required: "Detailed description is required!",
+                    required: "Detailed description is required",
                     validate: (value) => {
                       const wordCount = value
                         ?.split(/\s+/)
@@ -476,7 +488,7 @@ const Page = () => {
                   label="Stock *"
                   placeholder="100"
                   {...register("stock", {
-                    required: "Stock is required!",
+                    required: "Stock is required",
                     valueAsNumber: true,
                     min: { value: 1, message: "Stock must be at least 1" },
                     max: {
@@ -506,6 +518,35 @@ const Page = () => {
                 <label className="block font-semibold text-gray-300 mb-1 text-sm">
                   Select Discount Codes(Optional)
                 </label>
+
+                {isDiscountLoading ? (
+                  <p className="text-gray-400">Loading discount codes...</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {discountCodes.map((discountCode) => (
+                      <button
+                        type="button"
+                        className={`px-3 py-1 rounded-md text-sm font-semibold border ${watch("discountCodes")?.includes(discountCode.id) ? "bg-blue-600 text-white border-blue-600" : "bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700"}`}
+                        onClick={() => {
+                          const currentSelection = watch("discountCodes") || [];
+                          const updatedSelection = currentSelection?.includes(
+                            discountCode.id,
+                          )
+                            ? currentSelection.filter(
+                                (id: string) => id !== discountCode.id,
+                              )
+                            : [...currentSelection, discountCode.id];
+                          setValue("discountCodes", updatedSelection);
+                        }}
+                      >
+                        {discountCode?.public_name} (
+                        {discountCode.discountValue}
+                        {discountCode.discountType === "percentage" ? "%" : "$"}
+                        )
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

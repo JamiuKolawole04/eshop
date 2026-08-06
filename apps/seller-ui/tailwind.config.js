@@ -23,7 +23,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        Poppins: ["var(--font-poppins )"],
+        Poppins: ["var(--font-poppins)"],
       },
     },
   },
