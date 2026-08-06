@@ -5,8 +5,10 @@ import { isAuthenticated, isSeller } from "@packages/middleware";
 import {
   createDiscountCode,
   deleteDiscountCode,
+  deleteProductImage,
   getCategories,
   getDiscountCodes,
+  uploadProductImage,
 } from "../controllers/product.controller";
 
 const router: Router = express.Router();
@@ -20,5 +22,13 @@ router.delete(
   isSeller,
   deleteDiscountCode,
 );
+router.post(
+  "/upload-product-image",
+  isAuthenticated,
+  isSeller,
+  uploadProductImage,
+);
+
+router.delete("/product-image", isAuthenticated, isSeller, deleteProductImage);
 
 export default router;

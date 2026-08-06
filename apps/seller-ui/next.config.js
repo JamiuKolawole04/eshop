@@ -11,6 +11,13 @@ const nextConfig = {
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
   transpilePackages: ["@packages/components"],
+  images: {
+    remotePatterns: [
+      {
+        hostname: "ik.imagekit.io",
+      },
+    ],
+  },
 };
 
 const plugins = [

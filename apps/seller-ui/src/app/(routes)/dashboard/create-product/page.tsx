@@ -1,9 +1,10 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 
 import {
   Input,
@@ -17,6 +18,11 @@ import axiosInstance from "@/utils/axiosInstance";
 import { AllDiscountCodeResponseType } from "@/types/api.type";
 import { ImagePlaceholder } from "@/shared/component/image-placeholder";
 
+interface UploadedImage {
+  fileId: string;
+  fileUrl: string;
+}
+
 const Page = () => {
   const {
     register,
@@ -26,9 +32,12 @@ const Page = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const [openImageModal, setOpenImageModal] = useState(false);
+  const [openImageModal, setOpenImageModal] = useState<boolean>(false);
   const [isChanged, setIsChanges] = useState<boolean>(true);
-  const [images, setImages] = useState<(File | null)[]>([null]);
+  const [pictureUploadingLoader, setPictureUploadingLoader] =
+    useState<boolean>(false);
+  const [selectedImage, setSelectedImage] = useState<string>("");
+  const [images, setImages] = useState<(UploadedImage | null)[]>([null]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const { data, isLoading, isError } = useQuery({
@@ -68,37 +77,72 @@ const Page = () => {
 
   const onSubmit = () => {};
 
-  const handleImageChange = (file: File | null, index: number) => {
-    const updatedImages = [...images];
-
-    updatedImages[index] = file;
-
-    if (index === images.length - 1 && images.length < 8) {
-      updatedImages.push(null);
-    }
-
-    setImages(updatedImages);
-    setValue("images", updatedImages);
+  const convertFileToBase64 = (file: File) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
   };
 
-  const handleRemoveImage = (index: number) => {
-    setImages((prevImages) => {
-      const updatedImages = [...prevImages];
+  const handleImageChange = async (file: File | null, index: number) => {
+    if (!file) return;
 
-      if (index === -1) {
-        updatedImages[0] = null;
-      } else {
-        updatedImages.splice(index, 1);
+    setPictureUploadingLoader(true);
+
+    try {
+      const fileName = convertFileToBase64(file);
+
+      const response = await axiosInstance.post(
+        `/api/products/upload-product-image`,
+        { fileName },
+      );
+      const uploadedImage: UploadedImage = {
+        fileId: response.data?.fileId,
+        fileUrl: response.data?.fileUrl,
+      };
+
+      const updatedImages = [...images];
+      updatedImages[index] = uploadedImage;
+
+      if (index === images.length - 1 && updatedImages.length < 8) {
+        updatedImages.push(null);
       }
+
+      setImages(updatedImages);
+      setValue("images", updatedImages);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setPictureUploadingLoader(false);
+    }
+  };
+
+  const handleRemoveImage = async (index: number) => {
+    try {
+      const updatedImages = [...images];
+      const imageToDelete = updatedImages[index];
+
+      if (imageToDelete && typeof imageToDelete === "object") {
+        await axiosInstance.delete(`/api/products/product-image`, {
+          data: {
+            fileId: imageToDelete.fileId,
+          },
+        });
+      }
+
+      updatedImages.splice(index, 1);
 
       if (!updatedImages.includes(null) && updatedImages.length < 8) {
         updatedImages.push(null);
       }
 
-      return updatedImages;
-    });
-
-    setValue("images", images);
+      setImages(updatedImages);
+      setValue("images", updatedImages);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleSaveDraft = () => {};
@@ -125,7 +169,10 @@ const Page = () => {
             <ImagePlaceholder
               setOpenImageModal={setOpenImageModal}
               size="765 * 850"
+              pictureUploadingLoader={pictureUploadingLoader}
               small={false}
+              images={images}
+              setSelectedImage={setSelectedImage}
               index={0}
               onImageChange={handleImageChange}
               onRemove={handleRemoveImage}
@@ -138,7 +185,10 @@ const Page = () => {
                 key={index + 1}
                 setOpenImageModal={setOpenImageModal}
                 size="765 * 850"
+                pictureUploadingLoader={pictureUploadingLoader}
                 small
+                images={images}
+                setSelectedImage={setSelectedImage}
                 index={index + 1}
                 onImageChange={handleImageChange}
                 onRemove={handleRemoveImage}
@@ -525,6 +575,7 @@ const Page = () => {
                   <div className="flex flex-wrap gap-2">
                     {discountCodes.map((discountCode) => (
                       <button
+                        key={discountCode.id}
                         type="button"
                         className={`px-3 py-1 rounded-md text-sm font-semibold border ${watch("discountCodes")?.includes(discountCode.id) ? "bg-blue-600 text-white border-blue-600" : "bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700"}`}
                         onClick={() => {
@@ -552,6 +603,25 @@ const Page = () => {
           </div>
         </div>
       </div>
+
+      {openImageModal && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-gray-800 p-6 rounded-lg w-[450px] text-white">
+            <div className="flex justify-between items-center pb-3 mb-4">
+              <h2 className="text-lg font-semibold">Enhance product Image</h2>
+              <X
+                size={20}
+                className="cursor-pointer"
+                onClick={() => setOpenImageModal(!openImageModal)}
+              />
+            </div>
+
+            <div className="w-full h-[250px] rounded-md overflow-hidden border border-gray-600">
+              <Image src={selectedImage} alt="product-image" layout="fill" />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 flex justify-end gap-3">
         {isChanged && (

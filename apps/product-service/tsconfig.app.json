@@ -13,6 +13,9 @@
       "path": "../../packages/middleware/tsconfig.lib.json"
     },
     {
+      "path": "../../packages/imagekit/tsconfig.lib.json"
+    },
+    {
       "path": "../../packages/error-handler/tsconfig.lib.json"
     },
     {

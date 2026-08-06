@@ -6,6 +6,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "@packages/error-handler";
+import { imageKit } from "@packages/imagekit";
 
 export const getCategories = async (
   req: Request,
@@ -47,10 +48,8 @@ export const createDiscountCode = async (
     });
 
     if (isDiscountCodeExist) {
-      return next(
-        new ConflictError(
-          "Discount code already available plesae use a different code!",
-        ),
+      throw new ConflictError(
+        "Discount code already available plesae use a different code!",
       );
     }
 
@@ -121,6 +120,57 @@ export const deleteDiscountCode = async (
     return res
       .status(200)
       .json({ message: "Discount code successfully deleted" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadProductImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { fileName } = req.body;
+
+    if (!fileName) {
+      throw new ValidationError("file is required!");
+    }
+
+    const response = await imageKit.files.upload({
+      file: fileName,
+      fileName: `product-${Date.now()}.jpg`,
+      folder: "/eshop-products",
+    });
+
+    res.status(201).json({
+      success: true,
+      fileUrl: response.url,
+      fileId: response.fileId,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteProductImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { fileId } = req.body;
+
+    if (!fileId) {
+      throw new ValidationError("file id is required!");
+    }
+
+    const response = await imageKit.files.delete(fileId);
+
+    res.status(201).json({
+      success: true,
+      response,
+    });
   } catch (error) {
     next(error);
   }

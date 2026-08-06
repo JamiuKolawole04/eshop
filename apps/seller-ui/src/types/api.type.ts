@@ -58,3 +58,8 @@ export type AllDiscountCodeResponseType = {
 export type DeleteDiscountCodeResponseType = {
   message: string;
 };
+
+export type UploadFileResponseType = {
+  fileUrl: string;
+  fileName: string;
+};

@@ -7,11 +7,14 @@ import { ChangeEvent, Fragment, useState } from "react";
 type Props = {
   size: string;
   small?: boolean;
+  images: any;
+  setSelectedImage: (e: string) => void;
   onImageChange: (file: File | null, index: number) => void;
   onRemove?: (index: number) => void;
   defaultImage?: string | null;
   setOpenImageModal: (openImageModal: boolean) => void;
   index?: any;
+  pictureUploadingLoader: boolean;
 };
 
 export const ImagePlaceholder = ({
@@ -22,6 +25,9 @@ export const ImagePlaceholder = ({
   defaultImage = null,
   index = null,
   setOpenImageModal,
+  setSelectedImage,
+  images,
+  pictureUploadingLoader,
 }: Props) => {
   const [imagePreview, setImagePreview] = useState<string | null>(defaultImage);
 
@@ -48,6 +54,7 @@ export const ImagePlaceholder = ({
       {imagePreview ? (
         <Fragment>
           <button
+            disabled={pictureUploadingLoader}
             type="button"
             onClick={() => onRemove?.(index)}
             className="absolute top-3 right-3 p-2 !rounded bg-red-600 shadow-lg"
@@ -56,8 +63,12 @@ export const ImagePlaceholder = ({
           </button>
 
           <button
+            disabled={pictureUploadingLoader}
             className="absolute top-3 right-[70px] p-2 !rounded bg-blue-500 shadow-lg cursor-pointer"
-            onClick={() => setOpenImageModal(true)}
+            onClick={() => {
+              setOpenImageModal(true);
+              setSelectedImage(images[index].fileUrl);
+            }}
           >
             <WandSparkles size={16} />
           </button>
