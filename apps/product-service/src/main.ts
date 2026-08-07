@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 
 import { ErrorMiddleware } from "@packages/error-handler";
 import productRoutes from "./routes/product.route";
+import "./jobs/product-cron-job";
 
 const host = process.env.HOST ?? "localhost";
 const port = process.env.PORT ? Number(process.env.PORT) : 6002;
@@ -22,7 +23,7 @@ app.use(
 app.use(express.json({ limit: "100mb" }));
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.send({ message: "Hello Product API" });
 });
 

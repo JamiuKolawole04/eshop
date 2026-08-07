@@ -101,10 +101,9 @@ const Page = () => {
     try {
       const fileName = await convertFileToBase64(file);
 
-      const response = await axiosInstance.post(
-        `/api/products/upload-product-image`,
-        { fileName },
-      );
+      const response = await axiosInstance.post(`/api/products/product-image`, {
+        fileName,
+      });
       const uploadedImage: UploadedImage = {
         fileId: response.data?.fileId,
         fileUrl: response.data?.fileUrl,

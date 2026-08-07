@@ -6,16 +6,26 @@ import {
   createDiscountCode,
   createProduct,
   deleteDiscountCode,
+  deleteProduct,
   deleteProductImage,
   getCategories,
   getDiscountCodes,
+  getShopProducts,
+  restoreProduct,
   uploadProductImage,
 } from "../controllers/product.controller";
 
 const router: Router = express.Router();
 
 router.post("/", isAuthenticated, isSeller, createProduct);
+
+router.get("/shop-products", isAuthenticated, isSeller, getShopProducts);
+
+router.delete("/:productId", isAuthenticated, isSeller, deleteProduct);
+router.patch("/:productId/restore", isAuthenticated, isSeller, restoreProduct);
+
 router.get("/categories", getCategories);
+
 router.post("/discount-code", isAuthenticated, isSeller, createDiscountCode);
 router.get("/discount-code", isAuthenticated, getDiscountCodes);
 router.delete(
@@ -24,13 +34,7 @@ router.delete(
   isSeller,
   deleteDiscountCode,
 );
-router.post(
-  "/upload-product-image",
-  isAuthenticated,
-  isSeller,
-  uploadProductImage,
-);
-
+router.post("/product-image", isAuthenticated, isSeller, uploadProductImage);
 router.delete("/product-image", isAuthenticated, isSeller, deleteProductImage);
 
 export default router;
