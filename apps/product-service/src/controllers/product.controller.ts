@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { NextFunction, Request, Response } from "express";
 
 import { prisma } from "@packages/prisma";
@@ -143,7 +145,7 @@ export const uploadProductImage = async (
       folder: "/eshop-products",
     });
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       fileUrl: response.url,
       fileId: response.fileId,
@@ -167,9 +169,108 @@ export const deleteProductImage = async (
 
     const response = await imageKit.files.delete(fileId);
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       response,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const {
+      title,
+      short_description,
+      detailed_description,
+      warranty,
+      custom_specifications,
+      slug,
+      tags,
+      cash_on_delivery,
+      brand,
+      video_url,
+      category,
+      colors = [],
+      sizes = [],
+      discountCodes,
+      stock,
+      sale_price,
+      regular_price,
+      subCategory,
+      customProperties = {},
+      images = [],
+    } = req.body;
+
+    if (
+      !title ||
+      !short_description ||
+      !detailed_description ||
+      !warranty ||
+      !slug ||
+      !tags ||
+      !cash_on_delivery ||
+      !category ||
+      !subCategory ||
+      !sale_price ||
+      !regular_price ||
+      !stock
+    ) {
+      return next(new ValidationError("Missing required fields"));
+    }
+
+    const slugChecking = await prisma.products.findUnique({
+      where: { slug },
+    });
+
+    if (slugChecking) {
+      throw new ValidationError(
+        "Slug already exists! Please use a different slug.",
+      );
+    }
+
+    const newProduct = await prisma.products.create({
+      data: {
+        title,
+        short_description,
+        detailed_description,
+        warranty,
+        cashOnDelivery: cash_on_delivery,
+        slug,
+        shopId: req.seller?.shop?.id as string,
+        tags: Array.isArray(tags) ? tags : tags.split(","),
+        brand,
+        video_url,
+        category,
+        subCategory,
+        colors: colors || [],
+        discount_codes: discountCodes.map((codeId: string) => codeId),
+        sizes: sizes || [],
+        stock: parseInt(stock),
+        sale_price: parseFloat(sale_price),
+        regular_price: parseFloat(regular_price),
+        custom_properties: customProperties || {},
+        custom_specifications: custom_specifications || {},
+        images: {
+          create: images
+            .filter((img: any) => img && img.fileId && img.fileUrl)
+            .map((img: any) => ({
+              file_id: img.fileId,
+              url: img.fileUrl,
+            })),
+        },
+      },
+      include: { images: true },
+    });
+
+    return res.status(201).json({
+      success: true,
+      newProduct,
     });
   } catch (error) {
     next(error);

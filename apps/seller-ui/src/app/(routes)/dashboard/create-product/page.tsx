@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, Wand, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 import {
   Input,
@@ -17,6 +21,7 @@ import {
 import axiosInstance from "@/utils/axiosInstance";
 import { AllDiscountCodeResponseType } from "@/types/api.type";
 import { ImagePlaceholder } from "@/shared/component/image-placeholder";
+import { enhancements } from "@/utils/ai-enhancements";
 
 interface UploadedImage {
   fileId: string;
@@ -32,13 +37,17 @@ const Page = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const router = useRouter();
+
   const [openImageModal, setOpenImageModal] = useState<boolean>(false);
   const [isChanged, setIsChanges] = useState<boolean>(true);
+  const [activeEffect, setActiveEffect] = useState<string | null>(null);
   const [pictureUploadingLoader, setPictureUploadingLoader] =
     useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [images, setImages] = useState<(UploadedImage | null)[]>([null]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [processing, setProcessing] = useState<boolean>(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["categories"],
@@ -75,8 +84,6 @@ const Page = () => {
     return selectedCategory ? subCategoriesData[selectedCategory] || [] : [];
   }, [selectedCategory, subCategoriesData]);
 
-  const onSubmit = () => {};
-
   const convertFileToBase64 = (file: File) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -92,7 +99,7 @@ const Page = () => {
     setPictureUploadingLoader(true);
 
     try {
-      const fileName = convertFileToBase64(file);
+      const fileName = await convertFileToBase64(file);
 
       const response = await axiosInstance.post(
         `/api/products/upload-product-image`,
@@ -145,7 +152,35 @@ const Page = () => {
     }
   };
 
-  const handleSaveDraft = () => {};
+  const applyTransformation = (transformation: string) => {
+    if (!selectedImage || processing) return;
+
+    setProcessing(true);
+    setActiveEffect(transformation);
+
+    try {
+      const transformedUrl = `${selectedImage}?tr=${transformation}`;
+      setSelectedImage(transformedUrl);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {};
+
+  const onSubmit = async (data: any) => {
+    try {
+      setLoading(true);
+      await axiosInstance.post(`/api/products`, data);
+      router.push("/dashboard/all-products");
+    } catch (error: any) {
+      toast.error(error?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <form
@@ -168,7 +203,7 @@ const Page = () => {
           {images?.length > 0 && (
             <ImagePlaceholder
               setOpenImageModal={setOpenImageModal}
-              size="765 * 850"
+              size="765 x 850"
               pictureUploadingLoader={pictureUploadingLoader}
               small={false}
               images={images}
@@ -184,7 +219,7 @@ const Page = () => {
               <ImagePlaceholder
                 key={index + 1}
                 setOpenImageModal={setOpenImageModal}
-                size="765 * 850"
+                size="765 x 850"
                 pictureUploadingLoader={pictureUploadingLoader}
                 small
                 images={images}
@@ -220,7 +255,7 @@ const Page = () => {
                   label="Short Description * (Max 150 words)"
                   placeholder="Enter product description for quick view"
                   className="resize-none"
-                  {...register("description", {
+                  {...register("short_description", {
                     required: "Description is required",
                     validate: (value) => {
                       const wordCount = value.trim().split(/\s*/).length;
@@ -233,9 +268,9 @@ const Page = () => {
                   })}
                 />
 
-                {errors.description && (
+                {errors.short_description && (
                   <p className="text-red-500 text-xs mt-1">
-                    {String(errors.description.message)}
+                    {String(errors.short_description.message)}
                   </p>
                 )}
               </div>
@@ -447,9 +482,16 @@ const Page = () => {
                   rules={{
                     required: "Detailed description is required",
                     validate: (value) => {
-                      const wordCount = value
-                        ?.split(/\s+/)
-                        .filter((word: string) => word).length;
+                      const div = document.createElement("div");
+                      div.innerHTML = value || "";
+
+                      const text = div.textContent || "";
+
+                      const wordCount = text
+                        .trim()
+                        .split(/\s+/)
+                        .filter(Boolean).length;
+
                       return (
                         wordCount >= 100 ||
                         "Description must be at least 100 words!"
@@ -616,9 +658,30 @@ const Page = () => {
               />
             </div>
 
-            <div className="w-full h-[250px] rounded-md overflow-hidden border border-gray-600">
+            <div className="relative w-full h-[250px] rounded-md overflow-hidden border border-gray-600">
               <Image src={selectedImage} alt="product-image" layout="fill" />
             </div>
+
+            {selectedImage && (
+              <div className="mt-4 space-y-2">
+                <h3 className="text-white text-sm font-semibold">
+                  AI Enhancements
+                </h3>
+
+                <div className="grid grid-cols-2 gap-3 max-h-[250px] overflow-y-auto">
+                  {enhancements.map(({ label, effect }) => (
+                    <button
+                      type="button"
+                      key={effect}
+                      className={`p-2 rounded-md flex items-center gap-2 ${activeEffect === effect ? "bg-blue-600 text-white" : "bg-gray-700 hover:bg-gray-600"}`}
+                      onClick={() => applyTransformation(effect)}
+                    >
+                      <Wand size={18} /> {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

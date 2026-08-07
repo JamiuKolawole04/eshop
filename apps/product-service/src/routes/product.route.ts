@@ -4,6 +4,7 @@ import { isAuthenticated, isSeller } from "@packages/middleware";
 
 import {
   createDiscountCode,
+  createProduct,
   deleteDiscountCode,
   deleteProductImage,
   getCategories,
@@ -13,6 +14,7 @@ import {
 
 const router: Router = express.Router();
 
+router.post("/", isAuthenticated, isSeller, createProduct);
 router.get("/categories", getCategories);
 router.post("/discount-code", isAuthenticated, isSeller, createDiscountCode);
 router.get("/discount-code", isAuthenticated, getDiscountCodes);
