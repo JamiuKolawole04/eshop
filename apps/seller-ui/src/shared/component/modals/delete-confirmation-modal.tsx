@@ -43,7 +43,7 @@ export const DeleteConfirmationModal = ({
               product?.isDeleted
                 ? "bg-green-600 hover:bg-green-700"
                 : "bg-red-600 hover:bg-red-700"
-            } px-4 py-2 rounded-md text-white font-semibold transition`}
+            } px-3 py-1 rounded-md text-white font-semibold transition`}
           >
             {product?.isDeleted ? "Restore" : "Delete"}
           </button>
