@@ -8,6 +8,7 @@ import {
   deleteDiscountCode,
   deleteProduct,
   deleteProductImage,
+  getAllProducts,
   getCategories,
   getDiscountCodes,
   getShopProducts,
@@ -18,6 +19,7 @@ import {
 const router: Router = express.Router();
 
 router.post("/", isAuthenticated, isSeller, createProduct);
+router.get("/", getAllProducts);
 
 router.get("/shop-products", isAuthenticated, isSeller, getShopProducts);
 
