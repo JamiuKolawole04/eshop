@@ -5,23 +5,12 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-const publicPaths = [
-  "/login",
-  "/signup",
-  "/forgot-password",
-  "/reset-password",
-  "/verify-email",
-];
-
 let isRefreshing = false;
 let refreshSubscribers: (() => void)[] = [];
 
 // handle logout and prevent infinite loops
-
-const handleLogout = () => {
-  if (!publicPaths.includes(window.location.pathname)) {
-    window.location.href = "/login";
-  }
+export const handleLogout = () => {
+  window.location.href = "/login";
 };
 
 // handle adding a new access token to queued requests.
@@ -71,7 +60,7 @@ axiosInstance.interceptors.response.use(
       } catch (err) {
         isRefreshing = false;
         refreshSubscribers = [];
-        handleLogout();
+        // handleLogout();
 
         return Promise.reject(err);
       }

@@ -2,10 +2,6 @@ import cron from "node-cron";
 
 import { prisma } from "@packages/prisma";
 
-cron.schedule("* * * * *", () => {
-  console.log("Running a task every minute");
-});
-
 cron.schedule("0 * * * *", async () => {
   try {
     const now = new Date();
