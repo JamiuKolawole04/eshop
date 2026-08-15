@@ -1,3 +1,6 @@
+import { FileType } from "./file";
+import { ShopType } from "./shop";
+
 export type ProductType = {
   id: string;
   title: string;
@@ -24,23 +27,29 @@ export type ProductType = {
   cashOnDelivery: "yes" | "no";
   discount_codes: string[];
   status: "Active" | "Pending" | "Draft";
+  totalSales: number;
   deletedAt: string | null;
   shopId: string;
   createdAt: string;
   updatedAt: string;
-  images: {
-    id: string;
-    file_id: string;
-    url: string;
-    userId: string | null;
-    shopId: string | null;
-    productId: string;
-    createdAt: string;
-    updatedAt: string;
-  }[];
+};
+
+export type ProductWithRelationsType = ProductType & {
+  images: FileType[];
+  shop: ShopType;
 };
 
 export type CreateProductResponseType = {
   success: true;
-  newProduct: ProductType;
+  newProduct: ProductType & { images: Array<FileType> };
+};
+
+export type GetAllProductsResponseType = {
+  success: true;
+  products: ProductWithRelationsType[];
+  top10By: "latest" | "topSales";
+  top10Products: ProductType[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
 };
