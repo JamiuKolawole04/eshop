@@ -6,11 +6,10 @@ import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Controller, useForm } from "react-hook-form";
-
-import { AllDiscountCodeResponseType, DiscountCode } from "@/types/api.type";
-import axiosInstance from "@/utils/axiosInstance";
-import { Input } from "@packages/ui";
 import { AxiosError } from "axios";
+
+import axiosInstance from "@/utils/axiosInstance";
+import { Input, AllDiscountCodeResponseType, DiscountCode } from "@packages/ui";
 import { DeleteDiscountCodeModal } from "@/shared/component/modals/delete-discount-modal";
 
 const defaultValues = {

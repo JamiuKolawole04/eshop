@@ -25,6 +25,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
 import { DeleteConfirmationModal } from "@/shared/component/modals/delete-confirmation-modal";
+import { ProductType } from "@packages/ui";
 
 const fetchProducts = async () => {
   const response = await axiosInstance.get(`/api/products/shop-products`);
@@ -181,7 +182,7 @@ const Page = () => {
     onGlobalFilterChange: setGlobalFilter,
   });
 
-  const openDeleteModal = (product) => {
+  const openDeleteModal = (product: ProductType) => {
     setSelectedProduct(product);
     setShowDeleteModal(true);
   };

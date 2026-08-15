@@ -17,9 +17,9 @@ import {
   CustomProperties,
   RichTextEditor,
   SizeSelector,
+  AllDiscountCodeResponseType,
 } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
-import { AllDiscountCodeResponseType } from "@/types/api.type";
 import { ImagePlaceholder } from "@/shared/component/image-placeholder";
 import { enhancements } from "@/utils/ai-enhancements";
 
@@ -40,7 +40,7 @@ const Page = () => {
   const router = useRouter();
 
   const [openImageModal, setOpenImageModal] = useState<boolean>(false);
-  const [isChanged, setIsChanges] = useState<boolean>(true);
+  const [isChanged, setIsChanged] = useState<boolean>(true);
   const [activeEffect, setActiveEffect] = useState<string | null>(null);
   const [pictureUploadingLoader, setPictureUploadingLoader] =
     useState<boolean>(false);
@@ -167,7 +167,9 @@ const Page = () => {
     }
   };
 
-  const handleSaveDraft = async () => {};
+  const handleSaveDraft = async () => {
+    console.log("save draft");
+  };
 
   const onSubmit = async (data: any) => {
     try {
