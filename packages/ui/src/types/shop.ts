@@ -3,7 +3,7 @@ export type ShopType = {
   name: string;
   bio: string | null;
   category: string;
-  avatar: string | null;
+  avatar: string;
   coverBanner: string | null;
   address: string | null;
   opening_hours: string | null;

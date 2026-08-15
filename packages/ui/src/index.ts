@@ -8,4 +8,5 @@ export * from "./lib/size-selector";
 export * from "./types/product-category";
 export * from "./types/discount-code";
 export * from "./types/product";
-export * from "./types/product";
+export * from "./types/file";
+export * from "./types/shop";

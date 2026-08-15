@@ -6,7 +6,7 @@ type Props = {
 
 export const SectionTitle = ({ title }: Props) => {
   return (
-    <div className="relative">
+    <div className="relative font-Roboto">
       <h1 className="md:text-3xl text-xl relative z-10 font-semibold">
         {title}
       </h1>

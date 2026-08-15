@@ -93,7 +93,7 @@ model Shops {
   name          String
   bio           String?
   category      String
-  avatar        String?
+  avatar        String @default("https://ik.imagekit.io/jnven3dnh3/eshop-products/shop-avater.png")
   coverBanner   String?
   address       String?
   opening_hours String?
@@ -225,7 +225,7 @@ model ProductAnalytics {
   updatedAt DateTime @updatedAt
 }
 
-model shopAnalytics {
+model ShopAnalytics {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   totalVisitors Int      @default(0)
   countryStats  Json? //store aggregated country data {"us": 20, "IN": 50, "UK": 15}

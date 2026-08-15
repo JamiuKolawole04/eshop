@@ -32,16 +32,16 @@ export type ProductType = {
   shopId: string;
   createdAt: string;
   updatedAt: string;
+  images: Array<FileType>;
 };
 
 export type ProductWithRelationsType = ProductType & {
-  images: FileType[];
   shop: ShopType;
 };
 
 export type CreateProductResponseType = {
   success: true;
-  newProduct: ProductType & { images: Array<FileType> };
+  newProduct: ProductType;
 };
 
 export type GetAllProductsResponseType = {
