@@ -1,13 +1,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Heart,
-  MapPin,
-  MessageCircle,
-  ShoppingCartIcon,
-  X,
-} from "lucide-react";
+import { Heart, MapPin, ShoppingCartIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { ProductWithRelationsType } from "@packages/ui";

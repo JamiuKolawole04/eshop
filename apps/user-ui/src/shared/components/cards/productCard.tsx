@@ -5,6 +5,8 @@ import { Eye, Heart, ShoppingBag } from "lucide-react";
 import Ratings from "../ratings";
 import { ProductWithRelationsType } from "@packages/ui";
 import { ProductDetailsCard } from "./productDetailsCard";
+import { useStore } from "@/store";
+import { useUser } from "@/hooks/use-user";
 
 type Props = {
   product: ProductWithRelationsType;
@@ -12,8 +14,15 @@ type Props = {
 };
 
 export const ProductCard = ({ product, isEvent }: Props) => {
+  const { user } = useUser();
   const [timeLeft, setTimeLeft] = useState("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const { addToWishlist, addToCart, removeFromWishlist, wishlist, cart } =
+    useStore();
+
+  const isWishListed = wishlist.some((item) => item.id === product.id);
+  const isInCart = cart.some((item) => item.id === product.id);
 
   useEffect(() => {
     if (isEvent && product?.ending_date) {
@@ -110,8 +119,18 @@ export const ProductCard = ({ product, isEvent }: Props) => {
           <Heart
             className="cursor-pointer hover:scale-110 transition"
             size={20}
-            fill="red"
-            stroke="red"
+            onClick={() =>
+              isWishListed
+                ? removeFromWishlist(product.id, user, location, deviceInfo)
+                : addToWishlist(
+                    { ...product, quantity: 1 },
+                    user,
+                    location,
+                    deviceInfo,
+                  )
+            }
+            fill={isWishListed ? "red" : "transparent"}
+            stroke={isWishListed ? "red" : "#4b5563"}
           />
         </div>
 
