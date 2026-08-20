@@ -7,6 +7,8 @@ import { ProductWithRelationsType } from "@packages/ui";
 import { ProductDetailsCard } from "./productDetailsCard";
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
+import { useLocationTracking } from "@/hooks/use-location-tracking";
+import { useDeviceTracking } from "@/hooks/use-device-tracking";
 
 type Props = {
   product: ProductWithRelationsType;
@@ -15,11 +17,13 @@ type Props = {
 
 export const ProductCard = ({ product, isEvent }: Props) => {
   const { user } = useUser();
-  const [timeLeft, setTimeLeft] = useState("");
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
   const { addToWishlist, addToCart, removeFromWishlist, wishlist, cart } =
     useStore();
+  const location = useLocationTracking();
+  const deviceInfo = useDeviceTracking();
+
+  const [timeLeft, setTimeLeft] = useState("");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const isWishListed = wishlist.some((item) => item.id === product.id);
   const isInCart = cart.some((item) => item.id === product.id);
@@ -146,6 +150,10 @@ export const ProductCard = ({ product, isEvent }: Props) => {
           <ShoppingBag
             className="cursor-pointer text-[#4b5563] hover:scale-110 transition"
             size={20}
+            onClick={() =>
+              !isInCart &&
+              addToCart({ ...product, quantity: 1 }, user, location, deviceInfo)
+            }
           />
         </div>
       </div>

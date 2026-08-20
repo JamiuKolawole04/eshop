@@ -12,9 +12,11 @@ import React, { Fragment, useEffect, useState } from "react";
 
 import { navItems } from "@/configs/constants";
 import { useUser } from "@/hooks/use-user";
+import { useStore } from "@/store";
 
 const HeaderBottom = () => {
   const { user, isLoading } = useUser();
+  const { cart, wishlist } = useStore();
 
   const [show, setShow] = useState(false);
   const [isSticky, setIsSticky] = useState<boolean>(false);
@@ -117,7 +119,9 @@ const HeaderBottom = () => {
                     <Heart size={20} className="text-gray-600" />
 
                     <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                      <span className="text-white font-medium text-sm">0</span>
+                      <span className="text-white font-medium text-sm">
+                        {wishlist?.length}
+                      </span>
                     </div>
                   </Link>
 
@@ -125,7 +129,9 @@ const HeaderBottom = () => {
                     <ShoppingCart size={20} className="text-gray-600" />
 
                     <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                      <span className="text-white font-medium text-sm">0</span>
+                      <span className="text-white font-medium text-sm">
+                        {cart?.length}
+                      </span>
                     </div>
                   </Link>
                 </div>

@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 
 import { ProductWithRelationsType } from "@packages/ui";
 import Ratings from "../ratings";
+import { useStore } from "@/store";
+import { useUser } from "@/hooks/use-user";
+import { useLocationTracking } from "@/hooks/use-location-tracking";
+import { useDeviceTracking } from "@/hooks/use-device-tracking";
 
 type Props = {
   data: ProductWithRelationsType;
@@ -19,6 +23,15 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
   const [isSelected, setIsSelected] = useState(data?.colors?.[0] || "");
   const [isSizeSelected, setIsSizeSelected] = useState(data?.sizes?.[0] || "");
   const [quantity, setQuantity] = useState(0);
+
+  const { user } = useUser();
+  const { addToWishlist, addToCart, removeFromWishlist, wishlist, cart } =
+    useStore();
+  const location = useLocationTracking();
+  const deviceInfo = useDeviceTracking();
+
+  const isWishListed = wishlist.some((item) => item.id === data?.id);
+  const isInCart = cart.some((item) => item.id === data?.id);
 
   const estimatedDelivery = new Date();
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
@@ -183,14 +196,51 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
               </div>
 
               <button
-                className={`flex items-center gap-2 px-4 py-2 bg-[#ff5722] hover:bg-[#e64a19] text-white font-medium rounded-lg transition`}
+                disabled={isInCart}
+                onClick={() =>
+                  addToCart(
+                    {
+                      ...data,
+                      quantity,
+                      selectedOptions: {
+                        color: isSelected,
+                        size: isSizeSelected,
+                      },
+                    },
+                    user,
+                    location,
+                    deviceInfo,
+                  )
+                }
+                className={`flex items-center gap-2 px-4 py-2 bg-[#ff5722] hover:bg-[#e64a19] text-white font-medium rounded-lg transition ${isInCart ? "cursor-not-allowed" : "cursor-pointer"}`}
               >
                 <ShoppingCartIcon size={18} />
                 Add to cart
               </button>
 
               <button className={`opacity-[.7] cursor-pointer`}>
-                <Heart size={30} fill="red" color="red" />
+                <Heart
+                  size={30}
+                  onClick={() =>
+                    isWishListed
+                      ? removeFromWishlist(data.id, user, location, deviceInfo)
+                      : addToWishlist(
+                          {
+                            ...data,
+                            quantity,
+                            selectedOptions: {
+                              color: isSelected,
+                              size: isSizeSelected,
+                            },
+                          },
+                          user,
+                          location,
+                          deviceInfo,
+                        )
+                  }
+                  fill={isWishListed ? "red" : "transparent"}
+                  stroke={isWishListed ? "red" : "#4b5563"}
+                />
               </button>
             </div>
 

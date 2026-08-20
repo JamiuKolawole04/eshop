@@ -2,14 +2,9 @@
 import { persist } from "zustand/middleware";
 import { create } from "zustand";
 
-type Product = {
-  id: string;
-  title: string;
-  price: number;
-  image: string;
-  quantity?: number;
-  shopId: string;
-};
+import { ProductType } from "@packages/ui";
+
+type Product = ProductType & { quantity?: number };
 
 type Store = {
   cart: Product[];
@@ -17,7 +12,10 @@ type Store = {
   addToCart: (
     product: Product,
     user: any,
-    location: string,
+    location: {
+      country: string;
+      city: string;
+    } | null,
     deviceInfo: string,
   ) => void;
   removeFromCart: (
@@ -29,13 +27,16 @@ type Store = {
   addToWishlist: (
     product: Product,
     user: any,
-    location: string,
+    location: {
+      country: string;
+      city: string;
+    } | null,
     deviceInfo: string,
   ) => void;
   removeFromWishlist: (
     id: string,
     user: any,
-    location: string,
+    location: any,
     deviceInfo: string,
   ) => void;
 };
@@ -85,7 +86,7 @@ export const useStore = create<Store>()(
         const removeProduct = get().wishlist.find((item) => item.id === id);
 
         set((state) => ({
-          cart: state.wishlist?.filter((item) => item.id !== id),
+          wishlist: state.wishlist?.filter((item) => item.id !== id),
         }));
       },
     }),

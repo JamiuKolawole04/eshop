@@ -1,0 +1,95 @@
+"use client";
+
+import Link from "next/link";
+
+import { useStore } from "@/store";
+import { useUser } from "@/hooks/use-user";
+import { useLocationTracking } from "@/hooks/use-location-tracking";
+import { useDeviceTracking } from "@/hooks/use-device-tracking";
+import Image from "next/image";
+
+const Page = () => {
+  const { user } = useUser();
+  const { addToWishlist, addToCart, removeFromWishlist, wishlist, cart } =
+    useStore();
+  const location = useLocationTracking();
+  const deviceInfo = useDeviceTracking();
+
+  return (
+    <div className={`w-full bg-white font-Poppins`}>
+      <div className="md:w-[80%] w-[95%] mx-auto min-h-screen">
+        <div className="pb-[50px]">
+          <h1 className="md:pt-[50px] font-medium text-[44px] leading-1 mb-4">
+            Wishlist
+          </h1>
+
+          <Link href="/" className="text-[#55585b] hover:underline">
+            Home
+          </Link>
+
+          <span className="inline-block p-[1.5px] mx-1 bg-[#a8acb0] rounded-full"></span>
+
+          <span className="text-[#55585b]">Wishlist</span>
+        </div>
+
+        {wishlist?.length === 0 ? (
+          <div className="text-center text-gray-600 text-lg">
+            Your wishlist is empty! Start adding products.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-10">
+            <table className="w-full border-collapse">
+              <thead className="bg-[#f1f3f4]">
+                <tr>
+                  <th className="py-3 text-left pl-4">Product</th>
+                  <th className="py-3 text-left">Price</th>
+                  <th className="py-3 text-left">Quantity</th>
+                  <th className="py-3 text-left">Action</th>
+                  <th className="py-3 text-left"></th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {wishlist?.map((item) => (
+                  <tr key={item.id} className="border-b border-b-[#0000000e]">
+                    <td className="flex items-center gap-3 p-4">
+                      <Image
+                        src={item.images[0].url}
+                        alt={item.title}
+                        width={80}
+                        height={80}
+                        className="rounded"
+                      />
+
+                      <span>{item.title}</span>
+                    </td>
+
+                    <td className="px-6 text-lg">
+                      ${item?.sale_price.toFixed(2)}
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center itemitems-center border border-gray-200 rounded-[20px] w-[90px] p-[2px]">
+                        <button className="text-black cursor-pointer text-xl">
+                          -
+                        </button>
+
+                        <span className="px-4">{item?.quantity}</span>
+
+                        <button className="text-black cursor-pointer text-xl">
+                          +
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Page;

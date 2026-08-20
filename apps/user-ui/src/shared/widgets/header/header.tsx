@@ -6,9 +6,11 @@ import { Fragment } from "react";
 
 import HeaderBottom from "./headerBottom";
 import { useUser } from "@/hooks/use-user";
+import { useStore } from "@/store";
 
 const Header = () => {
   const { user, isLoading } = useUser();
+  const { cart, wishlist } = useStore();
 
   return (
     <header className="w-full bg-white">
@@ -75,7 +77,9 @@ const Header = () => {
               <Heart size={20} className="text-gray-600" />
 
               <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                <span className="text-white font-medium text-sm">0</span>
+                <span className="text-white font-medium text-sm">
+                  {wishlist?.length}
+                </span>
               </div>
             </Link>
 
@@ -83,7 +87,9 @@ const Header = () => {
               <ShoppingCart size={20} className="text-gray-600" />
 
               <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                <span className="text-white font-medium text-sm">0</span>
+                <span className="text-white font-medium text-sm">
+                  {cart?.length}
+                </span>
               </div>
             </Link>
           </div>
