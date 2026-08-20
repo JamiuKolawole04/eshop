@@ -4,7 +4,13 @@ import { create } from "zustand";
 
 import { ProductType } from "@packages/ui";
 
-type Product = ProductType & { quantity?: number };
+type Product = ProductType & {
+  quantity?: number;
+  selectedOptions?: {
+    color: string;
+    size: string;
+  };
+};
 
 type Store = {
   cart: Product[];

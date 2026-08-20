@@ -10,10 +10,31 @@ import Image from "next/image";
 
 const Page = () => {
   const { user } = useUser();
-  const { addToWishlist, addToCart, removeFromWishlist, wishlist, cart } =
-    useStore();
+  const { addToCart, removeFromWishlist, wishlist } = useStore();
   const location = useLocationTracking();
   const deviceInfo = useDeviceTracking();
+
+  const decreaseQuantity = (id: string) => {
+    useStore.setState((state) => ({
+      wishlist: state.wishlist.map((item) =>
+        item.id === id && (item.quantity as number) > 1
+          ? { ...item, quantity: (item.quantity as number) - 1 }
+          : item,
+      ),
+    }));
+  };
+
+  const increaseQuantity = (id: string) => {
+    useStore.setState((state) => ({
+      wishlist: state.wishlist.map((item) =>
+        item.id === id ? { ...item, quantity: (item.quantity ?? 1) + 1 } : item,
+      ),
+    }));
+  };
+
+  const removeItem = (id: string) => {
+    removeFromWishlist(id, user, location, deviceInfo);
+  };
 
   return (
     <div className={`w-full bg-white font-Poppins`}>
@@ -70,16 +91,42 @@ const Page = () => {
 
                     <td>
                       <div className="flex justify-center itemitems-center border border-gray-200 rounded-[20px] w-[90px] p-[2px]">
-                        <button className="text-black cursor-pointer text-xl">
+                        <button
+                          className="text-black cursor-pointer text-xl"
+                          onClick={() => decreaseQuantity(item.id)}
+                        >
                           -
                         </button>
 
                         <span className="px-4">{item?.quantity}</span>
 
-                        <button className="text-black cursor-pointer text-xl">
+                        <button
+                          className="text-black cursor-pointer text-xl"
+                          onClick={() => increaseQuantity(item?.id)}
+                        >
                           +
                         </button>
                       </div>
+                    </td>
+
+                    <td>
+                      <button
+                        className="bg-[#2295ff] text-sm cursor-pointer text-white px-5 py-2 rounded-md hover:bg-[#007bff] transition-all"
+                        onClick={() =>
+                          addToCart(item, user, location, deviceInfo)
+                        }
+                      >
+                        Add To Cart
+                      </button>
+                    </td>
+
+                    <td>
+                      <button
+                        className="text-[#818487] cursor-pointer hover:text-[#ff1826] transition duration-200"
+                        onClick={() => removeItem(item.id)}
+                      >
+                        X Remove
+                      </button>
                     </td>
                   </tr>
                 ))}
