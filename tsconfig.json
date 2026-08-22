@@ -47,6 +47,12 @@
     },
     {
       "path": "./packages/imagekit"
+    },
+    {
+      "path": "./apps/kafka-service"
+    },
+    {
+      "path": "./packages/kafka"
     }
   ]
 }

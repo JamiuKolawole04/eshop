@@ -40,7 +40,7 @@ const Page = () => {
     <div className={`w-full bg-white font-Poppins`}>
       <div className="md:w-[80%] w-[95%] mx-auto min-h-screen">
         <div className="pb-[50px]">
-          <h1 className="md:pt-[50px] font-medium text-[44px] leading-1 mb-4">
+          <h1 className="md:pt-[50px] font-medium text-[44px] leading-[1] mb-4">
             Wishlist
           </h1>
 
@@ -90,7 +90,7 @@ const Page = () => {
                     </td>
 
                     <td>
-                      <div className="flex justify-center itemitems-center border border-gray-200 rounded-[20px] w-[90px] p-[2px]">
+                      <div className="flex justify-center items-center border border-gray-200 rounded-[20px] w-[70px] p-[2px]">
                         <button
                           className="text-black cursor-pointer text-xl"
                           onClick={() => decreaseQuantity(item.id)}
@@ -98,7 +98,7 @@ const Page = () => {
                           -
                         </button>
 
-                        <span className="px-4">{item?.quantity}</span>
+                        <span className="px-2">{item?.quantity}</span>
 
                         <button
                           className="text-black cursor-pointer text-xl"
@@ -122,7 +122,7 @@ const Page = () => {
 
                     <td>
                       <button
-                        className="text-[#818487] cursor-pointer hover:text-[#ff1826] transition duration-200"
+                        className="text-[#818487] text-xs cursor-pointer hover:text-[#ff1826] transition duration-200"
                         onClick={() => removeItem(item.id)}
                       >
                         X Remove

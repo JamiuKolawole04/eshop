@@ -27,7 +27,10 @@ type Store = {
   removeFromCart: (
     id: string,
     user: any,
-    location: string,
+    location: {
+      country: string;
+      city: string;
+    } | null,
     deviceInfo: string,
   ) => void;
   addToWishlist: (
