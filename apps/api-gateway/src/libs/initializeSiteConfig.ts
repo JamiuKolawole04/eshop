@@ -26,6 +26,9 @@ export const initializeConfig = async () => {
           },
         },
       });
+      console.info("Site config initialized");
+    } else {
+      console.info("Site config already exists");
     }
   } catch (error) {
     console.error("Error initializing site config:", error);

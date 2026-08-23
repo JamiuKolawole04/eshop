@@ -1,10 +1,10 @@
 import { kafka } from "@packages/kafka";
 import { updateUserAnalytics } from "./services/analytics.service";
-import { EventQueue } from "./types";
+import { EventData } from "./types";
 
 const consumer = kafka.consumer({ groupId: "user-events-group" });
 
-const eventQueue: EventQueue[] = [];
+const eventQueue: EventData[] = [];
 
 const processQueue = async () => {
   if (eventQueue.length === 0) {

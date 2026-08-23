@@ -49,7 +49,6 @@ const server = app.listen(port, async () => {
 
   try {
     await initializeConfig();
-    console.log("site config initialized");
   } catch (err) {
     console.log("Failed to inialize site config:", err);
   }

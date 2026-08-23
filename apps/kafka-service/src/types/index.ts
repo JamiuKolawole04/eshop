@@ -5,7 +5,7 @@ export type Actions = {
   timestamp?: Date;
 };
 
-export type EventQueue = Actions & {
+export type EventData = Actions & {
   userId: string;
   country?: string;
   city?: string;

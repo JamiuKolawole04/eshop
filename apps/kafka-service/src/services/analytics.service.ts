@@ -1,7 +1,7 @@
 import { prisma } from "@packages/prisma";
-import { Actions, EventQueue } from "../types";
+import { Actions, EventData } from "../types";
 
-export const updateUserAnalytics = async (event: EventQueue) => {
+export const updateUserAnalytics = async (event: EventData) => {
   try {
     const existingData = await prisma.userAnalytics.findUnique({
       where: {
@@ -92,7 +92,7 @@ export const updateUserAnalytics = async (event: EventQueue) => {
   }
 };
 
-export const updateProductAnalytics = async (event: EventQueue) => {
+export const updateProductAnalytics = async (event: EventData) => {
   try {
     if (!event.productId) return;
 
