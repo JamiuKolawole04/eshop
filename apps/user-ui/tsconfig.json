@@ -51,6 +51,9 @@
   "references": [
     {
       "path": "../../packages/ui"
+    },
+    {
+      "path": "../../packages/kafka"
     }
   ]
 }

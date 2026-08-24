@@ -12,5 +12,13 @@
   "include": [
     "src/**/*.ts"
   ],
-  "exclude": []
+  "exclude": [],
+  "references": [
+    {
+      "path": "../../packages/prisma/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/kafka/tsconfig.lib.json"
+    }
+  ]
 }
