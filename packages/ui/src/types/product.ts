@@ -53,3 +53,8 @@ export type GetAllProductsResponseType = {
   currentPage: number;
   totalPages: number;
 };
+
+export type GetProductBySlugResponseType = {
+  success: true;
+  product: ProductWithRelationsType;
+};

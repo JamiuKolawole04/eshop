@@ -11,6 +11,7 @@ import {
   getAllProducts,
   getCategories,
   getDiscountCodes,
+  getProductDetails,
   getShopProducts,
   restoreProduct,
   uploadProductImage,
@@ -38,5 +39,7 @@ router.delete(
 );
 router.post("/product-image", isAuthenticated, isSeller, uploadProductImage);
 router.delete("/product-image", isAuthenticated, isSeller, deleteProductImage);
+
+router.get("/:slug", getProductDetails);
 
 export default router;
