@@ -11,9 +11,13 @@ import {
   getAllProducts,
   getCategories,
   getDiscountCodes,
+  getFilteredEvents,
+  getFilteredProducts,
+  getFilteredShops,
   getProductDetails,
   getShopProducts,
   restoreProduct,
+  searchProducts,
   uploadProductImage,
 } from "../controllers/product.controller";
 
@@ -39,6 +43,11 @@ router.delete(
 );
 router.post("/product-image", isAuthenticated, isSeller, uploadProductImage);
 router.delete("/product-image", isAuthenticated, isSeller, deleteProductImage);
+
+router.get("/events/offers", getFilteredEvents);
+router.get("/shops/filtered", getFilteredShops);
+router.get("/filtered-products", getFilteredProducts);
+router.get("/search-products", searchProducts);
 
 router.get("/:slug", getProductDetails);
 
