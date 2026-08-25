@@ -18,6 +18,7 @@ import {
   getShopProducts,
   restoreProduct,
   searchProducts,
+  topShops,
   uploadProductImage,
 } from "../controllers/product.controller";
 
@@ -46,6 +47,7 @@ router.delete("/product-image", isAuthenticated, isSeller, deleteProductImage);
 
 router.get("/events/offers", getFilteredEvents);
 router.get("/shops/filtered", getFilteredShops);
+router.get("/shops/top", topShops);
 router.get("/filtered-products", getFilteredProducts);
 router.get("/search-products", searchProducts);
 

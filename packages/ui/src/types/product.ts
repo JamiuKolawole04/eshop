@@ -58,3 +58,12 @@ export type GetProductBySlugResponseType = {
   success: true;
   product: ProductWithRelationsType;
 };
+
+export type GetFilteredProducts = {
+  products: ProductWithRelationsType[];
+  pagination: {
+    total: number;
+    page: number;
+    totalPages: number;
+  };
+};

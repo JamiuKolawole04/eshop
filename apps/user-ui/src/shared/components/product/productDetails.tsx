@@ -14,10 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import {
-  GetAllProductsResponseType,
-  ProductWithRelationsType,
-} from "@packages/ui";
+import { GetFilteredProducts, ProductWithRelationsType } from "@packages/ui";
 import Ratings from "../ratings";
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
@@ -25,7 +22,6 @@ import { useLocationTracking } from "@/hooks/use-location-tracking";
 import { useDeviceTracking } from "@/hooks/use-device-tracking";
 import { ProductCard } from "../cards/productCard";
 import axiosInstance from "@/utils/axiosInstance";
-import { console } from "node:inspector/promises";
 
 type Props = {
   product: ProductWithRelationsType;
@@ -41,7 +37,7 @@ export const ProductDetails = ({ product }: Props) => {
     product?.sizes?.[0] || "",
   );
   const [quantity, setQuantity] = useState(1);
-  const [priceRange, setPriceRange] = useState([product?.sale_price, 1199]);
+  const [priceRange] = useState([product?.sale_price, 1199]);
   const [recommendedProducts, setRecommendedProducts] = useState<
     ProductWithRelationsType[]
   >([]);
@@ -86,13 +82,13 @@ export const ProductDetails = ({ product }: Props) => {
       query.set("page", "1");
       query.set("limit", "5");
 
-      const response = await axiosInstance.get<GetAllProductsResponseType>(
-        `/api/products/${query.toString()}`,
+      const response = await axiosInstance.get<GetFilteredProducts>(
+        `/api/products/filtered-products?${query.toString()}`,
       );
 
       setRecommendedProducts(response.data?.products);
     } catch (err) {
-      console.error("Failed to fetch filtered products", err);
+      console.error(new Error("Failed to fetch filtered products"), err);
     }
   };
 
