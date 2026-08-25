@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import ReactImageMagnify from "react-image-magnify";
 import Image from "next/image";
 import {
   ChevronLeft,
@@ -22,6 +21,7 @@ import { useLocationTracking } from "@/hooks/use-location-tracking";
 import { useDeviceTracking } from "@/hooks/use-device-tracking";
 import { ProductCard } from "../cards/productCard";
 import axiosInstance from "@/utils/axiosInstance";
+import ImageMagnifier from "./productImageMagnifier";
 
 type Props = {
   product: ProductWithRelationsType;
@@ -101,29 +101,7 @@ export const ProductDetails = ({ product }: Props) => {
       <div className="w-[90%] bg-white lg:w-[80%] mx-auto pt-6 grid  grid-cols-1 lg:grid-cols-[28%_44%_28%] gap-6 overflow-hidden">
         <div className="p-4">
           <div className="relative w-full">
-            <ReactImageMagnify
-              {...{
-                smallImage: {
-                  alt: "Product Image",
-                  isFluidWidth: true,
-                  src: currentImage,
-                },
-                largeImage: {
-                  src: currentImage,
-                  width: 1200,
-                  height: 1200,
-                },
-                enlargedImageContainerDimensions: {
-                  width: "150%",
-                  height: "150%",
-                },
-                enlargedImageStyle: {
-                  border: "none",
-                  boxShadow: "none",
-                },
-                enlargedImagePosition: "right",
-              }}
-            />
+            <ImageMagnifier src={currentImage} alt="Product Image" zoom={2.5} />
           </div>
 
           <div className="relative flex items-center gap-2 mt-4 overflow-hidden">
