@@ -1,17 +1,19 @@
-import fs from "node:fs";
-import path from "node:path";
 import { Kafka } from "kafkajs";
 
+// "console.log(require('fs').readFileSync('ca.pem').toString('base64'))"
+
 const KAFKA_BROKER_URI = String(process.env.KAFKA_BROKER_URI);
+const caCert = Buffer.from(
+  String(process.env.KAFKA_CA_CERT),
+  "base64",
+).toString("utf-8");
 
 export const kafka = new Kafka({
   clientId: "eshop-kafka-service",
   brokers: [KAFKA_BROKER_URI],
   ssl: {
     rejectUnauthorized: true,
-    ca: [
-      fs.readFileSync(path.resolve(String(process.env.KAFKA_CA_PATH)), "utf-8"),
-    ],
+    ca: [caCert],
   },
   sasl: {
     mechanism: "scram-sha-256",
