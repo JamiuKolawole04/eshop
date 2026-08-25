@@ -576,9 +576,12 @@ export const getFilteredEvents = async (
         gte: parsedPriceRange[0],
         lte: parsedPriceRange[1],
       },
-      NOT: {
-        starting_date: null,
-      },
+      AND: [
+        { starting_date: { isSet: true } },
+        { starting_date: { not: null } },
+        { ending_date: { isSet: true } },
+        { ending_date: { not: null } },
+      ],
     };
 
     if (categories && (categories as string[]).length > 0) {

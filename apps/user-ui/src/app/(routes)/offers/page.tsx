@@ -8,7 +8,7 @@ import Link from "next/link";
 
 import axiosInstance from "@/utils/axiosInstance";
 import {
-  GetFilteredProductsResponseType,
+  GetEventOffersResponseType,
   ProductCategoriesTypes,
   ProductWithRelationsType,
 } from "@packages/ui";
@@ -66,7 +66,7 @@ const Page = () => {
     }
 
     params.set("page", page.toString());
-    router.replace(`products?${decodeURIComponent(params.toString())}`);
+    router.replace(`offers?${decodeURIComponent(params.toString())}`);
   };
 
   const fetchFilteredProducts = async () => {
@@ -91,8 +91,8 @@ const Page = () => {
       query.set("page", page.toString());
       query.set("limit", "12");
 
-      const response = await axiosInstance.get<GetFilteredProductsResponseType>(
-        `/api/products/filtered-products?${query.toString()}`,
+      const response = await axiosInstance.get<GetEventOffersResponseType>(
+        `/api/products/events/offers?${query.toString()}`,
       );
 
       setProducts(response.data.products);
@@ -296,7 +296,7 @@ const Page = () => {
                 {products.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5">
                     {products?.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                      <ProductCard key={product.id} product={product} isEvent />
                     ))}
                   </div>
                 ) : (

@@ -59,7 +59,7 @@ export type GetProductBySlugResponseType = {
   product: ProductWithRelationsType;
 };
 
-export type GetFilteredProducts = {
+export type GetFilteredProductsResponseType = {
   products: ProductWithRelationsType[];
   pagination: {
     total: number;
@@ -67,3 +67,4 @@ export type GetFilteredProducts = {
     totalPages: number;
   };
 };
+export type GetEventOffersResponseType = GetFilteredProductsResponseType;
