@@ -5,14 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import axiosInstance from "@/utils/axiosInstance";
-import { shopCategories } from "@packages/ui";
-
 import {
-  GetEventOffersResponseType,
-  ProductCategoriesTypes,
-  ProductWithRelationsType,
+  GetFilteredShopsResponseType,
+  shopCategories,
+  ShopType,
 } from "@packages/ui";
-import { ProductCard } from "@/shared/components/cards/productCard";
+import { ShopCard } from "@/shared/components/cards/ShopCard";
+import { countries } from "@/utils/countries";
 
 const Page = () => {
   const router = useRouter();
@@ -20,9 +19,8 @@ const Page = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [shops, setShops] = useState<ProductWithRelationsType[]>([]);
+  const [shops, setShops] = useState<ShopType[]>([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [tempPriceRange, setTempPriceRange] = useState([0, 1199]);
 
   const updateURL = () => {
     const params = new URLSearchParams();
@@ -56,11 +54,11 @@ const Page = () => {
       query.set("page", page.toString());
       query.set("limit", "12");
 
-      const response = await axiosInstance.get<GetEventOffersResponseType>(
-        `/api/products/events/offers?${query.toString()}`,
+      const response = await axiosInstance.get<GetFilteredShopsResponseType>(
+        `/api/products/shops/filtered?${query.toString()}`,
       );
 
-      setShops(response.data.products);
+      setShops(response.data.shops);
       setTotalPages(response.data.pagination.totalPages);
     } catch (err) {
       console.log(new Error("Error fetching filtered products"), err);
@@ -119,56 +117,30 @@ const Page = () => {
                   <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={selectedCategories.includes(category.label)}
-                      onChange={() => toggleCategory(category.label)}
+                      checked={selectedCategories.includes(category.value)}
+                      onChange={() => toggleCategory(category.value)}
                       className="accent-blue-600"
                     />
-                    {category.label}
-                  </label>
-                </li>
-              ))}
-            </ul>
-            <h3 className="text-xl font-medium border-b border-b-slate-300 pb-1 mt-6">
-              Filter by Color
-            </h3>
-            <ul className="space-y-2 !mt-3">
-              {colors.map((color) => (
-                <li
-                  key={color.name}
-                  className="flex items-center justify-between"
-                >
-                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={selectedColors.includes(color.name)}
-                      onChange={() => toggleColor(color.name)}
-                      className="accent-blue-600"
-                    />
-                    <span
-                      className="w-[16px] h-[16px] rounded-full border border-gray-200"
-                      style={{ backgroundColor: color.code }}
-                    ></span>
-                    {color.name}
+                    {category.value}
                   </label>
                 </li>
               ))}
             </ul>
 
-            <h3 className="text-xl font-medium border-b border-b-slate-300 pb-1 mt-6">
-              Filter by Size
+            <h3 className="text-xl font-medium border-b border-b-slate-300 pb-1">
+              Countries
             </h3>
-
             <ul className="space-y-2 !mt-3">
-              {sizes.map((size) => (
-                <li key={size} className="flex items-center justify-between">
+              {countries?.map((country) => (
+                <li key={country} className="flex items-center justify-between">
                   <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={selectedSizes.includes(size)}
-                      onChange={() => toggleSize(size)}
+                      checked={selectedCountries.includes(country)}
+                      onChange={() => toggleCountry(country)}
                       className="accent-blue-600"
                     />
-                    <span className="font-medium">{size}</span>
+                    {country}
                   </label>
                 </li>
               ))}
@@ -176,7 +148,7 @@ const Page = () => {
           </aside>
 
           <div className="flex-1 px-2 lg:px-3">
-            {isProductLoading ? (
+            {isShopLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5">
                 {Array.from({ length: 10 }).map((_, index) => (
                   <div
@@ -187,14 +159,14 @@ const Page = () => {
               </div>
             ) : (
               <div>
-                {products.length > 0 ? (
+                {shops.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5">
-                    {products?.map((product) => (
-                      <ProductCard key={product.id} product={product} isEvent />
+                    {shops?.map((shop) => (
+                      <ShopCard key={shop.id} shop={shop} />
                     ))}
                   </div>
                 ) : (
-                  <p>No products found</p>
+                  <p>No shop found</p>
                 )}
 
                 {totalPages > 1 && (

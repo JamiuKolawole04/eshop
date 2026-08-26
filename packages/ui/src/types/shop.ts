@@ -14,6 +14,16 @@ export type ShopType = {
   deletedAt: string | null;
   imageId: string | null;
   sellerId: string | null;
+  followers: string[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type GetFilteredShopsResponseType = {
+  shops: Array<ShopType>;
+  pagination: {
+    total: number;
+    page: number;
+    totalPages: number;
+  };
 };
