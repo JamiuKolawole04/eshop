@@ -27,3 +27,7 @@ export type GetFilteredShopsResponseType = {
     totalPages: number;
   };
 };
+
+type TopShopsType = ShopType & { totalSales: number };
+
+export type GetTopShopsResponseType = { shops: Array<TopShopsType> };

@@ -13,7 +13,10 @@ export const ShopCard = ({ shop }: Props) => {
     <div className="w-full rounded-md cursor-pointer bg-white border border-gray-200 shadow-sm overflow-hidden transition">
       <div className="h-[120px] w-full relative">
         <Image
-          src={shop?.coverBanner || ""}
+          src={
+            shop?.coverBanner ||
+            "https://ik.imagekit.io/jnven3dnh3/eshop-products/E-Shop%20Quality%20Products%20Banner.png?updatedAt=1787592133435"
+          }
           alt="cover"
           fill
           className="object-cover w-full h-full"
@@ -23,7 +26,10 @@ export const ShopCard = ({ shop }: Props) => {
       <div className="relative flex justify-center -mt-8">
         <div className="w-16 h-16 rounded-full border-4 border-white overflow-hidden shadow bg-white">
           <Image
-            src={shop?.avatar || ""}
+            src={
+              shop?.avatar ||
+              "https://ik.imagekit.io/jnven3dnh3/eshop-products/E-Shop%20Quality%20Products%20Banner.png?updatedAt=1787592133435"
+            }
             alt={shop?.name}
             width={64}
             height={64}
