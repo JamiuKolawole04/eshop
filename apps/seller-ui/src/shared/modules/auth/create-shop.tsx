@@ -1,7 +1,8 @@
-import { shopCategories } from "@/utils/category";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useForm } from "react-hook-form";
+
+import { shopCategories } from "@packages/ui";
 
 type Props = {
   sellerId: string;

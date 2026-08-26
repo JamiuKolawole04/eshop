@@ -1,12 +1,12 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Range } from "react-range";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import axiosInstance from "@/utils/axiosInstance";
+import { shopCategories } from "@packages/ui";
+
 import {
   GetEventOffersResponseType,
   ProductCategoriesTypes,
@@ -14,78 +14,43 @@ import {
 } from "@packages/ui";
 import { ProductCard } from "@/shared/components/cards/productCard";
 
-async function fetchProductCategories() {
-  const response = await axiosInstance.get<ProductCategoriesTypes>(
-    `api/products/categories`,
-  );
-
-  return response.data;
-}
-
-const MIN = 0;
-const MAX = 1199;
-
-const colors = [
-  { name: "Black", code: "#000" },
-  { name: "Red", code: "#ff0000" },
-  { name: "Green", code: "#00ff00" },
-  { name: "Blue", code: "#0000ff" },
-  { name: "Yellow", code: "#ffff00" },
-  { name: "Magenta", code: "#ff00ff" },
-  { name: "Cyan", code: "#00ffff" },
-];
-
-const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-
 const Page = () => {
   const router = useRouter();
-  const [isProductLoading, setIsProductLoading] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1199]);
+  const [isShopLoading, setIsShopLoading] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [products, setProducts] = useState<ProductWithRelationsType[]>([]);
+  const [shops, setShops] = useState<ProductWithRelationsType[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [tempPriceRange, setTempPriceRange] = useState([0, 1199]);
 
   const updateURL = () => {
     const params = new URLSearchParams();
 
-    params.set("priceRange", priceRange.join(","));
     if (selectedCategories.length > 0) {
       params.set("categories", selectedCategories.join(","));
     }
 
-    if (selectedColors.length > 0) {
-      params.set("colors", selectedColors.join(","));
-    }
-
-    if (selectedSizes.length > 0) {
-      params.set("sizes", selectedSizes.join(","));
+    if (selectedCountries.length > 0) {
+      params.set("categories", selectedCountries.join(","));
     }
 
     params.set("page", page.toString());
-    router.replace(`offers?${decodeURIComponent(params.toString())}`);
+    router.replace(`shops?${decodeURIComponent(params.toString())}`);
   };
 
-  const fetchFilteredProducts = async () => {
-    setIsProductLoading(true);
+  const fetchFilteredShops = async () => {
+    setIsShopLoading(true);
 
     try {
       const query = new URLSearchParams();
-      query.set("priceRange", priceRange.join(","));
 
       if (selectedCategories.length > 0) {
         query.set("categories", selectedCategories.join(","));
       }
 
-      if (selectedColors.length > 0) {
-        query.set("colors", selectedColors.join(","));
-      }
-
-      if (selectedSizes.length > 0) {
-        query.set("sizes", selectedSizes.join(","));
+      if (selectedCountries.length > 0) {
+        query.set("categories", selectedCountries.join(","));
       }
 
       query.set("page", page.toString());
@@ -95,25 +60,19 @@ const Page = () => {
         `/api/products/events/offers?${query.toString()}`,
       );
 
-      setProducts(response.data.products);
+      setShops(response.data.products);
       setTotalPages(response.data.pagination.totalPages);
     } catch (err) {
       console.log(new Error("Error fetching filtered products"), err);
     } finally {
-      setIsProductLoading(false);
+      setIsShopLoading(false);
     }
   };
 
   useEffect(() => {
     updateURL();
-    fetchFilteredProducts();
-  }, [priceRange, selectedCategories, selectedColors, selectedSizes, page]);
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchProductCategories,
-    staleTime: 1000 * 60 * 30,
-  });
+    fetchFilteredShops();
+  }, [selectedCategories, page]);
 
   const toggleCategory = (label: string) => {
     setSelectedCategories((prev) =>
@@ -123,15 +82,11 @@ const Page = () => {
     );
   };
 
-  const toggleColor = (color: string) => {
-    setSelectedColors((prev) =>
-      prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color],
-    );
-  };
-
-  const toggleSize = (size: string) => {
-    setSelectedSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size],
+  const toggleCountry = (label: string) => {
+    setSelectedCountries((prev) =>
+      prev.includes(label)
+        ? prev.filter((country) => country !== label)
+        : [...prev, label],
     );
   };
   return (
@@ -139,7 +94,7 @@ const Page = () => {
       <div className="w-[90%] lg:w-[80%] m-auto">
         <div className="pb-[50px]">
           <h1 className="md:pt-10 font-medium text-[40px] leading-1 mb-3.5">
-            All Offers
+            All Shops
           </h1>
 
           <Link href="/" className="text-[#55585b] hover:underline">
@@ -147,92 +102,31 @@ const Page = () => {
           </Link>
 
           <span className="inline-block p-[1.5px] mx-1 bg-[#a8acb0] rounded-full"></span>
-          <span className="text-[#55585b]">All offers</span>
+          <span className="text-[#55585b]">All shops</span>
         </div>
 
         <div className="w-full flex flex-col lg:flex-row gap-8">
           <aside className="w-full lg:w-[270px] !rounded bg-white p-4 space-y-6 shadow-md">
-            <h3 className="text-xl font-medium">Price Filter</h3>
-            <div className="ml-2">
-              <Range
-                step={1}
-                min={MIN}
-                max={MAX}
-                values={tempPriceRange}
-                onChange={(values) => setTempPriceRange(values)}
-                renderTrack={({ props, children }) => {
-                  const [min, max] = tempPriceRange;
-                  const percentageLeft = ((min - MIN) / (MAX - MIN)) * 100;
-                  const percentageRight = ((max - MIN) / (MAX - MIN)) * 100;
-
-                  return (
-                    <div
-                      {...props}
-                      className="h-[6px] bg-blue-200 rounded relative"
-                      style={{ ...props.style }}
-                    >
-                      <div
-                        className="absolute h-full bg-blue-600 rounded"
-                        style={{
-                          left: `${percentageLeft}%`,
-                          width: `${percentageRight - percentageLeft}%`,
-                        }}
-                      />
-                      {children}
-                    </div>
-                  );
-                }}
-                renderThumb={({ props }) => {
-                  const { key, ...rest } = props;
-                  return (
-                    <div
-                      key={key}
-                      {...rest}
-                      className="w-[16px] h-[16px] bg-blue-600 rounded-full shadow"
-                    />
-                  );
-                }}
-              />
-            </div>
-            <div className="flex justify-between items-center mt-2">
-              <div className="text-sm text-gray-600">
-                ${tempPriceRange[0]} - ${tempPriceRange[1]}
-              </div>
-
-              <button
-                onClick={() => {
-                  setPriceRange(tempPriceRange);
-                  setPage(1);
-                }}
-                className="text-sm px-4 py-1 bg-gray-200 hover:bg-blue-600 hover:text-white transition !rounded"
-              >
-                Apply
-              </button>
-            </div>
             <h3 className="text-xl font-medium border-b border-b-slate-300 pb-1">
               Categories
             </h3>
             <ul className="space-y-2 !mt-3">
-              {isLoading ? (
-                <p>Loading...</p>
-              ) : (
-                data?.categories?.map((category) => (
-                  <li
-                    key={category}
-                    className="flex items-center justify-between"
-                  >
-                    <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(category)}
-                        onChange={() => toggleCategory(category)}
-                        className="accent-blue-600"
-                      />
-                      {category}
-                    </label>
-                  </li>
-                ))
-              )}
+              {shopCategories?.map((category) => (
+                <li
+                  key={category.label}
+                  className="flex items-center justify-between"
+                >
+                  <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(category.label)}
+                      onChange={() => toggleCategory(category.label)}
+                      className="accent-blue-600"
+                    />
+                    {category.label}
+                  </label>
+                </li>
+              ))}
             </ul>
             <h3 className="text-xl font-medium border-b border-b-slate-300 pb-1 mt-6">
               Filter by Color
