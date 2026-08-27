@@ -11,6 +11,7 @@ import {
   resetUserPassword,
   sellerLogin,
   userForgotPassword,
+  userLogout,
   userRegistration,
   verifySeller,
   verifyUser,
@@ -27,6 +28,7 @@ router.post("/auth/users/forgot-password", userForgotPassword);
 router.post("/auth/users/verify-forgot-password", verifyUserForgotPassword);
 router.post("/auth/users/reset-password", resetUserPassword);
 router.get("/auth/users/profile", isAuthenticated, getUser);
+router.get("/auth/users/logout", isAuthenticated, userLogout);
 
 router.post("/auth/refresh-token", refreshToken);
 

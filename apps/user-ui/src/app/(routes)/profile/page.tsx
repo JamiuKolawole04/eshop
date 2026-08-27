@@ -23,12 +23,13 @@ import {
 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 
 import { useUser } from "@/hooks/use-user";
 import { StatCard } from "@/shared/components/cards/statCard";
 import axiosInstance from "@/utils/axiosInstance";
-import Image from "next/image";
 import { QuickActionCard } from "@/shared/components/cards/quickActionCard";
+import { ShippingAddress } from "@/shared/components/shippingAddress";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -173,6 +174,8 @@ const Page = () => {
                   {user?.points || 0}
                 </p>
               </div>
+            ) : activeTab === "Shipping Address" ? (
+              <ShippingAddress />
             ) : (
               ""
             )}

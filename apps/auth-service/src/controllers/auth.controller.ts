@@ -293,6 +293,49 @@ export const getUser = async (
   }
 };
 
+export const updateUserPassword = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return next(new ValidationError("all fields are required"));
+    }
+
+    if (newPassword !== confirmPassword) {
+      return next(new ValidationError("new passwords do not match"));
+    }
+
+    if (currentPassword === newPassword) {
+      return next(
+        new ValidationError(
+          "New password cannot be the same as the current password",
+        ),
+      );
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const userLogout = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+
+    res.status(200).json({
+      success: true,
+      message: "user logged out successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const registerSeller = async (
   req: Request,
   res: Response,
@@ -525,5 +568,23 @@ export const getSeller = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const adminLogout = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+
+    res.status(200).json({
+      success: true,
+      message: "admin logged out successfully",
+    });
+  } catch (err) {
+    next(err);
   }
 };
