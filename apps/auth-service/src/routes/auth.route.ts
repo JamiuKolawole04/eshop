@@ -1,8 +1,10 @@
 import express, { Router } from "express";
 
 import {
+  adminLogout,
   createShop,
   createtripeConnectLink,
+  getAdmin,
   getSeller,
   getUser,
   login,
@@ -36,6 +38,9 @@ router.post("/auth/sellers/register", registerSeller);
 router.post("/auth/sellers/verify", verifySeller);
 router.post("/auth/sellers/login", sellerLogin);
 router.get("/auth/sellers/profile", isAuthenticated, isSeller, getSeller);
+
+router.get("/auth/admin/logout", isAuthenticated, adminLogout);
+router.get("/auth/admin/profile", isAuthenticated, getAdmin);
 
 router.post("/shop", createShop);
 router.post("/stripe", createtripeConnectLink);
