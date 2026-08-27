@@ -300,7 +300,7 @@ const Page = () => {
                     ))}
                   </div>
                 ) : (
-                  <p>No products found</p>
+                  <p className="font-Roboto">No products found</p>
                 )}
 
                 {totalPages > 1 && (

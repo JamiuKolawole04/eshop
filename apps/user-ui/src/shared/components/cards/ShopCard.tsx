@@ -15,7 +15,7 @@ export const ShopCard = ({ shop }: Props) => {
         <Image
           src={
             shop?.coverBanner ||
-            "https://ik.imagekit.io/jnven3dnh3/eshop-products/E-Shop%20Quality%20Products%20Banner.png?updatedAt=1787592133435"
+            "https://ik.imagekit.io/jnven3dnh3/eshop-products/cover-banner.png"
           }
           alt="cover"
           fill
@@ -28,7 +28,7 @@ export const ShopCard = ({ shop }: Props) => {
           <Image
             src={
               shop?.avatar ||
-              "https://ik.imagekit.io/jnven3dnh3/eshop-products/E-Shop%20Quality%20Products%20Banner.png?updatedAt=1787592133435"
+              "https://ik.imagekit.io/jnven3dnh3/eshop-products/shop-avater.png"
             }
             alt={shop?.name}
             width={64}

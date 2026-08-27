@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { Hero } from "@/shared/components/hero";
 import { SectionTitle } from "@/shared/components/sectionTitle";
@@ -163,6 +163,10 @@ export default function Page() {
               />
             ))}
           </div>
+        )}
+
+        {topOffers?.length === 0 && (
+          <p className="text-center font-Roboto">No offers available yet</p>
         )}
       </div>
     </div>
