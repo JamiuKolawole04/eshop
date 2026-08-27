@@ -697,3 +697,29 @@ export const deleteUserAddress = async (
     return next(error);
   }
 };
+
+export const getUserAddresses = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id;
+
+    const addresses = await prisma.address.findMany({
+      where: {
+        userId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      addresses,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
