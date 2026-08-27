@@ -67,4 +67,13 @@ export type GetFilteredProductsResponseType = {
     totalPages: number;
   };
 };
-export type GetEventOffersResponseType = GetFilteredProductsResponseType;
+export type GetFilteredEventOffersResponseType =
+  GetFilteredProductsResponseType;
+
+export type GetEventOffersResponseType = {
+  events: ProductWithRelationsType[];
+  top10BySales: ProductWithRelationsType[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
+};

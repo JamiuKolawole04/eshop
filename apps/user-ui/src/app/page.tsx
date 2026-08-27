@@ -7,6 +7,7 @@ import { SectionTitle } from "@/shared/components/sectionTitle";
 import axiosInstance from "@/utils/axiosInstance";
 import {
   GetAllProductsResponseType,
+  GetEventOffersResponseType,
   GetTopShopsResponseType,
 } from "@packages/ui";
 import { ProductCard } from "@/shared/components/cards/productCard";
@@ -36,9 +37,15 @@ const fetchTopShops = async () => {
   return response.data?.shops;
 };
 
-export default function Page() {
-  const queryClient = useQueryClient();
+const fetchTopOffers = async () => {
+  const response = await axiosInstance.get<GetEventOffersResponseType>(
+    `/api/products/events/all?page=1&limit=10`,
+  );
 
+  return response.data.events;
+};
+
+export default function Page() {
   const {
     data: products,
     isLoading,
@@ -49,7 +56,7 @@ export default function Page() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const { data: latestProducts } = useQuery({
+  const { data: latestProducts, isLoading: isLatestProductLoading } = useQuery({
     queryKey: ["latest-products"],
     queryFn: fetchAllLatestProducts,
     staleTime: 1000 * 60 * 5,
@@ -58,6 +65,12 @@ export default function Page() {
   const { data: topShops, isLoading: isTopShopsLoading } = useQuery({
     queryKey: ["top-shops"],
     queryFn: fetchTopShops,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: topOffers, isLoading: isTopOffersLoading } = useQuery({
+    queryKey: ["offers"],
+    queryFn: fetchTopOffers,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -108,7 +121,7 @@ export default function Page() {
           <SectionTitle title="Latest Products" />
         </div>
 
-        {!isLoading && !isError && (
+        {!isLatestProductLoading && (
           <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5">
             {latestProducts?.map((latestProduct) => (
               <ProductCard key={latestProduct.id} product={latestProduct} />
@@ -134,6 +147,22 @@ export default function Page() {
 
         {topShops?.length === 0 && (
           <p className="text-center font-Roboto">No shops available yet</p>
+        )}
+
+        <div className="my-8 block">
+          <SectionTitle title="Top Offers" />
+        </div>
+
+        {!isTopOffersLoading && !isError && (
+          <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5">
+            {topOffers?.map((productOffers) => (
+              <ProductCard
+                key={productOffers.id}
+                product={productOffers}
+                isEvent
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

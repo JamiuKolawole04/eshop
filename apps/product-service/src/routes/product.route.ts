@@ -8,6 +8,7 @@ import {
   deleteDiscountCode,
   deleteProduct,
   deleteProductImage,
+  getAllEvents,
   getAllProducts,
   getCategories,
   getDiscountCodes,
@@ -46,6 +47,8 @@ router.post("/product-image", isAuthenticated, isSeller, uploadProductImage);
 router.delete("/product-image", isAuthenticated, isSeller, deleteProductImage);
 
 router.get("/events/offers", getFilteredEvents);
+router.get("/events/all", getAllEvents);
+
 router.get("/shops/filtered", getFilteredShops);
 router.get("/shops/top", topShops);
 router.get("/filtered-products", getFilteredProducts);

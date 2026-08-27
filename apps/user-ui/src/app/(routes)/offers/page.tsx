@@ -8,7 +8,7 @@ import Link from "next/link";
 
 import axiosInstance from "@/utils/axiosInstance";
 import {
-  GetEventOffersResponseType,
+  GetFilteredEventOffersResponseType,
   ProductCategoriesTypes,
   ProductWithRelationsType,
 } from "@packages/ui";
@@ -91,9 +91,10 @@ const Page = () => {
       query.set("page", page.toString());
       query.set("limit", "12");
 
-      const response = await axiosInstance.get<GetEventOffersResponseType>(
-        `/api/products/events/offers?${query.toString()}`,
-      );
+      const response =
+        await axiosInstance.get<GetFilteredEventOffersResponseType>(
+          `/api/products/events/offers?${query.toString()}`,
+        );
 
       setProducts(response.data.products);
       setTotalPages(response.data.pagination.totalPages);
