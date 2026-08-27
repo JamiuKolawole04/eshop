@@ -1,11 +1,47 @@
 "use client";
 
-import { countries } from "@/utils/countries";
-import { Plus, X } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { MapPin, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { countries } from "@/utils/countries";
+import axiosInstance from "@/utils/axiosInstance";
+import {
+  AddressType,
+  CreateUserAddressResponseType,
+  GetUserAddressResponseType,
+} from "@packages/ui";
+
+type FormData = {
+  label: string;
+  name: string;
+  street: string;
+  city: string;
+  zip: string;
+  country: string;
+  isDefault: string | boolean;
+};
+
+const fetchUserAddress = async () => {
+  const response = await axiosInstance.get<GetUserAddressResponseType>(
+    `/api/users/shipping-address`,
+  );
+
+  return response.data?.addresses;
+};
+
+const createUserAddress = async (payload: FormData) => {
+  const response = await axiosInstance.post<CreateUserAddressResponseType>(
+    "/api/users/shipping-address",
+    payload,
+  );
+  return response?.data?.address;
+};
+
 export const ShippingAddress = () => {
+  const queryClient = useQueryClient();
+
   const [showModal, setShowModal] = useState(false);
 
   const {
@@ -25,7 +61,30 @@ export const ShippingAddress = () => {
     },
   });
 
-  const onSubmit = () => {};
+  const { mutate: addAddress } = useMutation({
+    mutationFn: createUserAddress,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-shipping-addresses"] });
+      reset();
+      setShowModal(false);
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
+    addAddress({
+      ...data,
+      isDefault: data?.isDefault === "true",
+    });
+  };
+
+  const { data: addresses, isLoading: isUserAddressLoading } = useQuery({
+    queryKey: ["user-shipping-addresses"],
+    queryFn: fetchUserAddress,
+  });
+
+  const deleteAddress = (address: AddressType) => {
+    console.log({ address });
+  };
 
   return (
     <div className="space-y-4">
@@ -40,8 +99,52 @@ export const ShippingAddress = () => {
         </button>
       </div>
 
-      {/*Adress List*/}
-      <div></div>
+      <div>
+        {isUserAddressLoading ? (
+          <p className="text-sm text-gray-500">Loading Addresses...</p>
+        ) : !addresses || addresses.length === 0 ? (
+          <p className="text-sm text-gray-600">No saved addresses found.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {addresses.map((address) => (
+              <div
+                key={address.id}
+                className="border border-gray-200 rounded-md p-4 relative"
+              >
+                {address.isDefault && (
+                  <span className="absolute top-2 right-2 bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full">
+                    Default
+                  </span>
+                )}
+
+                <div className="flex items-start gap-2 text-sm text-gray-700">
+                  <MapPin className="w-5 h-5 mt-0.5 text-gray-500" />
+
+                  <div className="">
+                    <p className="font-medium">
+                      {address?.label} - {address?.name}
+                    </p>
+
+                    <p>
+                      {address?.street}, {address?.city}, {address?.zip},{" "}
+                      {address?.country}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-4">
+                  <button
+                    className="flex items-center gap-1 !cursor-pointer text-xs text-red-50"
+                    onClick={() => deleteAddress(address)}
+                  >
+                    <Trash2 className="w-4 h-4" /> Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[110]">

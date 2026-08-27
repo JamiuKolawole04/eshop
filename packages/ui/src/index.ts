@@ -11,3 +11,4 @@ export * from "./types/product";
 export * from "./types/file";
 export * from "./types/shop";
 export * from "./utils/shop-category";
+export * from "./types/address";
