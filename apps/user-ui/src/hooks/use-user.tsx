@@ -4,7 +4,7 @@ import axios from "axios";
 import axiosInstance from "@/utils/axiosInstance";
 
 const fetchUser = async () => {
-  const response = await axiosInstance.get("/api/auth/users/profile");
+  const response = await axiosInstance.get("/api/users/profile");
   return response.data?.user ?? null;
 };
 

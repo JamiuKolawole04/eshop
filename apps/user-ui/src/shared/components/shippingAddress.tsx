@@ -8,8 +8,8 @@ import { useForm } from "react-hook-form";
 import { countries } from "@/utils/countries";
 import axiosInstance from "@/utils/axiosInstance";
 import {
-  AddressType,
   CreateUserAddressResponseType,
+  DeleteUserAddressResponseType,
   GetUserAddressResponseType,
 } from "@packages/ui";
 
@@ -39,6 +39,12 @@ const createUserAddress = async (payload: FormData) => {
   return response?.data?.address;
 };
 
+const deleteUserAddress = async (id: string) => {
+  await axiosInstance.delete<DeleteUserAddressResponseType>(
+    `/api/users/shipping-address/${id}`,
+  );
+};
+
 export const ShippingAddress = () => {
   const queryClient = useQueryClient();
 
@@ -61,6 +67,11 @@ export const ShippingAddress = () => {
     },
   });
 
+  const { data: addresses, isLoading: isUserAddressLoading } = useQuery({
+    queryKey: ["user-shipping-addresses"],
+    queryFn: fetchUserAddress,
+  });
+
   const { mutate: addAddress } = useMutation({
     mutationFn: createUserAddress,
     onSuccess: () => {
@@ -70,20 +81,18 @@ export const ShippingAddress = () => {
     },
   });
 
+  const { mutate: deleteAddress } = useMutation({
+    mutationFn: deleteUserAddress,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-shipping-addresses"] });
+    },
+  });
+
   const onSubmit = (data: FormData) => {
     addAddress({
       ...data,
       isDefault: data?.isDefault === "true",
     });
-  };
-
-  const { data: addresses, isLoading: isUserAddressLoading } = useQuery({
-    queryKey: ["user-shipping-addresses"],
-    queryFn: fetchUserAddress,
-  });
-
-  const deleteAddress = (address: AddressType) => {
-    console.log({ address });
   };
 
   return (
@@ -135,7 +144,7 @@ export const ShippingAddress = () => {
                 <div className="flex gap-3 mt-4">
                   <button
                     className="flex items-center gap-1 !cursor-pointer text-xs text-red-50"
-                    onClick={() => deleteAddress(address)}
+                    onClick={() => deleteAddress(address?.id)}
                   >
                     <Trash2 className="w-4 h-4" /> Delete
                   </button>

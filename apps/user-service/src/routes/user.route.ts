@@ -11,15 +11,15 @@ import {
 
 const router: Router = express.Router();
 
-router.post("/users/shipping-address", isAuthenticated, addUserAddress);
-router.get("/users/shipping-address", isAuthenticated, getUserAddresses);
+router.post("/shipping-address", isAuthenticated, addUserAddress);
+router.get("/shipping-address", isAuthenticated, getUserAddresses);
 router.delete(
-  "/users/shipping-address/:addressId",
+  "/shipping-address/:addressId",
   isAuthenticated,
   deleteUserAddress,
 );
 
-router.get("/auth/users/profile", isAuthenticated, getUser);
+router.get("/profile", isAuthenticated, getUser);
 
 router.get("/admin/profile", isAuthenticated, getAdmin);
 

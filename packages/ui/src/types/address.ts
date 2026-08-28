@@ -21,3 +21,8 @@ export type GetUserAddressResponseType = {
   success: true;
   addresses: Array<AddressType>;
 };
+
+export type DeleteUserAddressResponseType = {
+  success: true;
+  message: string;
+};
