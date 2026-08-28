@@ -53,6 +53,9 @@
     },
     {
       "path": "./packages/kafka"
+    },
+    {
+      "path": "./apps/user-service"
     }
   ]
 }

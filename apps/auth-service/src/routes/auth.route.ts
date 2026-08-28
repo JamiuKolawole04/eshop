@@ -1,15 +1,10 @@
 import express, { Router } from "express";
 
 import {
-  addUserAddress,
   adminLogout,
   createShop,
   createtripeConnectLink,
-  deleteUserAddress,
-  getAdmin,
   getSeller,
-  getUser,
-  getUserAddresses,
   login,
   refreshToken,
   registerSeller,
@@ -32,16 +27,7 @@ router.post("/auth/users/login", login);
 router.post("/auth/users/forgot-password", userForgotPassword);
 router.post("/auth/users/verify-forgot-password", verifyUserForgotPassword);
 router.post("/auth/users/reset-password", resetUserPassword);
-router.get("/auth/users/profile", isAuthenticated, getUser);
 router.get("/auth/users/logout", isAuthenticated, userLogout);
-
-router.post("/users/shipping-address", isAuthenticated, addUserAddress);
-router.get("/users/shipping-address", isAuthenticated, getUserAddresses);
-router.delete(
-  "/users/shipping-address/:addressId",
-  isAuthenticated,
-  deleteUserAddress,
-);
 
 router.post("/auth/refresh-token", refreshToken);
 
@@ -51,7 +37,6 @@ router.post("/auth/sellers/login", sellerLogin);
 router.get("/auth/sellers/profile", isAuthenticated, isSeller, getSeller);
 
 router.get("/auth/admin/logout", isAuthenticated, adminLogout);
-router.get("/auth/admin/profile", isAuthenticated, getAdmin);
 
 router.post("/shop", createShop);
 router.post("/stripe", createtripeConnectLink);
