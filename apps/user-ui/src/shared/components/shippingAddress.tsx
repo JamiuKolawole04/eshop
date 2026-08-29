@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { countries } from "@/utils/countries";
@@ -11,6 +11,7 @@ import {
   CreateUserAddressResponseType,
   DeleteUserAddressResponseType,
   GetUserAddressResponseType,
+  ButtonLoader,
 } from "@packages/ui";
 
 type FormData = {
@@ -72,14 +73,17 @@ export const ShippingAddress = () => {
     queryFn: fetchUserAddress,
   });
 
-  const { mutate: addAddress } = useMutation({
-    mutationFn: createUserAddress,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-shipping-addresses"] });
-      reset();
-      setShowModal(false);
-    },
-  });
+  const { mutate: addAddress, isPending: isCreatingAddressPending } =
+    useMutation({
+      mutationFn: createUserAddress,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["user-shipping-addresses"],
+        });
+        reset();
+        setShowModal(false);
+      },
+    });
 
   const { mutate: deleteAddress } = useMutation({
     mutationFn: deleteUserAddress,
@@ -143,7 +147,7 @@ export const ShippingAddress = () => {
 
                 <div className="flex gap-3 mt-4">
                   <button
-                    className="flex items-center gap-1 !cursor-pointer text-xs text-red-50"
+                    className="flex items-center gap-1 !cursor-pointer text-xs text-red-500 hover:underline"
                     onClick={() => deleteAddress(address?.id)}
                   >
                     <Trash2 className="w-4 h-4" /> Delete
@@ -244,10 +248,18 @@ export const ShippingAddress = () => {
               </select>
 
               <button
+                disabled={isCreatingAddressPending}
                 type="submit"
-                className="w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700 transition"
+                className="w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Save Address
+                {isCreatingAddressPending ? (
+                  <Fragment>
+                    <ButtonLoader />
+                    Saving...
+                  </Fragment>
+                ) : (
+                  "Save Address"
+                )}
               </button>
             </form>
           </div>

@@ -13,7 +13,7 @@ export const addUserAddress = async (
     const { label, name, street, city, zip, country, isDefault } = req.body;
 
     if (!label || !name || !street || !city || !zip || !country) {
-      return next(new ValidationError("All fields are required"));
+      throw new ValidationError("All fields are required");
     }
 
     if (isDefault) {
@@ -60,7 +60,7 @@ export const deleteUserAddress = async (
     const { addressId } = req.params;
 
     if (!addressId) {
-      return next(new ValidationError("Address ID is required"));
+      throw new ValidationError("Address ID is required");
     }
 
     const existingAddress = await prisma.address.findFirst({
@@ -71,7 +71,7 @@ export const deleteUserAddress = async (
     });
 
     if (!existingAddress) {
-      return next(new NotFoundError("Address not found or unauthorized"));
+      throw new NotFoundError("Address not found or unauthorized");
     }
 
     await prisma.address.delete({
@@ -125,18 +125,16 @@ export const updateUserPassword = (
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      return next(new ValidationError("all fields are required"));
+      throw new ValidationError("all fields are required");
     }
 
     if (newPassword !== confirmPassword) {
-      return next(new ValidationError("new passwords do not match"));
+      throw new ValidationError("new passwords do not match");
     }
 
     if (currentPassword === newPassword) {
-      return next(
-        new ValidationError(
-          "New password cannot be the same as the current password",
-        ),
+      throw new ValidationError(
+        "New password cannot be the same as the current password",
       );
     }
   } catch (err) {
