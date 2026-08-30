@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { XCircle } from "lucide-react";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
@@ -20,7 +20,9 @@ const Page = () => {
 
   const [clientSecret, setClientSecret] = useState("");
   const [cartItems, setCartItems] = useState([]);
-  const [coupon, setCoupon] = useState("");
+  const [coupon, setCoupon] = useState<{
+    discountAmount: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

@@ -3,27 +3,30 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import { FormEvent, Fragment, useState } from "react";
+import { Fragment, SubmitEvent, useState } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
-
 import { ButtonLoader } from "@packages/ui";
 
+type CartItem = {
+  title: string;
+  quantity: number;
+  sale_price: number;
+};
+
+type Coupon = {
+  discountAmount: number;
+} | null;
+
 type Props = {
-  clientSecret: string;
-  cartItems: [];
-  coupon: string;
+  clientSecret?: string;
+  cartItems: CartItem[];
+  coupon: Coupon;
   sessionId: string;
 };
 
-export const CheckoutForm = ({
-  cartItems,
-  clientSecret,
-  coupon,
-  sessionId,
-}: Props) => {
+export const CheckoutForm = ({ cartItems, coupon, sessionId }: Props) => {
   const stripe = useStripe();
   const elements = useElements();
-
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<"success" | "failed" | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -33,7 +36,7 @@ export const CheckoutForm = ({
     0,
   );
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
@@ -42,6 +45,7 @@ export const CheckoutForm = ({
       setIsLoading(false);
       return;
     }
+
     const result = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -66,21 +70,21 @@ export const CheckoutForm = ({
         onSubmit={handleSubmit}
       >
         <h2 className="text-3xl font-bold text-center mb-2">
-          Secure Payemnt Checkout
+          Secure Payment Checkout
         </h2>
 
-        <div className="bg-gray-100 p-4 rounded-md text-sm text-gray-700 space-y-2">
+        {/* Dynamic Order Summary */}
+        <div className="bg-gray-100 p-4 rounded-md text-sm text-gray-700 space-y-2 max-h-48 overflow-y-auto">
           {cartItems.map((item, index) => (
             <div key={index + 1} className="flex justify-between text-sm pb-1">
               <span>
                 {item.quantity} x {item.title}
               </span>
-
               <span>${(item.quantity * item.sale_price).toFixed(2)}</span>
             </div>
           ))}
 
-          <div className="flex justify-between font-semibold pt-2 border-t border-t-1">
+          <div className="flex justify-between font-semibold pt-2 border-t border-t-gray-200">
             {!!coupon?.discountAmount && (
               <Fragment>
                 <span>Discount</span>
@@ -93,9 +97,7 @@ export const CheckoutForm = ({
 
           <div className="flex justify-between font-semibold mt-2">
             <span>Total</span>
-            <span>
-              ${(total - coupon ? coupon?.discountAmount : 0).toFixed(2)}
-            </span>
+            <span>${(total - (coupon?.discountAmount ?? 0)).toFixed(2)}</span>
           </div>
         </div>
 
@@ -104,7 +106,7 @@ export const CheckoutForm = ({
         <button
           type="submit"
           disabled={!stripe || isLoading}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isLoading && <ButtonLoader className="w-5 h-5" />}
           {isLoading ? "Processing..." : "Pay Now"}
@@ -113,7 +115,6 @@ export const CheckoutForm = ({
         {errorMessage && (
           <div className="flex items-center gap-2 text-red-600 text-sm justify-center">
             <XCircle className="w-5 h-5" />
-
             {errorMessage}
           </div>
         )}
@@ -127,7 +128,7 @@ export const CheckoutForm = ({
 
         {status === "failed" && (
           <div className="flex items-center gap-2 text-red-600 text-sm justify-center">
-            <CheckCircle className="w-5 h-5" />
+            <XCircle className="w-5 h-5" />
             Payment failed. Please try again.
           </div>
         )}
