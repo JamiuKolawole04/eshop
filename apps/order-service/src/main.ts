@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";
@@ -5,6 +7,7 @@ import bodyParser from "body-parser";
 
 import { ErrorMiddleware } from "@packages/error-handler";
 import orderRoutes from "./routes/order.route";
+import { createOrder } from "./controllers/order.controller";
 
 const host = process.env.HOST ?? "localhost";
 const port = process.env.PORT ? Number(process.env.PORT) : 6004;
@@ -20,9 +23,19 @@ app.use(
   }),
 );
 
-app.use(express.json({ limit: "100mb" }));
+app.post(
+  "/api/order",
+  bodyParser.raw({ type: "application/json" }),
+  (req, res, next) => {
+    (req as any).rawBody = req.body;
+    next();
+  },
+
+  createOrder,
+);
+
+app.use(express.json());
 app.use(cookieParser());
-app.use(bodyParser());
 
 app.get("/health", (req, res) => {
   res.send({ message: "Hello Order API" });

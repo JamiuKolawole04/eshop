@@ -4,14 +4,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
 import { useLocationTracking } from "@/hooks/use-location-tracking";
 import { useDeviceTracking } from "@/hooks/use-device-tracking";
-import { GetUserAddressResponseType } from "@packages/ui";
+import {
+  ButtonLoader,
+  CreatePaymentSessionResponseType,
+  GetUserAddressResponseType,
+} from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 
 const fetchUserAddress = async () => {
@@ -35,6 +39,30 @@ const Page = () => {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [coupon, setCoupon] = useState("");
   const [selectedAddressId, setSelectedAddressId] = useState("");
+
+  const createPaymentSession = async () => {
+    setIsLoading(true);
+
+    try {
+      const response =
+        await axiosInstance.post<CreatePaymentSessionResponseType>(
+          "/api/orders/payment-session",
+          {
+            cart,
+            selectedAddressId,
+            coupon: {},
+          },
+        );
+
+      const sessionId = response.data?.sessionId;
+      router.push(`/checkout?sessionId=${sessionId}`);
+    } catch (err) {
+      console.error(err);
+      toast.error(`Something went wrong. Please try again.`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const decreaseQuantity = (id: string) => {
     useStore.setState((state) => ({
@@ -312,8 +340,9 @@ const Page = () => {
                 <button
                   disabled={isLoading}
                   className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
+                  onClick={createPaymentSession}
                 >
-                  {isLoading && <Loader2 className="animate-spin w-5 h-5" />}
+                  {isLoading && <ButtonLoader />}
                   {isLoading ? "Redirecting..." : "Proceed to checkout"}
                 </button>
               </div>

@@ -302,13 +302,14 @@ model Address {
 }
 
 model Notifications {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+  id                  String @id @default(auto()) @map("_id") @db.ObjectId
 
-  creatorId    String @db.ObjectId
-  receiverId   String
-  redirectLink String
-  title        String
+  creatorId            String @db.ObjectId
+  receiverId           String
+  redirectLink         String
+  title                String
+  message              String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

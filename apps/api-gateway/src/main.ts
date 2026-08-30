@@ -34,6 +34,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+app.use("/api/orders", proxy("http://localhost:6004"));
 app.use("/api/users", proxy("http://localhost:6003"));
 app.use("/api/products", proxy("http://localhost:6002"));
 app.use("/", proxy("http://localhost:6001"));

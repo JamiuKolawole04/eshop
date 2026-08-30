@@ -48,6 +48,13 @@ export const createPaymentSession = async (
   res: Response,
   next: NextFunction,
 ) => {
+  type Session = {
+    id: string;
+    quantity: string;
+    sale_price: string;
+    shopId: string;
+    selectedOptions: object;
+  };
   try {
     const { cart, selectedAddressId, coupon } = req.body;
     const userId = req.user?.id;
@@ -78,7 +85,7 @@ export const createPaymentSession = async (
         if (session.userId === userId) {
           const existingCart = JSON.stringify(
             session?.cart
-              ?.map((item) => ({
+              ?.map((item: Session) => ({
                 id: item.id,
                 quantity: item.quantity,
                 sale_price: item.sale_price,
@@ -373,7 +380,7 @@ export const createOrder = async (
               message: `A customer just ordered ${productTitle} from your shop.`,
               creatorId: userId,
               receiverId: shop.sellerId as string,
-              redirect_link: `https://eshop.com/order/${sessionId}`,
+              redirectLink: `https://eshop.com/order/${sessionId}`,
             },
           });
 
