@@ -64,7 +64,7 @@ export const createPaymentSession = async (
     }
 
     const normalizedCart = JSON.stringify(
-      cart
+      (cart as Session[])
         .map((item) => ({
           id: item.id,
           quantity: item.quantity,
@@ -72,7 +72,7 @@ export const createPaymentSession = async (
           shopId: item.shopId,
           selectedOptions: item.selectedOptions || {},
         }))
-        .sort((a, b) => a.id.localCompare(b.id)),
+        .sort((a, b) => a.id.localeCompare(b.id)),
     );
 
     const keys = await redis.keys("payment-session:*");
@@ -84,15 +84,15 @@ export const createPaymentSession = async (
 
         if (session.userId === userId) {
           const existingCart = JSON.stringify(
-            session?.cart
-              ?.map((item: Session) => ({
+            (session?.cart as Session[])
+              ?.map((item) => ({
                 id: item.id,
                 quantity: item.quantity,
                 sale_price: item.sale_price,
                 shopId: item.shopId,
                 selectedOptions: item.selectedOptions || {},
               }))
-              .sort((a, b) => a.id.localCompare(b.id)),
+              .sort((a, b) => a.id.localeCompare(b.id)),
           );
 
           if (existingCart === normalizedCart) {
