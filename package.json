@@ -11,7 +11,8 @@
     "user-ui": "npx nx dev user-ui",
     "seller-ui": "npx nx dev seller-ui",
     "kafka-service": "npx nx serve kafka-service --outputStyle=stream",
-    "user-service": "npx nx serve user-service --outputStyle=stream"
+    "user-service": "npx nx serve user-service --outputStyle=stream",
+    "order-service": "npx nx serve order-service --outputStyle=stream"
   },
   "private": true,
   "dependencies": {

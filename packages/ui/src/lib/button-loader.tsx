@@ -6,7 +6,7 @@ type ButtonLoaderProps = {
 };
 
 export const ButtonLoader = ({
-  size = 16,
+  size = 14,
   className = "",
 }: ButtonLoaderProps) => {
   return (

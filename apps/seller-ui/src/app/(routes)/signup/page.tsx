@@ -121,7 +121,7 @@ const Signup = () => {
   const connectStripe = async () => {
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URI}`,
+        `${process.env.NEXT_PUBLIC_SERVER_URI}/api/stripe`,
         { sellerId },
       );
       if (response.data.url) {

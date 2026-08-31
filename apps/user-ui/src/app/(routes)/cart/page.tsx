@@ -28,7 +28,7 @@ const fetchUserAddress = async () => {
 
 const Page = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isAuthenticated } = useUser();
   const { removeFromCart, cart } = useStore();
   const location = useLocationTracking();
   const deviceInfo = useDeviceTracking();
@@ -39,6 +39,9 @@ const Page = () => {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [coupon, setCoupon] = useState("");
   const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+    "credit_card" | "cash_on_delivery"
+  >("cash_on_delivery");
 
   const createPaymentSession = async () => {
     setIsLoading(true);
@@ -102,9 +105,7 @@ const Page = () => {
     if (addresses && addresses?.length > 0 && !selectedAddressId) {
       const defaultAddress = addresses?.find((address) => address.isDefault);
 
-      if (defaultAddress) {
-        setSelectedAddressId(defaultAddress?.id);
-      }
+      setSelectedAddressId(defaultAddress?.id ?? addresses[0].id);
     }
   }, [addresses, selectedAddressId]);
 
@@ -291,7 +292,7 @@ const Page = () => {
 
                   {addresses?.length !== 0 && (
                     <select
-                      className="w-full p-2 border- border-gray-200 rounded-md focus:outline-none focus:border-blue-500"
+                      className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:border-blue-500"
                       value={selectedAddressId}
                       onChange={({ target: { value } }) =>
                         setSelectedAddressId(value)
@@ -320,8 +321,13 @@ const Page = () => {
                   </h4>
 
                   <select
-                    className="w-full p-2 border- border-gray-200 rounded-md focus:outline-none focus:border-blue-500"
-                    value={selectedAddressId}
+                    className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:border-blue-500"
+                    value={selectedPaymentMethod}
+                    onChange={(e) =>
+                      setSelectedPaymentMethod(
+                        e.target.value as "credit_card" | "cash_on_delivery",
+                      )
+                    }
                   >
                     <option value="credit_card">Online Payment</option>
                     <option value="cash_on_delivery">Cash on Delivery</option>
@@ -337,14 +343,27 @@ const Page = () => {
                   </span>
                 </div>
 
-                <button
-                  disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
-                  onClick={createPaymentSession}
-                >
-                  {isLoading && <ButtonLoader />}
-                  {isLoading ? "Redirecting..." : "Proceed to checkout"}
-                </button>
+                {isAuthenticated ? (
+                  <button
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
+                    onClick={createPaymentSession}
+                  >
+                    {isLoading && <ButtonLoader />}
+                    {isLoading ? "Redirecting..." : "Proceed to checkout"}
+                  </button>
+                ) : (
+                  <button
+                    className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
+                    onClick={() =>
+                      router.push(
+                        `/login?redirect=${encodeURIComponent(window.location.pathname)}`,
+                      )
+                    }
+                  >
+                    Log in
+                  </button>
+                )}
               </div>
             </div>
           </div>

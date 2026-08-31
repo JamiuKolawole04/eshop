@@ -7,6 +7,7 @@ import crypto from "node:crypto";
 import { Prisma, Users, prisma } from "@packages/prisma";
 import { ValidationError } from "@packages/error-handler";
 import { redis } from "@packages/redis";
+import { sendMail } from "../utils/sendMail";
 
 const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY), {
   apiVersion: "2026-06-24.dahlia",
@@ -23,6 +24,13 @@ export const createPaymentIntent = async (
   const platformFee = Math.floor(customerAccount * 0.1);
 
   try {
+    await stripe.accounts.update(sellerStripeAccountId, {
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+    });
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: customerAccount,
       currency: "usd",
@@ -39,6 +47,7 @@ export const createPaymentIntent = async (
 
     res.send({ clientSecret: paymentIntent.client_secret });
   } catch (err) {
+    console.log({ err });
     next(err);
   }
 };
@@ -225,7 +234,7 @@ export const createOrder = async (
 
       const user = await prisma.users.findUnique({ where: { id: userId } });
       const name = user?.name;
-      const email = user?.email;
+      const email = user?.email as string;
 
       const shopGrouped = cart.reduce((acc: any, item: any) => {
         if (!acc[item.shopId]) acc[item.shopId] = [];
@@ -345,7 +354,7 @@ export const createOrder = async (
         }
 
         // Send email for user
-        await sendEmail(
+        await sendMail(
           email,
           "🛍 Your Eshop Order Confirmation",
           "order-confirmation",
@@ -389,6 +398,8 @@ export const createOrder = async (
       }
 
       res.status(200).json({ received: true });
+    } else {
+      return res.status(200).json({ received: true, ignored: event.type });
     }
   } catch (error) {
     console.error(error);

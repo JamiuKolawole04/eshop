@@ -347,13 +347,14 @@ export const verifySeller = async (
     await verifyOtp(email, otp);
     const hashedPassword = await hash(password, 10);
 
-    await prisma.sellers.create({
+    const seller = await prisma.sellers.create({
       data: { name, email, password: hashedPassword, phone_number, country },
     });
 
     res.status(201).json({
       success: true,
       message: "Seller registered successfully.",
+      seller: { id: seller.id },
     });
   } catch (error) {
     return next(error);
@@ -446,6 +447,7 @@ export const createtripeConnectLink = async (
 
     res.status(200).json({ url: accountLink.url });
   } catch (err) {
+    console.log({ err });
     next(err);
   }
 };

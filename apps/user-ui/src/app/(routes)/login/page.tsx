@@ -2,7 +2,7 @@
 
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios, { AxiosError } from "axios";
@@ -17,6 +17,8 @@ type FormData = {
 
 const Page = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect");
 
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -40,7 +42,7 @@ const Page = () => {
     },
     onSuccess: () => {
       setServerError(null);
-      router.push("/");
+      router.push(redirectPath || "/");
     },
 
     onError: (error: AxiosError) => {
