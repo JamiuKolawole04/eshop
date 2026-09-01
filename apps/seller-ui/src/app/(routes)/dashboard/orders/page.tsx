@@ -106,7 +106,7 @@ const OrdersTable = () => {
   });
 
   return (
-    <div className="w-full min-h-screen p-8">
+    <div className="w-full min-h-screen p-8 font-Poppins">
       <h2 className="text-2xl text-white font-semibold mb-2">All Orders</h2>
 
       {/* Breadcrumbs */}

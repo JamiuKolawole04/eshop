@@ -5,7 +5,7 @@ import Stripe from "stripe";
 import crypto from "node:crypto";
 
 import { Prisma, Users, prisma } from "@packages/prisma";
-import { ValidationError } from "@packages/error-handler";
+import { NotFoundError, ValidationError } from "@packages/error-handler";
 import { redis } from "@packages/redis";
 import { sendMail } from "../utils/sendMail";
 
@@ -437,6 +437,63 @@ export const getSellerOrders = async (
     res.status(200).json({
       success: true,
       orders,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getOrderDetails = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const orderId = req.params.id;
+
+    const order = await prisma.orders.findUnique({
+      where: { id: orderId },
+      include: { oderItems: true },
+    });
+
+    if (!order) {
+      throw new NotFoundError("Order with this id does not exists");
+    }
+
+    const shippingAddress = order.shippingAddressId
+      ? await prisma.address.findUnique({
+          where: { id: order.shippingAddressId },
+        })
+      : null;
+
+    const coupon = order.couponCode
+      ? await prisma.discount_codes.findUnique({
+          where: { discountCode: order.couponCode },
+        })
+      : null;
+    const productId = order.oderItems.map((item) => item.productId);
+
+    const products = await prisma.products.findMany({
+      where: { id: { in: productId } },
+      select: { id: true, title: true, images: true },
+    });
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    const items = order.oderItems.map((item) => ({
+      ...item,
+      selectedOptions: item.selectedOptions,
+      product: productMap.get(item.productId) || null,
+    }));
+
+    res.status(200).json({
+      success: true,
+      order: {
+        ...order,
+        items,
+        shippingAddress,
+        couponCode: coupon,
+      },
     });
   } catch (err) {
     next(err);
