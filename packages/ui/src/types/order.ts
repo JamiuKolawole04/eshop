@@ -61,7 +61,8 @@ export interface OrderDetailsType {
   couponCode: Coupon | null;
   discountAmount: number;
   status: string;
-  deliveryStatus: string;
+  deliveryStatus:
+    "Ordered" | "Packed" | "Shipped" | "Out for Delivery" | "Delivered";
   createdAt: string;
   updatedAt: string;
   oderItems: OrderItem[];
