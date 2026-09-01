@@ -1,0 +1,18 @@
+import { ChevronRight } from "lucide-react";
+import Link from "next/link";
+
+type Props = {
+  title: string;
+};
+
+export const BreadCrumbs = ({ title }: Props) => {
+  return (
+    <div className="flex items-center mb-4">
+      <Link href={"/dashboard"} className="text-blue-400 cursor-pointer">
+        Dashboard
+      </Link>
+      <ChevronRight size={20} className="text-gray-200" />
+      <span className="text-white">{title}</span>
+    </div>
+  );
+};

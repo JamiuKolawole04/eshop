@@ -14,3 +14,4 @@ export * from "./utils/shop-category";
 export * from "./types/address";
 export * from "./lib/button-loader";
 export * from "./types/payment";
+export * from "./types/order";

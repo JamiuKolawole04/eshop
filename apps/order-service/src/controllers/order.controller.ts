@@ -406,3 +406,39 @@ export const createOrder = async (
     return next(error);
   }
 };
+
+export const getSellerOrders = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const shop = await prisma.shops.findUnique({
+      where: { sellerId: req.seller?.id },
+    });
+
+    const orders = await prisma.orders.findMany({
+      where: { shopId: shop?.id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      orders,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
