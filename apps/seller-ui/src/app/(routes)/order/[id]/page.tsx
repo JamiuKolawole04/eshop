@@ -114,44 +114,35 @@ const Page = () => {
 
       {/* Delivery Progress */}
       <div className="mb-8 overflow-x-auto">
-        <div className="min-w-[500px] sm:min-w-0">
-          {/* Labels */}
-          <div className="flex items-center justify-between text-[11px] sm:text-xs font-medium text-gray-400 mb-2 px-1">
-            {statuses.map((step, idx) => (
-              <span
-                key={step}
-                className={
-                  idx === currentIndex
-                    ? "text-blue-400"
-                    : idx <= currentIndex
-                      ? "text-blue-500"
-                      : "text-gray-500"
-                }
-              >
-                {step}
-              </span>
-            ))}
-          </div>
-
-          {/* Track */}
-          <div className="relative h-1.5 bg-gray-700 rounded-full">
-            <div
-              className="absolute top-0 left-0 h-1.5 bg-blue-500 rounded-full transition-all"
-              style={{
-                width: `${(currentIndex / (statuses.length - 1)) * 100}%`,
-              }}
-            />
-            <div className="absolute inset-0 flex items-center justify-between">
-              {statuses.map((step, idx) => (
+        <div className="min-w-[500px] sm:min-w-0 flex items-start">
+          {statuses.map((step, idx) => (
+            <div key={step} className="flex items-center flex-1 last:flex-none">
+              {/* Dot + label */}
+              <div className="flex flex-col items-center flex-shrink-0">
                 <div
-                  key={step}
                   className={`w-3.5 h-3.5 rounded-full border-2 border-gray-900 ${
                     idx <= currentIndex ? "bg-blue-500" : "bg-gray-600"
                   }`}
                 />
-              ))}
+                <span
+                  className={`mt-2 text-[11px] sm:text-xs font-medium whitespace-nowrap ${
+                    idx <= currentIndex ? "text-blue-400" : "text-gray-500"
+                  }`}
+                >
+                  {step}
+                </span>
+              </div>
+
+              {/* Connector to next dot (skip after the last one) */}
+              {idx !== statuses.length - 1 && (
+                <div
+                  className={`flex-1 h-1 mx-1 rounded-full ${
+                    idx < currentIndex ? "bg-blue-500" : "bg-gray-700"
+                  }`}
+                />
+              )}
             </div>
-          </div>
+          ))}
         </div>
       </div>
 
@@ -182,7 +173,9 @@ const Page = () => {
         {order.couponCode && (
           <p>
             <span className="font-semibold">Coupon Used:</span>{" "}
-            <span className="text-blue-400">{order.coupon.public_name}</span>
+            <span className="text-blue-400">
+              {order.couponCode.public_name}
+            </span>
           </p>
         )}
 
