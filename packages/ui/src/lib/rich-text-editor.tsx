@@ -1,6 +1,15 @@
+"use client";
+
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import "react-quill-new/dist/quill.snow.css";
-import ReactQuill from "react-quill-new";
+
+const ReactQuill = dynamic(() => import("react-quill-new"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[250px] w-full bg-gray-800 animate-pulse rounded-md" />
+  ),
+});
 
 export const RichTextEditor = ({
   value,
@@ -37,7 +46,7 @@ export const RichTextEditor = ({
       <ReactQuill
         theme="snow"
         value={editorValue}
-        onChange={(content) => {
+        onChange={(content: string) => {
           setEditorValue(content);
           onChange(content);
         }}
@@ -48,7 +57,6 @@ export const RichTextEditor = ({
           minHeight: "250px",
         }}
       />
-
       <style>
         {`
         .ql-toolbar {
