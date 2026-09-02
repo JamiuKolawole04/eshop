@@ -25,12 +25,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
 import { DeleteConfirmationModal } from "@/shared/component/modals/delete-confirmation-modal";
-import { ProductType } from "@packages/ui";
+import { GetEventOffersResponseType, ProductType } from "@packages/ui";
 
 const fetchEvents = async () => {
-  const response = await axiosInstance.get(`/api/products/shop-events`);
+  const response = await axiosInstance.get<GetEventOffersResponseType>(
+    `/api/products/events/all`,
+  );
 
-  return response.data?.products;
+  return response.data.events;
 };
 
 const deleteEvent = async (eventId: string) => {

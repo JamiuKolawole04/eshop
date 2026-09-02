@@ -224,6 +224,16 @@ const Page = () => {
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
         {isLoading ? (
           <p className="text-center text-white">Loading products...</p>
+        ) : products.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">
+              No products found
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              You haven&apos;t created any products yet. Click &quot;Add
+              Product&quot; to get started.
+            </p>
+          </div>
         ) : (
           <table className="w-full text-white">
             <thead>
