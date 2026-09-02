@@ -165,7 +165,7 @@ const OrdersTable = () => {
         )}
 
         {!isLoading && orders?.length === 0 && (
-          <p className="text-center py-3 text-white">No Orders found!</p>
+          <p className="text-center py-3 text-white mt-2">No Orders found!</p>
         )}
       </div>
     </div>

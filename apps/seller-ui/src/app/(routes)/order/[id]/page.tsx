@@ -38,7 +38,7 @@ const Page = () => {
 
   const { mutate: updateStatus, isPending: updating } = useMutation({
     mutationFn: async (deliveryStatus: string) => {
-      await axiosInstance.put(`/api/orders/${orderId}/status`, {
+      await axiosInstance.patch(`/api/orders/${orderId}/status`, {
         deliveryStatus,
       });
     },
