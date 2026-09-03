@@ -262,10 +262,10 @@ export const createOrder = async (
 
           if (discountedItem) {
             const discount =
-              coupon.discountPercent > 0
+              coupon.discountPercentage > 0
                 ? (discountedItem.sale_price *
                     discountedItem.quantity *
-                    coupon.discountPercent) /
+                    coupon.discountPercentage) /
                   100
                 : coupon.discountAmount;
 
@@ -550,5 +550,63 @@ export const updateDeliveryStatus = async (
     });
   } catch (error) {
     return next(error);
+  }
+};
+
+export const verifyCouponCode = async (
+  req: any,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { couponCode, cart } = req.body;
+
+    if (!couponCode || !cart || cart.length === 0) {
+      return next(new ValidationError("Coupon code and cart are required!"));
+    }
+
+    const discount = await prisma.discount_codes.findUnique({
+      where: { discountCode: couponCode },
+    });
+
+    if (!discount) {
+      return next(new ValidationError("Coupon code isn't valid!"));
+    }
+
+    const matchingProduct = cart.find((item: any) =>
+      item.discount_codes?.some((d: any) => d === discount.id),
+    );
+
+    if (!matchingProduct) {
+      return res.status(200).json({
+        valid: false,
+        discount: 0,
+        discountAmount: 0,
+        message: "No matching product found in cart for this coupon",
+      });
+    }
+
+    let discountAmount = 0;
+    const price = matchingProduct.sale_price * matchingProduct.quantity;
+
+    if (discount.discountType === "percentage") {
+      discountAmount = (price * discount.discountValue) / 100;
+    } else if (discount.discountType === "flat") {
+      discountAmount = discount.discountValue;
+    }
+
+    // Prevent discount from being greater than total price
+    discountAmount = Math.min(discountAmount, price);
+
+    res.status(200).json({
+      valid: true,
+      discount: discount.discountValue,
+      discountAmount: discountAmount.toFixed(2),
+      discountedProductId: matchingProduct.id,
+      discountType: discount.discountType,
+      message: "Discount applied to 1 eligible product",
+    });
+  } catch (error) {
+    next(error);
   }
 };

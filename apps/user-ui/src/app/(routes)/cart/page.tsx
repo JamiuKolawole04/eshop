@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import Link from "next/link";
@@ -15,6 +17,7 @@ import {
   ButtonLoader,
   CreatePaymentSessionResponseType,
   GetUserAddressResponseType,
+  VerifyCouponCodeResponseType,
 } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 
@@ -34,16 +37,22 @@ const Page = () => {
   const deviceInfo = useDeviceTracking();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [discountedPriceId, setDiscountedPriceId] = useState("");
+  const [discountedProductId, setDiscountedProductId] = useState("");
   const [discountPercentage, setDiscountPercentage] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [coupon, setCoupon] = useState("");
   const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [error, setError] = useState("");
+  const [storedCouponCode, setStoredCouponCode] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
     "credit_card" | "cash_on_delivery"
   >("cash_on_delivery");
 
   const createPaymentSession = async () => {
+    if (addresses?.length === 0) {
+      toast.error("Please set your delivery address to create an order!");
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -53,7 +62,12 @@ const Page = () => {
           {
             cart,
             selectedAddressId,
-            coupon: {},
+            coupon: {
+              code: storedCouponCode,
+              discountAmount,
+              discountPercentage,
+              discountedProductId,
+            },
           },
         );
 
@@ -94,7 +108,44 @@ const Page = () => {
     0,
   );
 
-  const applyCouponCode = () => {};
+  const applyCouponCode = async () => {
+    setError("");
+
+    if (!coupon.trim()) {
+      setError("Coupon code is required");
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.put<VerifyCouponCodeResponseType>(
+        `/api/orders/verify-coupon`,
+        {
+          couponCode: coupon.trim(),
+          cart,
+        },
+      );
+
+      if (response?.data?.valid) {
+        setStoredCouponCode(coupon.trim());
+        setDiscountAmount(parseFloat(response?.data?.discountAmount));
+        setDiscountPercentage(response?.data?.discount);
+        setDiscountedProductId(response?.data?.discountedProductId);
+        setCoupon("");
+      } else {
+        setDiscountAmount(0);
+        setDiscountPercentage(0);
+        setDiscountedProductId("");
+        setError(
+          response?.data?.message || "Coupon not valid for any items in cart",
+        );
+      }
+    } catch (error: any) {
+      setDiscountAmount(0);
+      setDiscountPercentage(0);
+      setDiscountedProductId("");
+      setError(error?.response?.data?.message);
+    }
+  };
 
   const { data: addresses } = useQuery({
     queryKey: ["user-shipping-addresses"],
@@ -102,11 +153,10 @@ const Page = () => {
   });
 
   useEffect(() => {
-    if (addresses && addresses?.length > 0 && !selectedAddressId) {
-      const defaultAddress = addresses?.find((address) => address.isDefault);
-
-      setSelectedAddressId(defaultAddress?.id ?? addresses[0].id);
-    }
+    // if (addresses && addresses?.length > 0 && !selectedAddressId) {
+    //   const defaultAddress = addresses?.find((address) => address.isDefault);
+    //   setSelectedAddressId(defaultAddress?.id ?? addresses[0].id);
+    // }
   }, [addresses, selectedAddressId]);
 
   return (
@@ -187,7 +237,7 @@ const Page = () => {
                     </td>
 
                     <td className="px-6 text-lg text-center">
-                      {item?.id === discountedPriceId ? (
+                      {item?.id === discountedProductId ? (
                         <div className="flex flex-col items-center">
                           <span className="line-through text-gray-500 text-sm">
                             ${item.sale_price.toFixed(2)}
@@ -279,9 +329,9 @@ const Page = () => {
                   >
                     Apply
                   </button>
-                  {/*{error && (
+                  {error && (
                     <p className="text-sm pt-2 text-red-500">{error}</p>
-                  )}*/}
+                  )}
                 </div>
                 <hr className="my-4 text-slate-200" />
 

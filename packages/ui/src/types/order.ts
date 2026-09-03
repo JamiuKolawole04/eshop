@@ -74,3 +74,12 @@ export interface OrderDetailsResponseType {
   success: boolean;
   order: OrderDetailsType;
 }
+
+export interface VerifyCouponCodeResponseType {
+  valid: boolean;
+  discount: number;
+  discountAmount: string;
+  discountedProductId: string;
+  discountType: string;
+  message: string;
+}
