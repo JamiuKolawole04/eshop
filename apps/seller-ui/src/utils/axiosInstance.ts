@@ -1,4 +1,5 @@
 import axios from "axios";
+import { runRedirectToLogin } from "./redirect";
 
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_SERVER_URI,
@@ -17,10 +18,10 @@ let isRefreshing = false;
 let refreshSubscribers: (() => void)[] = [];
 
 // handle logout and prevent infinite loops
-
 const handleLogout = () => {
-  if (!publicPaths.includes(window.location.pathname)) {
-    window.location.href = "/login";
+  const currentPath = window.location.pathname;
+  if (!publicPaths.includes(currentPath)) {
+    runRedirectToLogin();
   }
 };
 
@@ -47,7 +48,11 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const is401 = error?.response?.status === 401;
+    const isRetry = originalRequest?._retry;
+    const isAuthRequired = originalRequest?.requireAuth === true;
+
+    if (is401 && !isRetry && isAuthRequired) {
       if (isRefreshing) {
         return new Promise((resolve) => {
           subscribeTokenRefresh(() => resolve(axiosInstance(originalRequest)));
