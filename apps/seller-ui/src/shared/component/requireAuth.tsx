@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+
 import { useSeller } from "@/hooks/use-seller";
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
