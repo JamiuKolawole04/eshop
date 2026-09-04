@@ -22,7 +22,7 @@ import {
   User,
 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 
 import { useUser } from "@/hooks/use-user";
@@ -32,6 +32,13 @@ import { QuickActionCard } from "@/shared/components/cards/quickActionCard";
 import { ShippingAddress } from "@/shared/components/shippingAddress";
 import { ChangePassword } from "@/shared/components/changePassword";
 import { OrdersTable } from "@/shared/components/tables/ordersTable";
+import { UserOrdersResponseType } from "@packages/ui";
+
+const fetchUserOrders = async () => {
+  const res =
+    await axiosInstance.get<UserOrdersResponseType>(`/api/orders/user`);
+  return res.data.orders;
+};
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -41,6 +48,21 @@ const Page = () => {
   const { isLoading, user } = useUser();
   const queryTab = searchParams.get("active") || "Profile";
   const [activeTab, setActiveTab] = useState(queryTab);
+
+  const { data: orders = [] } = useQuery({
+    queryKey: ["user-orders"],
+    queryFn: fetchUserOrders,
+  });
+
+  const totalOrders = orders.length;
+  const processingOrders = orders.filter(
+    (order) =>
+      order.deliveryStatus !== "Delivered" &&
+      order.deliveryStatus !== "Cancelled",
+  ).length;
+  const completedOrders = orders.filter(
+    (order) => order.deliveryStatus === "Delivered",
+  ).length;
 
   const logOutHandler = async () => {
     await axiosInstance.post("/api/auth/users/logout");
@@ -75,9 +97,17 @@ const Page = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <StatCard title="Total Orders" count={10} Icon={Clock} />
-          <StatCard title="Processing Orders" count={4} Icon={Truck} />
-          <StatCard title="Completed Orders" count={5} Icon={CheckCircle} />
+          <StatCard title="Total Orders" count={totalOrders} Icon={Clock} />
+          <StatCard
+            title="Processing Orders"
+            count={processingOrders}
+            Icon={Truck}
+          />
+          <StatCard
+            title="Completed Orders"
+            count={completedOrders}
+            Icon={CheckCircle}
+          />
         </div>
 
         <div className="mt-10 flex flex-col md:flex-row gap-6">

@@ -2,6 +2,14 @@ import { AddressType } from "./address";
 import { DiscountCode } from "./discount-code";
 import { FileType } from "./file";
 
+type DeliveryStaus =
+  | "Ordered"
+  | "Packed"
+  | "Shipped"
+  | "Out for Delivery"
+  | "Delivered"
+  | "Cancelled";
+
 export interface OrderUser {
   id: string;
   name: string;
@@ -18,7 +26,7 @@ export interface Order {
   couponCode: string | null;
   discountAmount: number;
   status: string; // "Paid" | "Pending" | "Failed"
-  deliveryStatus: string; // "Ordered" | "Shipped" | "Delivered" | "Cancelled"
+  deliveryStatus: DeliveryStaus;
   createdAt: string;
   updatedAt: string;
   user: OrderUser;
@@ -65,8 +73,7 @@ export interface OrderDetailsType {
   couponCode: Coupon | null;
   discountAmount: number;
   status: string;
-  deliveryStatus:
-    "Ordered" | "Packed" | "Shipped" | "Out for Delivery" | "Delivered";
+  deliveryStatus: DeliveryStaus;
   createdAt: string;
   updatedAt: string;
   oderItems: OrderItem[];

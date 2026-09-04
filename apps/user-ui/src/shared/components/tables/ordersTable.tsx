@@ -16,15 +16,18 @@ import { useRouter } from "next/navigation";
 import { OrderWithItems, UserOrdersResponseType } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 
+const fetchUserOrders = async () => {
+  const res =
+    await axiosInstance.get<UserOrdersResponseType>(`/api/orders/user`);
+  return res.data.orders;
+};
+
 export const OrdersTable = () => {
   const router = useRouter();
+
   const { data, isLoading } = useQuery({
     queryKey: ["user-orders"],
-    queryFn: async () => {
-      const res =
-        await axiosInstance.get<UserOrdersResponseType>(`/api/orders/user`);
-      return res.data.orders;
-    },
+    queryFn: fetchUserOrders,
   });
 
   const columns: ColumnDef<OrderWithItems>[] = [

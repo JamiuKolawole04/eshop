@@ -24,7 +24,7 @@ export const useUser = () => {
     queryKey: ["user-profile"],
     queryFn: () => fetchUser(isLoggedIn),
     staleTime: 1000 * 60 * 5,
-    retry: false,
+    retry: 1,
   });
 
   useEffect(() => {
