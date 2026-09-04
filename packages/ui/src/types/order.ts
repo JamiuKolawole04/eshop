@@ -46,6 +46,10 @@ export interface OrderItem {
   updatedAt: string;
 }
 
+export interface OrderWithItems extends Order {
+  oderItems: OrderItem[];
+}
+
 export interface OrderItemWithProduct extends OrderItem {
   product: OrderProduct;
 }
@@ -82,4 +86,9 @@ export interface VerifyCouponCodeResponseType {
   discountedProductId: string;
   discountType: string;
   message: string;
+}
+
+export interface UserOrdersResponseType {
+  success: boolean;
+  orders: OrderWithItems[];
 }

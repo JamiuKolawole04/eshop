@@ -49,7 +49,7 @@ const Page = () => {
   >("cash_on_delivery");
 
   const createPaymentSession = async () => {
-    if (addresses?.length === 0) {
+    if (!selectedAddressId || addresses?.length === 0) {
       toast.error("Please set your delivery address to create an order!");
       return;
     }
@@ -153,10 +153,10 @@ const Page = () => {
   });
 
   useEffect(() => {
-    // if (addresses && addresses?.length > 0 && !selectedAddressId) {
-    //   const defaultAddress = addresses?.find((address) => address.isDefault);
-    //   setSelectedAddressId(defaultAddress?.id ?? addresses[0].id);
-    // }
+    if (addresses && addresses?.length > 0 && !selectedAddressId) {
+      const defaultAddress = addresses?.find((address) => address.isDefault);
+      setSelectedAddressId(defaultAddress?.id ?? addresses[0].id);
+    }
   }, [addresses, selectedAddressId]);
 
   return (
@@ -329,10 +329,8 @@ const Page = () => {
                   >
                     Apply
                   </button>
-                  {error && (
-                    <p className="text-sm pt-2 text-red-500">{error}</p>
-                  )}
                 </div>
+                {error && <p className="text-sm pt-2 text-red-500">{error}</p>}
                 <hr className="my-4 text-slate-200" />
 
                 <div className="mb-4">

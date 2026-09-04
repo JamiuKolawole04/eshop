@@ -30,6 +30,8 @@ import { StatCard } from "@/shared/components/cards/statCard";
 import axiosInstance from "@/utils/axiosInstance";
 import { QuickActionCard } from "@/shared/components/cards/quickActionCard";
 import { ShippingAddress } from "@/shared/components/shippingAddress";
+import { ChangePassword } from "@/shared/components/changePassword";
+import { OrdersTable } from "@/shared/components/tables/ordersTable";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -176,6 +178,10 @@ const Page = () => {
               </div>
             ) : activeTab === "Shipping Address" ? (
               <ShippingAddress />
+            ) : activeTab === "My Orders" ? (
+              <OrdersTable />
+            ) : activeTab === "Change Password" ? (
+              <ChangePassword />
             ) : (
               ""
             )}

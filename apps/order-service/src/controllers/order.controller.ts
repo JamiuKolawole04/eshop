@@ -562,7 +562,7 @@ export const verifyCouponCode = async (
     const { couponCode, cart } = req.body;
 
     if (!couponCode || !cart || cart.length === 0) {
-      return next(new ValidationError("Coupon code and cart are required!"));
+      throw new ValidationError("Coupon code and cart are required!");
     }
 
     const discount = await prisma.discount_codes.findUnique({
@@ -608,5 +608,32 @@ export const verifyCouponCode = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const getUserOrders = async (
+  req: any,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const orders = await prisma.orders.findMany({
+      where: {
+        userId: req.user.id,
+      },
+      include: {
+        oderItems: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      orders,
+    });
+  } catch (error) {
+    return next(error);
   }
 };
