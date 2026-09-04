@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": ["node", "express"],
+    "rootDir": "src",
+    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
+  },
+  "include": ["src/**/*.ts", "../../packages/types/src/express.d.ts"],
+  "exclude": [],
+  "references": [
+    {
+      "path": "../../packages/middleware/tsconfig.lib.json",
+    },
+    {
+      "path": "../../packages/prisma/tsconfig.lib.json",
+    },
+    {
+      "path": "../../packages/error-handler/tsconfig.lib.json",
+    },
+  ],
+}

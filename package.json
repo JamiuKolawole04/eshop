@@ -9,10 +9,11 @@
     "auth-service": "npx nx serve auth-service --outputStyle=stream",
     "product-service": "npx nx serve product-service --outputStyle=stream",
     "user-ui": "npx nx dev user-ui",
-    "seller-ui": "npx nx dev seller-ui",
+    "seller-ui": "npx nx dev seller-ui -- --port 3001",
     "kafka-service": "npx nx serve kafka-service --outputStyle=stream",
     "user-service": "npx nx serve user-service --outputStyle=stream",
-    "order-service": "npx nx serve order-service --outputStyle=stream"
+    "order-service": "npx nx serve order-service --outputStyle=stream",
+    "admin-ui": "npx nx dev seller-ui -- --port 3002"
   },
   "private": true,
   "dependencies": {
