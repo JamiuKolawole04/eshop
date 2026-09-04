@@ -629,7 +629,7 @@ export const getUserOrders = async (
       },
     });
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       orders,
     });

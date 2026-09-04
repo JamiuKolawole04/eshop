@@ -1,6 +1,11 @@
 import { NextFunction, Request, Response } from "express";
+import { hash, compare } from "bcryptjs";
 
-import { NotFoundError, ValidationError } from "@packages/error-handler";
+import {
+  AuthError,
+  NotFoundError,
+  ValidationError,
+} from "@packages/error-handler";
 import { prisma } from "@packages/prisma";
 
 export const addUserAddress = async (
@@ -115,33 +120,6 @@ export const getUserAddresses = async (
   }
 };
 
-export const updateUserPassword = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const userId = req.user?.id;
-    const { currentPassword, newPassword, confirmPassword } = req.body;
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      throw new ValidationError("all fields are required");
-    }
-
-    if (newPassword !== confirmPassword) {
-      throw new ValidationError("new passwords do not match");
-    }
-
-    if (currentPassword === newPassword) {
-      throw new ValidationError(
-        "New password cannot be the same as the current password",
-      );
-    }
-  } catch (err) {
-    next(err);
-  }
-};
-
 export const getUser = async (
   req: Request,
   res: Response,
@@ -175,6 +153,58 @@ export const getAdmin = async (
     res.status(200).json({
       success: true,
       user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      throw new ValidationError("all fields are required");
+    }
+
+    if (newPassword !== confirmPassword) {
+      throw new ValidationError("new passwords do not match");
+    }
+
+    if (currentPassword === newPassword) {
+      throw new ValidationError(
+        "New password cannot be the same as the current password",
+      );
+    }
+
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.password) {
+      throw new AuthError("user not found or password not set");
+    }
+
+    const isPasswordCorrect = await compare(currentPassword, user.password);
+    if (!isPasswordCorrect) {
+      throw new AuthError("current password is incorrect");
+    }
+
+    const hashedPassword = await hash(newPassword, 10);
+
+    await prisma.users.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "password updated successfully",
     });
   } catch (error) {
     next(error);

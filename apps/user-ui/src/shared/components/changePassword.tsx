@@ -1,8 +1,9 @@
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import axios from "axios";
 
 import axiosInstance from "@/utils/axiosInstance";
+import { ButtonLoader, UpdateUserPasswordResponse } from "@packages/ui";
 
 type FormData = {
   currentPassword: string;
@@ -28,11 +29,14 @@ export const ChangePassword = () => {
     setError("");
     setMessage("");
     try {
-      await axiosInstance.post("/api/change-password", {
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
-        confirmPassword: data?.confirmPassword,
-      });
+      await axiosInstance.patch<UpdateUserPasswordResponse>(
+        "/api/users/password",
+        {
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword,
+          confirmPassword: data?.confirmPassword,
+        },
+      );
       setMessage("Password updated successfully!");
       reset();
     } catch (error: unknown) {
@@ -118,15 +122,19 @@ export const ChangePassword = () => {
           )}
         </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        {message && <p className="text-green-600 text-sm">{message}</p>}
-
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-500 text-white text-sm font-medium py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white text-sm font-medium py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Updating..." : "Update Password"}
+          {isSubmitting ? (
+            <Fragment>
+              <ButtonLoader size={14} className="text-white" />
+              Updating...
+            </Fragment>
+          ) : (
+            "Update Password"
+          )}
         </button>
       </form>
 

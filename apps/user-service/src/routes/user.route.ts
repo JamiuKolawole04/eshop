@@ -7,6 +7,7 @@ import {
   getAdmin,
   getUser,
   getUserAddresses,
+  updateUserPassword,
 } from "../controllers/user.controller";
 
 const router: Router = express.Router();
@@ -20,6 +21,7 @@ router.delete(
 );
 
 router.get("/profile", isAuthenticated, getUser);
+router.patch("/password", isAuthenticated, updateUserPassword);
 
 router.get("/admin/profile", isAuthenticated, getAdmin);
 
