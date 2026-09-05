@@ -1,6 +1,10 @@
 import express, { Router } from "express";
 
-import { isAuthenticated, isSeller } from "@packages/middleware";
+import {
+  isAuthenticated,
+  isSeller,
+  isAuthenticatedAny,
+} from "@packages/middleware";
 
 import {
   createDiscountCode,
@@ -25,26 +29,56 @@ import {
 
 const router: Router = express.Router();
 
-router.post("/", isAuthenticated, isSeller, createProduct);
+router.post("/", isAuthenticated("seller"), isSeller, createProduct);
 router.get("/", getAllProducts);
 
-router.get("/shop-products", isAuthenticated, isSeller, getShopProducts);
+router.get(
+  "/shop-products",
+  isAuthenticated("seller"),
+  isSeller,
+  getShopProducts,
+);
 
-router.delete("/:productId", isAuthenticated, isSeller, deleteProduct);
-router.patch("/:productId/restore", isAuthenticated, isSeller, restoreProduct);
+router.delete(
+  "/:productId",
+  isAuthenticated("seller"),
+  isSeller,
+  deleteProduct,
+);
+router.patch(
+  "/:productId/restore",
+  isAuthenticated("seller"),
+  isSeller,
+  restoreProduct,
+);
 
 router.get("/categories", getCategories);
 
-router.post("/discount-code", isAuthenticated, isSeller, createDiscountCode);
-router.get("/discount-code", isAuthenticated, getDiscountCodes);
+router.post(
+  "/discount-code",
+  isAuthenticated("seller"),
+  isSeller,
+  createDiscountCode,
+);
+router.get("/discount-code", isAuthenticatedAny, getDiscountCodes);
 router.delete(
   "/discount-code/:id",
-  isAuthenticated,
+  isAuthenticated("seller"),
   isSeller,
   deleteDiscountCode,
 );
-router.post("/product-image", isAuthenticated, isSeller, uploadProductImage);
-router.delete("/product-image", isAuthenticated, isSeller, deleteProductImage);
+router.post(
+  "/product-image",
+  isAuthenticated("seller"),
+  isSeller,
+  uploadProductImage,
+);
+router.delete(
+  "/product-image",
+  isAuthenticated("seller"),
+  isSeller,
+  deleteProductImage,
+);
 
 router.get("/events/offers", getFilteredEvents);
 router.get("/events/all", getAllEvents);

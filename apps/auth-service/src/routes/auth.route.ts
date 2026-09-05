@@ -27,16 +27,21 @@ router.post("/auth/users/login", login);
 router.post("/auth/users/forgot-password", userForgotPassword);
 router.post("/auth/users/verify-forgot-password", verifyUserForgotPassword);
 router.post("/auth/users/reset-password", resetUserPassword);
-router.get("/auth/users/logout", isAuthenticated, userLogout);
+router.get("/auth/users/logout", isAuthenticated("user"), userLogout);
 
 router.post("/auth/refresh-token", refreshToken);
 
 router.post("/auth/sellers/register", registerSeller);
 router.post("/auth/sellers/verify", verifySeller);
 router.post("/auth/sellers/login", sellerLogin);
-router.get("/auth/sellers/profile", isAuthenticated, isSeller, getSeller);
+router.get(
+  "/auth/sellers/profile",
+  isAuthenticated("seller"),
+  isSeller,
+  getSeller,
+);
 
-router.get("/auth/admin/logout", isAuthenticated, adminLogout);
+router.get("/auth/admin/logout", isAuthenticated("user"), adminLogout);
 
 router.post("/shop", createShop);
 router.post("/stripe", createtripeConnectLink);

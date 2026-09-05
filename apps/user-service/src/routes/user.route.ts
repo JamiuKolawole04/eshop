@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 
-import { isAuthenticated } from "@packages/middleware";
+import { isAuthenticated, isUser } from "@packages/middleware";
 import {
   addUserAddress,
   deleteUserAddress,
@@ -12,17 +12,28 @@ import {
 
 const router: Router = express.Router();
 
-router.post("/shipping-address", isAuthenticated, addUserAddress);
-router.get("/shipping-address", isAuthenticated, getUserAddresses);
+router.post(
+  "/shipping-address",
+  isAuthenticated("user"),
+  isUser,
+  addUserAddress,
+);
+router.get(
+  "/shipping-address",
+  isAuthenticated("user"),
+  isUser,
+  getUserAddresses,
+);
 router.delete(
   "/shipping-address/:addressId",
-  isAuthenticated,
+  isAuthenticated("user"),
+  isUser,
   deleteUserAddress,
 );
 
-router.get("/profile", isAuthenticated, getUser);
-router.patch("/password", isAuthenticated, updateUserPassword);
+router.get("/profile", isAuthenticated("user"), isUser, getUser);
+router.patch("/password", isAuthenticated("user"), isUser, updateUserPassword);
 
-router.get("/admin/profile", isAuthenticated, getAdmin);
+router.get("/admin/profile", isAuthenticated("user"), isUser, getAdmin);
 
 export default router;

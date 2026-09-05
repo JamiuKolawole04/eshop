@@ -117,9 +117,6 @@ export const login = async (
       throw new AuthError("Invalid credentials.");
     }
 
-    res.clearCookie("seller_access_token");
-    res.clearCookie("seller_refresh_token");
-
     const accessToken = jwt.sign(
       {
         id: user.id,
@@ -474,9 +471,6 @@ export const sellerLogin = async (
     if (!isMatch) {
       throw new AuthError("Invalid credentials.");
     }
-
-    res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
 
     const accessToken = jwt.sign(
       {

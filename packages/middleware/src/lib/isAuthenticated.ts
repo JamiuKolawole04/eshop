@@ -1,9 +1,69 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
+type AuthRole = "user" | "seller";
+
 import { prisma } from "@packages/prisma";
 
-export const isAuthenticated = async (
+const cookieNameByRole: Record<AuthRole, string> = {
+  user: "access_token",
+  seller: "seller_access_token",
+};
+
+export const isAuthenticated = (expectedRole: AuthRole) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const cookieName = cookieNameByRole[expectedRole];
+      const token =
+        req.cookies[cookieName] || req.headers.authorization?.split(" ")[1];
+
+      if (!token) {
+        return res.status(401).json({
+          message: "Unauthorized! Token missing.",
+        });
+      }
+
+      const decoded = jwt.verify(
+        token,
+        String(process.env.ACCESS_TOKEN_SECRET),
+      ) as { id: string; role: AuthRole };
+
+      if (!decoded || decoded.role !== expectedRole) {
+        return res.status(401).json({
+          message: "Unauthorized! Invalid token.",
+        });
+      }
+
+      let account;
+      if (decoded.role === "user") {
+        account = await prisma.users.findUnique({
+          where: { id: decoded.id },
+        });
+        req.user = account;
+      } else if (decoded.role === "seller") {
+        account = await prisma.sellers.findUnique({
+          where: { id: decoded.id },
+          include: { shop: true },
+        });
+        req.seller = account;
+      }
+
+      if (!account) {
+        return res.status(401).json({
+          message: "Account not found",
+        });
+      }
+
+      req.role = decoded.role;
+      return next();
+    } catch {
+      res.status(401).json({
+        message: "Unauthorized! Token expired or invalid token.",
+      });
+    }
+  };
+};
+export const isAuthenticatedAny = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -23,7 +83,7 @@ export const isAuthenticated = async (
     const decoded = jwt.verify(
       token,
       String(process.env.ACCESS_TOKEN_SECRET),
-    ) as { id: string; role: "user" | "seller" };
+    ) as { id: string; role: AuthRole };
 
     if (!decoded) {
       return res.status(401).json({
@@ -32,19 +92,16 @@ export const isAuthenticated = async (
     }
 
     let account;
-
     if (decoded.role === "user") {
       account = await prisma.users.findUnique({
         where: { id: decoded.id },
       });
-
       req.user = account;
     } else if (decoded.role === "seller") {
       account = await prisma.sellers.findUnique({
         where: { id: decoded.id },
         include: { shop: true },
       });
-
       req.seller = account;
     }
 
