@@ -1,4 +1,3 @@
-import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";
 
@@ -11,14 +10,6 @@ const port = process.env.PORT ? Number(process.env.PORT) : 6002;
 
 const app = express();
 app.disable("x-powered-by");
-
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    allowedHeaders: ["Authorization", "Content-Type"],
-    credentials: true,
-  }),
-);
 
 app.use(express.json({ limit: "100mb" }));
 app.use(cookieParser());

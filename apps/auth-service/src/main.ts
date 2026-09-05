@@ -1,26 +1,16 @@
-import cors from "cors";
 import express, { type Response } from "express";
 import cookieParser from "cookie-parser";
 import swaggerUI from "swagger-ui-express";
 
 import authRoutes from "./routes/auth.route";
 import { ErrorMiddleware } from "@packages/error-handler";
-
-const swaggerDocument = require("./swagger-output.json");
+import swaggerDocument from "./swagger-output.json";
 
 const host = process.env.HOST ?? "localhost";
 const port = process.env.PORT ? Number(process.env.PORT) : 6001;
 
 const app = express();
 app.disable("x-powered-by");
-
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    allowedHeaders: ["Authorization", "Content-Type"],
-    credentials: true,
-  }),
-);
 
 app.use(express.json({ limit: "100mb" }));
 app.use(cookieParser());

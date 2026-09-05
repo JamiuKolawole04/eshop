@@ -157,8 +157,6 @@ export const refreshToken = async (
   next: NextFunction,
 ) => {
   try {
-    // const refreshToken = req.cookies.refresh_token;
-
     const refreshToken =
       req.cookies.refresh_token ||
       req.cookies.seller_refresh_token ||
@@ -171,7 +169,7 @@ export const refreshToken = async (
     const decoded = jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET as string,
-    ) as { id: string; role: "user" | "seller" };
+    ) as { id: string; role: "user" | "seller" | "admin" };
 
     if (!decoded || !decoded.id || !decoded.role) {
       throw new JsonWebTokenError("Forbidden! Invalid refresh token.");
@@ -186,6 +184,8 @@ export const refreshToken = async (
         where: { id: decoded.id },
         include: { shop: true },
       });
+    } else if (decoded.role === "admin") {
+      account = await prisma.users.findUnique({ where: { id: decoded.id } });
     }
 
     if (!account) {
@@ -519,6 +519,74 @@ export const getSeller = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const loginAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      throw new ValidationError("Email and password are required!");
+    }
+
+    const user = await prisma.users.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new AuthError("User doesn't exists!");
+    }
+
+    const isMatch = await compare(password, String(user.password));
+    if (!isMatch) {
+      throw new AuthError("Invalid credentials");
+    }
+
+    const isAdmin = user.role === "admin";
+
+    if (!isAdmin) {
+      // sendLog({
+      //   type: "error",
+      //   message: `Admin login failed for ${email} — not an admin`,
+      //   source: "auth-service",
+      // });
+      // throw new AuthError("Invalid access!");
+    }
+
+    // sendLog({
+    //   type: "success",
+    //   message: `Admin login successful: ${email}`,
+    //   source: "auth-service",
+    // });
+
+    const accessToken = jwt.sign(
+      { id: user.id, role: "admin" },
+      process.env.ACCESS_TOKEN_SECRET as string,
+      {
+        expiresIn: "15m",
+      },
+    );
+
+    const refreshToken = jwt.sign(
+      { id: user.id, role: "admin" },
+      process.env.REFRESH_TOKEN_SECRET as string,
+      {
+        expiresIn: "7d",
+      },
+    );
+
+    setCookie(res, "refresh_token", refreshToken);
+    setCookie(res, "access_token", accessToken);
+
+    res.status(200).json({
+      message: "Login successful!",
+      user: { id: user.id, email: user.email, name: user.name },
+    });
+  } catch (error) {
+    return next(error);
   }
 };
 

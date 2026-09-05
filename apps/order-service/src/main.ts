@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
@@ -14,14 +13,6 @@ const port = process.env.PORT ? Number(process.env.PORT) : 6004;
 
 const app = express();
 app.disable("x-powered-by");
-
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    allowedHeaders: ["Authorization", "Content-Type"],
-    credentials: true,
-  }),
-);
 
 app.post(
   "/api/order",

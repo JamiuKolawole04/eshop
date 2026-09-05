@@ -6,6 +6,7 @@ import {
   createtripeConnectLink,
   getSeller,
   login,
+  loginAdmin,
   refreshToken,
   registerSeller,
   resetUserPassword,
@@ -27,7 +28,7 @@ router.post("/auth/users/login", login);
 router.post("/auth/users/forgot-password", userForgotPassword);
 router.post("/auth/users/verify-forgot-password", verifyUserForgotPassword);
 router.post("/auth/users/reset-password", resetUserPassword);
-router.get("/auth/users/logout", isAuthenticated("user"), userLogout);
+router.post("/auth/users/logout", isAuthenticated("user"), userLogout);
 
 router.post("/auth/refresh-token", refreshToken);
 
@@ -41,7 +42,8 @@ router.get(
   getSeller,
 );
 
-router.get("/auth/admin/logout", isAuthenticated("user"), adminLogout);
+router.post("/auth/admin/login", loginAdmin);
+router.post("/auth/admin/logout", isAuthenticated("user"), adminLogout);
 
 router.post("/shop", createShop);
 router.post("/stripe", createtripeConnectLink);

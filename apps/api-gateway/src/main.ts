@@ -1,23 +1,17 @@
 import express from "express";
 import * as path from "node:path";
-import cors from "cors";
 import proxy from "express-http-proxy";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 
 import { initializeConfig } from "./libs/initializeSiteConfig";
+import { corsMiddleware } from "./shared/middlewares/cors";
 
 const app = express();
 app.disable("x-powered-by");
 
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    allowedHeaders: ["Authorization", "Content-Type"],
-    credentials: true,
-  }),
-);
+app.use(corsMiddleware);
 
 app.use(morgan("dev"));
 app.use(express.json({ limit: "100mb" }));

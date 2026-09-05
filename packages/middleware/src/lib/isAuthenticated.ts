@@ -1,12 +1,13 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-type AuthRole = "user" | "seller";
+type AuthRole = "user" | "seller" | "admin";
 
 import { prisma } from "@packages/prisma";
 
 const cookieNameByRole: Record<AuthRole, string> = {
   user: "access_token",
+  admin: "access_token",
   seller: "seller_access_token",
 };
 
@@ -46,6 +47,11 @@ export const isAuthenticated = (expectedRole: AuthRole) => {
           include: { shop: true },
         });
         req.seller = account;
+      } else if (decoded.role === "admin") {
+        account = await prisma.users.findUnique({
+          where: { id: decoded.id },
+        });
+        req.user = account;
       }
 
       if (!account) {

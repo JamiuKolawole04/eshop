@@ -5,7 +5,7 @@ declare global {
     interface Request {
       user?: Users | null;
       seller?: (Sellers & { shop: Shops | null }) | null;
-      role?: "user" | "seller";
+      role?: "user" | "seller" | "admin";
     }
   }
 }

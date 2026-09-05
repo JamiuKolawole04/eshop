@@ -17,3 +17,11 @@ export const isUser = (req: Request, res: Response, next: NextFunction) => {
 
   next();
 };
+
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (req.role !== "admin") {
+    throw new AuthError("Access denied: User only");
+  }
+
+  next();
+};
