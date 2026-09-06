@@ -1,10 +1,19 @@
 import express, { Router } from "express";
 
 import { isAdmin, isAuthenticated } from "@packages/middleware";
-import { getAdmin } from "../controllers/admin.controller";
+import {
+  getAdmin,
+  getAllProductsForAdmin,
+} from "../controllers/admin.controller";
 
 const router: Router = express.Router();
 
 router.get("/profile", isAuthenticated("admin"), isAdmin, getAdmin);
+router.get(
+  "/products",
+  isAuthenticated("admin"),
+  isAdmin,
+  getAllProductsForAdmin,
+);
 
 export default router;
