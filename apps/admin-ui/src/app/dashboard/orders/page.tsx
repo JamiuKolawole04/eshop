@@ -12,13 +12,14 @@ import {
 import { Search, Eye } from "lucide-react";
 import Link from "next/link";
 
-import { Order, SellerOrdersResponseType } from "@packages/ui";
+import { AdminOrdersResponseType, OrderWithShop } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 import { BreadCrumbs } from "@/shared/components/breadcrumbs";
 
 const fetchOrders = async () => {
-  const response =
-    await axiosInstance.get<SellerOrdersResponseType>(`/api/orders/seller`);
+  const response = await axiosInstance.get<AdminOrdersResponseType>(
+    `/api/orders/admin/all`,
+  );
 
   return response.data.orders;
 };
@@ -26,13 +27,13 @@ const fetchOrders = async () => {
 const OrdersTable = () => {
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const { data: orders = [], isLoading } = useQuery<Order[]>({
+  const { data: orders = [], isLoading } = useQuery<OrderWithShop[]>({
     queryKey: ["admin-orders"],
     queryFn: fetchOrders,
     staleTime: 1000 * 60 * 5,
   });
 
-  const columns = useMemo<ColumnDef<Order>[]>(
+  const columns = useMemo<ColumnDef<OrderWithShop>[]>(
     () => [
       {
         accessorKey: "id",
@@ -106,7 +107,7 @@ const OrdersTable = () => {
     [],
   );
 
-  const table = useReactTable<Order>({
+  const table = useReactTable<OrderWithShop>({
     data: orders,
     columns,
     getCoreRowModel: getCoreRowModel(),

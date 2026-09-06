@@ -1,20 +1,12 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, PackageX, ChevronDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, Loader2, PackageX } from "lucide-react";
 
 import { OrderDetailsResponseType, DeliveryProgress } from "@packages/ui";
 
 import axiosInstance from "@/utils/axiosInstance";
-
-const statuses = [
-  "Ordered",
-  "Packed",
-  "Shipped",
-  "Out for Delivery",
-  "Delivered",
-];
 
 const fetchOrder = async (id: string) => {
   const res = await axiosInstance.get<OrderDetailsResponseType>(
@@ -27,7 +19,6 @@ const Page = () => {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const orderId = params.id;
-  const queryClient = useQueryClient();
 
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", orderId],
@@ -35,24 +26,9 @@ const Page = () => {
     enabled: !!orderId,
   });
 
-  const { mutate: updateStatus, isPending: updating } = useMutation({
-    mutationFn: async (deliveryStatus: string) => {
-      await axiosInstance.patch(`/api/orders/${orderId}/status`, {
-        deliveryStatus,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["order", orderId] });
-    },
-  });
-
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateStatus(e.target.value);
-  };
-
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-24 flex flex-col items-center justify-center gap-3 font-Poppins">
+      <div className="max-w-5xl mx-auto px-4 py-24 flex flex-col items-center justify-center gap-3 font-poppins">
         <Loader2 size={28} className="text-blue-500 animate-spin" />
         <p className="text-gray-400 text-sm">Loading order...</p>
       </div>
@@ -61,7 +37,7 @@ const Page = () => {
 
   if (!order) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-24 flex flex-col items-center justify-center gap-3 text-center font-Poppins">
+      <div className="max-w-5xl mx-auto px-4 py-24 flex flex-col items-center justify-center gap-3 text-center font-poppins">
         <PackageX size={32} className="text-gray-600" />
         <p className="text-gray-300 font-medium">Order not found</p>
         <p className="text-gray-500 text-sm">
@@ -77,10 +53,8 @@ const Page = () => {
     );
   }
 
-  const currentIndex = statuses.indexOf(order.deliveryStatus);
-
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 font-Poppins">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 font-poppins">
       {/* Back link */}
       <button
         onClick={() => router.push("/dashboard/orders")}
@@ -112,38 +86,6 @@ const Page = () => {
         <label className="text-sm font-medium text-gray-300 shrink-0">
           Delivery status
         </label>
-        <div className="relative">
-          <select
-            value={order.deliveryStatus}
-            onChange={handleStatusChange}
-            disabled={updating}
-            className="appearance-none border border-gray-700 bg-gray-900 text-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition"
-          >
-            {statuses.map((status) => {
-              const statusIndex = statuses.indexOf(status);
-              return (
-                <option
-                  key={status}
-                  value={status}
-                  disabled={statusIndex < currentIndex}
-                  className="bg-gray-900"
-                >
-                  {status}
-                </option>
-              );
-            })}
-          </select>
-          <ChevronDown
-            size={14}
-            className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500"
-          />
-        </div>
-        {updating && (
-          <span className="flex items-center gap-1.5 text-xs text-gray-500">
-            <Loader2 size={12} className="animate-spin" />
-            Updating...
-          </span>
-        )}
       </div>
 
       {/* Delivery Progress */}

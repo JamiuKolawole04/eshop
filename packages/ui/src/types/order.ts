@@ -1,8 +1,9 @@
 import { AddressType } from "./address";
 import { DiscountCode } from "./discount-code";
 import { FileType } from "./file";
+import { ShopType } from "./shop";
 
-type DeliveryStaus =
+export type DeliveryStatus =
   | "Ordered"
   | "Packed"
   | "Shipped"
@@ -26,7 +27,7 @@ export interface Order {
   couponCode: string | null;
   discountAmount: number;
   status: string; // "Paid" | "Pending" | "Failed"
-  deliveryStatus: DeliveryStaus;
+  deliveryStatus: DeliveryStatus;
   createdAt: string;
   updatedAt: string;
   user: OrderUser;
@@ -73,7 +74,7 @@ export interface OrderDetailsType {
   couponCode: Coupon | null;
   discountAmount: number;
   status: string;
-  deliveryStatus: DeliveryStaus;
+  deliveryStatus: DeliveryStatus;
   createdAt: string;
   updatedAt: string;
   oderItems: OrderItem[];
@@ -98,4 +99,13 @@ export interface VerifyCouponCodeResponseType {
 export interface UserOrdersResponseType {
   success: boolean;
   orders: OrderWithItems[];
+}
+
+export interface OrderWithShop extends Order {
+  shop: ShopType;
+}
+
+export interface AdminOrdersResponseType {
+  success: boolean;
+  orders: Array<OrderWithShop>;
 }

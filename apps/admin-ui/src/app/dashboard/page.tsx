@@ -5,6 +5,7 @@ import {
   useReactTable,
   getCoreRowModel,
   flexRender,
+  ColumnDef,
 } from "@tanstack/react-table";
 import {
   PieChart,
@@ -14,6 +15,13 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+
+type Order = {
+  id: string;
+  customer: string;
+  amount: string;
+  status: string;
+};
 
 import { GeographicalMap } from "@/shared/components/charts/geographicalmap-chart";
 import { SalesChart } from "@/shared/components/charts/sale-chart";
@@ -36,7 +44,7 @@ const orders = [
   { id: "ORD-006", customer: "Bob Lee", amount: "$90", status: "Failed" },
 ];
 
-const columns = [
+const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "id",
     header: "Order ID",
@@ -53,7 +61,7 @@ const columns = [
     accessorKey: "status",
     header: "Status",
     cell: ({ getValue }) => {
-      const value = getValue();
+      const value = getValue<Order["status"]>();
       const color =
         value === "Paid"
           ? "text-green-400"

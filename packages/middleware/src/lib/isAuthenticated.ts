@@ -109,6 +109,11 @@ export const isAuthenticatedAny = async (
         include: { shop: true },
       });
       req.seller = account;
+    } else if (decoded.role === "admin") {
+      account = await prisma.users.findUnique({
+        where: { id: decoded.id },
+      });
+      req.user = account;
     }
 
     if (!account) {

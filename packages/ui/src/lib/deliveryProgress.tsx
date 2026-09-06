@@ -7,8 +7,7 @@ import {
   Check,
 } from "lucide-react";
 
-type DeliveryStatus =
-  "Ordered" | "Packed" | "Shipped" | "Out for Delivery" | "Delivered";
+import { DeliveryStatus } from "../types/order";
 
 const STEP_CONFIG: { label: DeliveryStatus; icon: typeof Package }[] = [
   { label: "Ordered", icon: Package },
