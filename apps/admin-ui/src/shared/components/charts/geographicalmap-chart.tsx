@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ComposableMap,
   createCoordinates,
@@ -8,8 +8,6 @@ import {
   Geography,
 } from "@vnedyalk0v/react19-simple-maps";
 import { motion, AnimatePresence } from "framer-motion";
-
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 const countryData = [
   { name: "United States of America", users: 120, sellers: 30 },
@@ -29,13 +27,28 @@ const getColor = (countryName: string) => {
 };
 
 export const GeographicalMap = () => {
+  const [geoData, setGeoData] = useState(null);
   const [hovered, setHovered] = useState<{
     name: string;
     users: number;
     sellers: number;
   } | null>(null);
-
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    fetch("/api/geo/countries")
+      .then((res) => res.json())
+      .then((data) => setGeoData(data))
+      .catch((err) => console.error("Failed to load geo data:", err));
+  }, []);
+
+  if (!geoData) {
+    return (
+      <div className="relative w-full px-0 py-5 h-[35vh] flex items-center justify-center text-gray-400 text-sm">
+        Loading map…
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full px-0 py-5 overflow-visible">
@@ -55,7 +68,7 @@ export const GeographicalMap = () => {
           display: "block",
         }}
       >
-        <Geographies geography={geoUrl}>
+        <Geographies geography={geoData}>
           {({ geographies }) =>
             geographies.map((geo) => {
               const countryName = geo.properties.name;
@@ -67,7 +80,7 @@ export const GeographicalMap = () => {
                   key={geo.rsmKey}
                   geography={geo}
                   onMouseEnter={(e) => {
-                    setTooltipPosition({ x: e.pageX, y: e.pageY });
+                    setTooltipPosition({ x: e.clientX, y: e.clientY });
                     setHovered({
                       name: countryName,
                       users: match?.users || 0,
@@ -75,7 +88,7 @@ export const GeographicalMap = () => {
                     });
                   }}
                   onMouseMove={(e) => {
-                    setTooltipPosition({ x: e.pageX, y: e.pageY });
+                    setTooltipPosition({ x: e.clientX, y: e.clientY });
                   }}
                   onMouseLeave={() => setHovered(null)}
                   fill={baseColor}
@@ -107,7 +120,7 @@ export const GeographicalMap = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="fixed bg-gray-800 text-white text-xs p-2 !rounded shadow-lg"
+            className="fixed bg-gray-800 text-white text-xs p-2 !rounded shadow-lg pointer-events-none"
             style={{
               top: tooltipPosition.y,
               left: tooltipPosition.x,
