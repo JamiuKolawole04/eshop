@@ -52,10 +52,10 @@ export const Page = () => {
     loginMutation.mutate(data);
   };
   return (
-    <div className="w-full h-screen flex items-center justify-center">
+    <div className="w-full h-screen flex items-center justify-center font-poppins">
       <div className="md:w-[450px] pb-8 bg-slate-800 rounded-md sshadow">
         <form className="p-5" onSubmit={handleSubmit(onSubmit)}>
-          <h1 className="text-3xl pb-3 pt-4 font-semibold text-center text-white font-poppins">
+          <h1 className="text-3xl pb-3 pt-4 font-semibold text-center text-white">
             Welcome Admin
           </h1>
 

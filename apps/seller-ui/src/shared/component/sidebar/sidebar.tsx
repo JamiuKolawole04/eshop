@@ -216,7 +216,7 @@ export const SidebarWrapper = () => {
                 title="Logout"
                 href="/"
                 isActive={activeSidebar === "/logout"}
-                icon={<LogOutIcon size={20} color={getIconColor("/logouts")} />}
+                icon={<LogOutIcon size={20} color={getIconColor("/logout")} />}
               />
             </SidebarMenu>
           </div>
