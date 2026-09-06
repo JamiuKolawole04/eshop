@@ -205,6 +205,8 @@ export const refreshToken = async (
       setCookie(res, "access_token", newAccessToken);
     } else if (decoded.role === "seller") {
       setCookie(res, "seller_access_token", newAccessToken);
+    } else if (decoded.role === "admin") {
+      setCookie(res, "access_token", newAccessToken);
     }
 
     req.role = decoded.role;
@@ -553,7 +555,7 @@ export const loginAdmin = async (
       //   message: `Admin login failed for ${email} — not an admin`,
       //   source: "auth-service",
       // });
-      // throw new AuthError("Invalid access!");
+      throw new AuthError("Invalid access!");
     }
 
     // sendLog({

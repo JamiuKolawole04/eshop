@@ -13,7 +13,8 @@
     "kafka-service": "npx nx serve kafka-service --outputStyle=stream",
     "user-service": "npx nx serve user-service --outputStyle=stream",
     "order-service": "npx nx serve order-service --outputStyle=stream",
-    "admin-ui": "npx nx dev admin-ui -- --port 3002"
+    "admin-ui": "npx nx dev admin-ui -- --port 3002",
+    "admin-service": "npx nx serve admin-service --outputStyle=stream"
   },
   "private": true,
   "dependencies": {

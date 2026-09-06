@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 const fetchAdmin = async () => {
-  const response = await axiosInstance.get("/api/users/profile");
+  const response = await axiosInstance.get("/api/admin/profile");
   return response.data?.user ?? null;
 };
 
