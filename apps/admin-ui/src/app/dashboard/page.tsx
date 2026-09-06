@@ -16,6 +16,7 @@ import {
 } from "recharts";
 
 import { GeographicalMap } from "@/shared/components/charts/geographicalmap-chart";
+import { SalesChart } from "@/shared/components/charts/sale-chart";
 
 const deviceData = [
   { name: "Phone", value: 55 },
@@ -51,7 +52,7 @@ const columns = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ getValue }: any) => {
+    cell: ({ getValue }) => {
       const value = getValue();
       const color =
         value === "Paid"
@@ -133,7 +134,7 @@ const DashboardPage = () => {
                 Last 6 months performance
               </span>
             </h2>
-            {/*<SalesChart />*/}
+            <SalesChart />
           </div>
         </div>
 
