@@ -3,6 +3,7 @@ import express, { Router } from "express";
 import {
   createPaymentIntent,
   createPaymentSession,
+  getAllOrdersForAdmin,
   getOrderDetails,
   getSellerOrders,
   getUserOrders,
@@ -15,6 +16,7 @@ import {
   isSeller,
   isUser,
   isAuthenticatedAny,
+  isAdmin,
 } from "@packages/middleware";
 
 const router: Router = express.Router();
@@ -33,6 +35,13 @@ router.patch(
   isAuthenticated("seller"),
   isSeller,
   updateDeliveryStatus,
+);
+
+router.get(
+  "/admin/all",
+  isAuthenticated("admin"),
+  isAdmin,
+  getAllOrdersForAdmin,
 );
 
 router.put("/verify-coupon", isAuthenticatedAny, verifyCouponCode);

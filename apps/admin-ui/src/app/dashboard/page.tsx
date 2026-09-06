@@ -122,7 +122,7 @@ const OrdersTable = () => {
 // Dashboard Layout
 const DashboardPage = () => {
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
+    <div className="p-4 sm:p-6 lg:p-8 font-poppins">
       {/* Top Charts */}
       <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Revenue Chart */}
