@@ -12,7 +12,11 @@ import {
 import { Search, Eye } from "lucide-react";
 import Link from "next/link";
 
-import { AdminOrdersResponseType, OrderWithShop } from "@packages/ui";
+import {
+  AdminOrdersResponseType,
+  ButtonLoader,
+  OrderWithShop,
+} from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 import { BreadCrumbs } from "@/shared/components/breadcrumbs";
 
@@ -117,6 +121,15 @@ const OrdersTable = () => {
     onGlobalFilterChange: setGlobalFilter,
   });
 
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-24 flex flex-col items-center justify-center gap-3 font-poppins">
+        <ButtonLoader size={28} className="text-blue-500" />
+        <p className="text-gray-400 text-xs">Loading order...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full min-h-screen p-8 font-poppins">
       <h2 className="text-2xl text-white font-semibold mb-2">All Orders</h2>
@@ -138,43 +151,36 @@ const OrdersTable = () => {
 
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
-        {isLoading ? (
-          <p className="text-center text-white">Loading orders...</p>
-        ) : (
-          <table className="w-full text-white">
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b border-gray-800">
-                  {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="p-3 text-left text-sm">
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-b border-gray-800 hover:bg-gray-900 transition"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-3 text-sm">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <table className="w-full text-white">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="border-b border-gray-800">
+                {headerGroup.headers.map((header) => (
+                  <th key={header.id} className="p-3 text-left text-sm">
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                className="border-b border-gray-800 hover:bg-gray-900 transition"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="p-3 text-sm">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
         {!isLoading && orders?.length === 0 && (
           <p className="text-center py-3 text-white mt-2">No Orders found!</p>

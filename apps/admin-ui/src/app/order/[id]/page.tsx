@@ -2,9 +2,13 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, PackageX } from "lucide-react";
+import { ArrowLeft, PackageX } from "lucide-react";
 
-import { OrderDetailsResponseType, DeliveryProgress } from "@packages/ui";
+import {
+  OrderDetailsResponseType,
+  DeliveryProgress,
+  ButtonLoader,
+} from "@packages/ui";
 
 import axiosInstance from "@/utils/axiosInstance";
 
@@ -29,8 +33,8 @@ const Page = () => {
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-24 flex flex-col items-center justify-center gap-3 font-poppins">
-        <Loader2 size={28} className="text-blue-500 animate-spin" />
-        <p className="text-gray-400 text-sm">Loading order...</p>
+        <ButtonLoader size={28} className="text-blue-500" />
+        <p className="text-gray-400 text-xs">Loading order...</p>
       </div>
     );
   }
