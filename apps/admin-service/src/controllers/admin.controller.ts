@@ -160,6 +160,13 @@ export const getAllAdmins = async (
       where: {
         role: "admin",
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
     });
 
     res.status(200).json({
@@ -224,5 +231,95 @@ export const getAllCustomizations = async (
     });
   } catch (error) {
     return next(error);
+  }
+};
+
+export const getAllUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+
+    const [users, totalUsers] = await Promise.all([
+      prisma.users.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+        },
+      }),
+      prisma.users.count(),
+    ]);
+
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    res.status(200).json({
+      success: true,
+      data: users,
+      meta: {
+        totalUsers,
+        currentPage: page,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllSellers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+
+    const [sellers, totalSellers] = await Promise.all([
+      prisma.sellers.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          createdAt: true,
+          shop: {
+            select: {
+              name: true,
+              avatar: true,
+              address: true,
+            },
+          },
+        },
+      }),
+      prisma.sellers.count(),
+    ]);
+
+    const totalPages = Math.ceil(totalSellers / limit);
+
+    res.status(200).json({
+      success: true,
+      data: sellers,
+      meta: {
+        totalSellers,
+        currentPage: page,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    next(error);
   }
 };

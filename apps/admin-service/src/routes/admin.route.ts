@@ -8,6 +8,8 @@ import {
   getAllCustomizations,
   getAllEvents,
   getAllProductsForAdmin,
+  getAllSellers,
+  getAllUsers,
 } from "../controllers/admin.controller";
 
 const router: Router = express.Router();
@@ -28,5 +30,7 @@ router.get(
   isAdmin,
   getAllCustomizations,
 );
+router.get("/users", isAuthenticated("admin"), isAdmin, getAllUsers);
+router.get("/sellers", isAuthenticated("admin"), isAdmin, getAllSellers);
 
 export default router;
