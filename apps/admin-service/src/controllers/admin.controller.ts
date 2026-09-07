@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import { prisma } from "@packages/prisma";
+import { ValidationError } from "@packages/error-handler";
 
 export const getAdmin = async (
   req: Request,
@@ -167,5 +168,61 @@ export const getAllAdmins = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const addNewAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email, role } = req.body;
+
+    const isUser = await prisma.users.findUnique({ where: { email } });
+    if (!isUser) {
+      throw new ValidationError("No user found with this email");
+    }
+
+    if (role !== "admin") {
+      throw new ValidationError("Invalid role provided");
+    }
+
+    const updateRole = await prisma.users.update({
+      where: { email },
+      data: { role },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      updateRole,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllCustomizations = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const config = await prisma.site_config.findFirst();
+
+    return res.status(200).json({
+      categories: config?.categories || [],
+      subCategories: config?.subCategories || {},
+      logo: config?.logo || null,
+      banner: config?.banner || null,
+    });
+  } catch (error) {
+    return next(error);
   }
 };
