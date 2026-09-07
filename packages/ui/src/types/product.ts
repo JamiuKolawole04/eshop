@@ -77,27 +77,3 @@ export type GetEventOffersResponseType = {
   currentPage: number;
   totalPages: number;
 };
-
-export type ProductForAdmin = {
-  id: string;
-  title: string;
-  slug: string;
-  stock: number;
-  ratings: number;
-  category: string;
-  sale_price: number;
-  images: Array<{ url: string }>;
-  shop: {
-    name: string;
-  };
-};
-
-export type ProductsForAdminResponseType = {
-  success: true;
-  data: Array<ProductForAdmin>;
-  meta: {
-    totalProducts: number;
-    currentPage: number;
-    totalPages: number;
-  };
-};

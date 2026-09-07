@@ -9,17 +9,14 @@ import {
   flexRender,
   ColumnDef,
 } from "@tanstack/react-table";
-import { ChevronRight, Eye, Plus, Search, Star } from "lucide-react";
+import { ChevronRight, Eye, Search, Star } from "lucide-react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
-import {
-  ButtonLoader,
-  ProductForAdmin,
-  ProductsForAdminResponseType,
-} from "@packages/ui";
+import { ButtonLoader } from "@packages/ui";
 import { Pagination } from "@/shared/components/pagination";
+import { ProductForAdmin, ProductsForAdminResponseType } from "@/types/product";
 
 const Products = () => {
   const [globalFilter, setGlobalFilter] = useState("");
@@ -35,10 +32,15 @@ const Products = () => {
     return response?.data;
   };
 
-  const { data: products, isLoading } = useQuery({
+  const {
+    data: products,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["all-products", page],
     queryFn: fetchProducts,
     staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
   });
 
   const columns = useMemo<ColumnDef<ProductForAdmin>[]>(
@@ -145,12 +147,6 @@ const Products = () => {
     <div className="w-full min-h-screen p-8 font-Poppins text-sm">
       <div className="flex justify-between items-center mb-1">
         <h2 className="text-2xl text-white font-semibold">All Products</h2>
-        <Link
-          href="/dashboard/create-product"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-        >
-          <Plus size={18} /> Add Product
-        </Link>
       </div>
 
       {/* Breadcrumbs */}
@@ -188,7 +184,9 @@ const Products = () => {
           </div>
         ) : (
           <Fragment>
-            <table className="w-full text-white">
+            <table
+              className={`w-full text-white transition-opacity ${isFetching ? "opacity-50" : "opacity-100"}`}
+            >
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id} className="border-b border-gray-800">

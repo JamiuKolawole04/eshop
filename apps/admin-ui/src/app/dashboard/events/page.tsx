@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -9,13 +7,15 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   flexRender,
+  ColumnDef,
 } from "@tanstack/react-table";
 import { ChevronRight, Plus, Search } from "lucide-react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
-import { GetEventOffersResponseType } from "@packages/ui";
+import { ButtonLoader } from "@packages/ui";
+import { EventsForAdmin, EventsForAdminResponseType } from "@/types/product";
 
 const EventsPage = () => {
   const [globalFilter, setGlobalFilter] = useState("");
@@ -24,25 +24,26 @@ const EventsPage = () => {
   const limit = 10;
 
   const fetchEvents = async () => {
-    const response = await axiosInstance.get<GetEventOffersResponseType>(
+    const response = await axiosInstance.get<EventsForAdminResponseType>(
       `/api/admin/events?page=${page}&limit=${limit}`,
     );
 
-    return response.data.events;
+    return response.data;
   };
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["shop-events"],
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ["events", page],
     queryFn: fetchEvents,
     staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
   });
 
-  const columns = useMemo(
+  const columns = useMemo<ColumnDef<EventsForAdmin>[]>(
     () => [
       {
         accessorKey: "image",
         header: "Image",
-        cell: ({ row }: any) => (
+        cell: ({ row }) => (
           <Image
             src={row.original.images[0].url}
             alt={row.original.images[0].url}
@@ -55,7 +56,7 @@ const EventsPage = () => {
       {
         accessorKey: "name",
         header: "Product Name",
-        cell: ({ row }: any) => {
+        cell: ({ row }) => {
           const truncatedTitle =
             row.original.title.length > 25
               ? `${row.original.title.substring(0, 25)}...`
@@ -75,12 +76,12 @@ const EventsPage = () => {
       {
         accessorKey: "price",
         header: "Price",
-        cell: ({ row }: any) => <span>${row.original.sale_price}</span>,
+        cell: ({ row }) => <span>${row.original.sale_price}</span>,
       },
       {
         accessorKey: "stock",
         header: "Stock",
-        cell: ({ row }: any) => (
+        cell: ({ row }) => (
           <span
             className={row.original.stock < 10 ? "text-red-500" : "text-white"}
           >
@@ -95,27 +96,27 @@ const EventsPage = () => {
       {
         accessorKey: "starting_date",
         header: "Start",
-        cell: ({ row }: any) =>
-          new Date(row.original.starting_date).toLocaleDateString(),
+        cell: ({ row }) =>
+          new Date(String(row.original.starting_date)).toLocaleDateString(),
       },
       {
         accessorKey: "endiing_date",
         header: "End",
-        cell: ({ row }: any) =>
-          new Date(row.original.ending_date).toLocaleDateString(),
+        cell: ({ row }) =>
+          new Date(String(row.original.ending_date)).toLocaleDateString(),
       },
 
       {
         accessorKey: "shop.name",
         header: "Shop Name",
-        cell: ({ row }: any) => row.original?.shop?.name || "-",
+        cell: ({ row }) => row.original?.shop?.name || "-",
       },
     ],
     [],
   );
 
   const table = useReactTable({
-    data: products,
+    data: data?.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -124,8 +125,16 @@ const EventsPage = () => {
     onGlobalFilterChange: setGlobalFilter,
   });
 
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-24 flex flex-col items-center justify-center gap-3 font-poppins">
+        <ButtonLoader size={28} className="text-blue-500" />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full min-h-screen p-8 font-Poppins text-sm">
+    <div className="w-full min-h-screen p-8 font-Poppins text-sm font-poppins">
       <div className="flex justify-between items-center mb-1">
         <h2 className="text-2xl text-white font-semibold">All Events</h2>
         <Link
@@ -159,18 +168,14 @@ const EventsPage = () => {
 
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
-        {isLoading ? (
-          <p className="text-center text-white">Loading events...</p>
-        ) : products.length === 0 ? (
+        {data?.data?.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-white text-base font-medium">No events found</p>
-            <p className="text-gray-400 text-sm mt-1">
-              You haven&apos;t created any events yet. Click &quot;Add
-              Event&quot; to get started.
-            </p>
           </div>
         ) : (
-          <table className="w-full text-white">
+          <table
+            className={`w-full text-white transition-opacity ${isFetching ? "opacity-50" : "opacity-100"}`}
+          >
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="border-b border-gray-800">
