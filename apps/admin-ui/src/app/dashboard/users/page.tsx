@@ -9,7 +9,7 @@ import {
   getFilteredRowModel,
   ColumnDef,
 } from "@tanstack/react-table";
-import { Search, Ban, UserCheck } from "lucide-react";
+import { Search, Ban, UserCheck, AlertTriangle } from "lucide-react";
 import {
   useQuery,
   useMutation,
@@ -50,7 +50,7 @@ const UsersPage = () => {
 
   const banUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      await axiosInstance.put(`/admin/api/ban-user/${userId}`);
+      await axiosInstance.put(`/api/admin/ban-user/${userId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users-list"] });
@@ -182,9 +182,7 @@ const UsersPage = () => {
 
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
-        {isLoading ? (
-          <p className="text-center py-6 text-gray-400">Loading users...</p>
-        ) : filteredUsers.length === 0 ? (
+        {filteredUsers.length === 0 ? (
           <p className="text-center py-6 text-gray-400">No users found.</p>
         ) : (
           <table className="w-full text-sm">
@@ -233,12 +231,19 @@ const UsersPage = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 w-[380px]">
             <h3 className="text-lg font-semibold mb-2">Ban User</h3>
-            <p className="text-sm text-gray-300 mb-6">
-              <span className="text-yellow-400 font-medium">Important:</span>{" "}
-              Are you sure you want to ban{" "}
-              <span className="text-red-400">{selectedUser.name}</span>? This
-              action can be reverted later.
+            <p className="text-sm text-gray-300 mb-6 flex items-start gap-2">
+              <AlertTriangle
+                size={16}
+                className="text-yellow-400 shrink-0 mt-0.5"
+              />
+              <span>
+                <span className="text-yellow-400 font-medium">Important:</span>{" "}
+                Are you sure you want to ban{" "}
+                <span className="text-red-400">{selectedUser.name}</span> ? This
+                action can be reverted later.
+              </span>
             </p>
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => {
