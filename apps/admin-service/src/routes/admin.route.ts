@@ -24,12 +24,7 @@ router.get(
 router.get("/events", isAuthenticated("admin"), isAdmin, getAllEvents);
 router.get("/admins", isAuthenticated("admin"), isAdmin, getAllAdmins);
 router.put("/add-new-admin", isAuthenticated("admin"), isAdmin, addNewAdmin);
-router.get(
-  "/customizations",
-  isAuthenticated("admin"),
-  isAdmin,
-  getAllCustomizations,
-);
+router.get("/customizations", getAllCustomizations);
 router.get("/users", isAuthenticated("admin"), isAdmin, getAllUsers);
 router.get("/sellers", isAuthenticated("admin"), isAdmin, getAllSellers);
 
