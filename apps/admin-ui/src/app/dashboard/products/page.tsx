@@ -10,31 +10,26 @@ import {
   getFilteredRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import {
-  BarChart,
-  ChevronRight,
-  Eye,
-  Pencil,
-  Plus,
-  Search,
-  Star,
-  Trash,
-} from "lucide-react";
+import { ChevronRight, Eye, Plus, Search, Star } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
-
-const fetchProducts = async () => {
-  const response = await axiosInstance.get(`/api/admin/products`);
-
-  return response?.data;
-};
+import { ButtonLoader } from "@packages/ui";
 
 const Products = () => {
   const [globalFilter, setGlobalFilter] = useState("");
-  const [analyticsData, setAnalyticsData] = useState(null);
-  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const limmit = 10;
+
+  const fetchProducts = async () => {
+    const response = await axiosInstance.get(
+      `/api/admin/products?page=${page}&limit=${limmit}`,
+    );
+
+    return response?.data?.data;
+  };
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["all-products"],
@@ -112,23 +107,11 @@ const Products = () => {
         cell: ({ row }: any) => (
           <div className="flex gap-3">
             <Link
-              href={`/product/${row.original.id}`}
+              href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/product/${row.original.id}`}
               className="text-blue-400 hover:text-blue-300 transition"
             >
               <Eye size={18} />
             </Link>
-            <Link
-              href={`/product/edit/${row.original.id}`}
-              className="text-yellow-400 hover:text-yellow-300 transition"
-            >
-              <Pencil size={18} />
-            </Link>
-            <button
-              className="text-green-400 hover:text-green-300 transition"
-              // onClick={() => openAnalytics(row.original)}
-            >
-              <BarChart size={18} />
-            </button>
           </div>
         ),
       },
@@ -145,6 +128,14 @@ const Products = () => {
     state: { globalFilter },
     onGlobalFilterChange: setGlobalFilter,
   });
+
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-24 flex flex-col items-center justify-center gap-3 font-poppins">
+        <ButtonLoader size={28} className="text-blue-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen p-8 font-Poppins text-sm">
@@ -181,9 +172,7 @@ const Products = () => {
 
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
-        {isLoading ? (
-          <p className="text-center text-white">Loading products...</p>
-        ) : products.length === 0 ? (
+        {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-white text-base font-medium">
               No products found

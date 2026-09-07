@@ -3,6 +3,8 @@ import express, { Router } from "express";
 import { isAdmin, isAuthenticated } from "@packages/middleware";
 import {
   getAdmin,
+  getAllAdmins,
+  getAllEvents,
   getAllProductsForAdmin,
 } from "../controllers/admin.controller";
 
@@ -15,5 +17,7 @@ router.get(
   isAdmin,
   getAllProductsForAdmin,
 );
+router.get("/events", isAuthenticated("admin"), isAdmin, getAllEvents);
+router.get("/admins", isAuthenticated("admin"), isAdmin, getAllAdmins);
 
 export default router;
