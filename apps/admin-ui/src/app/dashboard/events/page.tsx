@@ -10,40 +10,16 @@ import {
   getFilteredRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import {
-  BarChart,
-  ChevronRight,
-  Eye,
-  Pencil,
-  Plus,
-  Search,
-  Star,
-  Trash,
-} from "lucide-react";
+import { ChevronRight, Plus, Search } from "lucide-react";
 import Link from "next/link";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
-import { DeleteConfirmationModal } from "@/shared/component/modals/delete-confirmation-modal";
-import { GetEventOffersResponseType, ProductType } from "@packages/ui";
+import { GetEventOffersResponseType } from "@packages/ui";
 
-const deleteEvent = async (eventId: string) => {
-  await axiosInstance.delete(`api/events/${eventId}`);
-};
-
-const restoreEvent = async (eventId: string) => {
-  await axiosInstance.patch(`api/events/${eventId}/restore`);
-};
-
-const Page = () => {
-  const queryClient = useQueryClient();
-
+const EventsPage = () => {
   const [globalFilter, setGlobalFilter] = useState("");
-  const [analyticsData, setAnalyticsData] = useState(null);
-  const [showAnalytics, setShowAnalytics] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any>();
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
 
   const limit = 10;
 
@@ -59,22 +35,6 @@ const Page = () => {
     queryKey: ["shop-events"],
     queryFn: fetchEvents,
     staleTime: 1000 * 60 * 5,
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteEvent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["shop-events"] });
-      setShowDeleteModal(false);
-    },
-  });
-
-  const restoreMutation = useMutation({
-    mutationFn: restoreEvent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["shop-events"] });
-      setShowDeleteModal(false);
-    },
   });
 
   const columns = useMemo(
@@ -164,11 +124,6 @@ const Page = () => {
     onGlobalFilterChange: setGlobalFilter,
   });
 
-  const openDeleteModal = (product: ProductType) => {
-    setSelectedProduct(product);
-    setShowDeleteModal(true);
-  };
-
   return (
     <div className="w-full min-h-screen p-8 font-Poppins text-sm">
       <div className="flex justify-between items-center mb-1">
@@ -251,18 +206,9 @@ const Page = () => {
             </tbody>
           </table>
         )}
-
-        {showDeleteModal && (
-          <DeleteConfirmationModal
-            product={selectedProduct}
-            onClose={() => setShowDeleteModal(false)}
-            onConfirm={() => deleteMutation.mutate(selectedProduct?.id)}
-            onRestore={() => restoreMutation.mutate(selectedProduct?.id)}
-          />
-        )}
       </div>
     </div>
   );
 };
 
-export default Page;
+export default EventsPage;
