@@ -1,21 +1,25 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import Image from "next/image";
 import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
   flexRender,
+  ColumnDef,
 } from "@tanstack/react-table";
 import { ChevronRight, Eye, Plus, Search, Star } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
-import { ButtonLoader } from "@packages/ui";
+import {
+  ButtonLoader,
+  ProductForAdmin,
+  ProductsForAdminResponseType,
+} from "@packages/ui";
+import { Pagination } from "@/shared/components/pagination";
 
 const Products = () => {
   const [globalFilter, setGlobalFilter] = useState("");
@@ -24,25 +28,25 @@ const Products = () => {
   const limmit = 10;
 
   const fetchProducts = async () => {
-    const response = await axiosInstance.get(
+    const response = await axiosInstance.get<ProductsForAdminResponseType>(
       `/api/admin/products?page=${page}&limit=${limmit}`,
     );
 
-    return response?.data?.data;
+    return response?.data;
   };
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["all-products"],
+  const { data: products, isLoading } = useQuery({
+    queryKey: ["all-products", page],
     queryFn: fetchProducts,
     staleTime: 1000 * 60 * 5,
   });
 
-  const columns = useMemo(
+  const columns = useMemo<ColumnDef<ProductForAdmin>[]>(
     () => [
       {
         accessorKey: "image",
         header: "Image",
-        cell: ({ row }: any) => (
+        cell: ({ row }) => (
           <Image
             src={row.original.images[0].url}
             alt={row.original.images[0].url}
@@ -55,7 +59,7 @@ const Products = () => {
       {
         accessorKey: "name",
         header: "Product Name",
-        cell: ({ row }: any) => {
+        cell: ({ row }) => {
           const truncatedTitle =
             row.original.title.length > 25
               ? `${row.original.title.substring(0, 25)}...`
@@ -75,12 +79,12 @@ const Products = () => {
       {
         accessorKey: "price",
         header: "Price",
-        cell: ({ row }: any) => <span>${row.original.sale_price}</span>,
+        cell: ({ row }) => <span>${row.original.sale_price}</span>,
       },
       {
         accessorKey: "stock",
         header: "Stock",
-        cell: ({ row }: any) => (
+        cell: ({ row }) => (
           <span
             className={row.original.stock < 10 ? "text-red-500" : "text-white"}
           >
@@ -95,7 +99,7 @@ const Products = () => {
       {
         accessorKey: "rating",
         header: "Rating",
-        cell: ({ row }: any) => (
+        cell: ({ row }) => (
           <div className="flex items-center gap-1 text-yellow-400">
             <Star fill="#fde047" size={18} />
             <span className="text-white">{row.original.ratings || 5}</span>
@@ -104,7 +108,7 @@ const Products = () => {
       },
       {
         header: "Actions",
-        cell: ({ row }: any) => (
+        cell: ({ row }) => (
           <div className="flex gap-3">
             <Link
               href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/product/${row.original.id}`}
@@ -120,7 +124,7 @@ const Products = () => {
   );
 
   const table = useReactTable({
-    data: products,
+    data: products?.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -172,7 +176,7 @@ const Products = () => {
 
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
-        {products.length === 0 ? (
+        {products?.data?.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-white text-base font-medium">
               No products found
@@ -183,41 +187,49 @@ const Products = () => {
             </p>
           </div>
         ) : (
-          <table className="w-full text-white">
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b border-gray-800">
-                  {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="p-3 text-left">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-b border-gray-800 hover:bg-gray-900 transition"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-3">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <Fragment>
+            <table className="w-full text-white">
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id} className="border-b border-gray-800">
+                    {headerGroup.headers.map((header) => (
+                      <th key={header.id} className="p-3 text-left">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="border-b border-gray-800 hover:bg-gray-900 transition"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="p-3">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <Pagination
+              currentPage={products?.meta?.currentPage || 1}
+              totalPages={products?.meta?.totalPages || 1}
+              onPageChange={setPage}
+            />
+          </Fragment>
         )}
       </div>
     </div>

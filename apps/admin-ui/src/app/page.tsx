@@ -13,7 +13,7 @@ type FormData = {
   password: string;
 };
 
-export const Page = () => {
+const Page = () => {
   const router = useRouter();
 
   const {
