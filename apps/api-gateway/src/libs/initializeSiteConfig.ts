@@ -24,6 +24,8 @@ export const initializeConfig = async () => {
               "Wearables",
             ],
           },
+          logo: "https://ik.imagekit.io/jnven3dnh3/eshop-products/E-shop-logo.png",
+          banner: "https://ik.imagekit.io/jnven3dnh3/eshop-products/watch.png",
         },
       });
       console.info("Site config initialized");

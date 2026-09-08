@@ -186,6 +186,14 @@ export const addNewAdmin = async (
   try {
     const { email, role } = req.body;
 
+    if (!email) {
+      throw new ValidationError("Email is required.");
+    }
+
+    if (!role) {
+      throw new ValidationError("Role is required.");
+    }
+
     const isUser = await prisma.users.findUnique({ where: { email } });
     if (!isUser) {
       throw new ValidationError("No user found with this email");
