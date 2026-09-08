@@ -23,7 +23,7 @@ router.get(
 );
 router.get("/events", isAuthenticated("admin"), isAdmin, getAllEvents);
 router.get("/all", isAuthenticated("admin"), isAdmin, getAllAdmins);
-router.put("/add-new-admin", isAuthenticated("admin"), isAdmin, addNewAdmin);
+router.post("/", isAuthenticated("admin"), isAdmin, addNewAdmin);
 router.get("/customizations", getAllCustomizations);
 router.get("/users", isAuthenticated("admin"), isAdmin, getAllUsers);
 router.get("/sellers", isAuthenticated("admin"), isAdmin, getAllSellers);
