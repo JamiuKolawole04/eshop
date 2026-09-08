@@ -1,21 +1,15 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
-import express from 'express';
-import * as path from 'path';
+import express from "express";
 
 const app = express();
 
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
+const host = process.env.HOST ?? "localhost";
+const port = process.env.PORT ? Number(process.env.PORT) : 6008;
 
-app.get('/api', (req, res) => {
-  res.send({ message: 'Welcome to logger-service!' });
+app.get("/health", (req, res) => {
+  res.send({ message: "Welcome to logger-service!" });
 });
 
-const port = process.env.PORT || 3333;
 const server = app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}/api`);
+  console.log(`Logger service is running at http://${host}:${port}`);
 });
-server.on('error', console.error);
+server.on("error", console.error);
