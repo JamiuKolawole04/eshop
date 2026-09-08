@@ -15,6 +15,7 @@ import {
   useMutation,
   useQueryClient,
   UseQueryResult,
+  keepPreviousData,
 } from "@tanstack/react-query";
 
 import { ButtonLoader } from "@packages/ui";
@@ -44,7 +45,7 @@ const UsersPage = () => {
         );
         return res.data;
       },
-      placeholderData: (previousData) => previousData,
+      placeholderData: keepPreviousData,
       staleTime: 1000 * 60 * 5,
     });
 

@@ -10,14 +10,18 @@ import {
   ColumnDef,
 } from "@tanstack/react-table";
 import { Search } from "lucide-react";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  UseQueryResult,
+} from "@tanstack/react-query";
+import Image from "next/image";
 
 import { ButtonLoader } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 import { BreadCrumbs } from "@/shared/components/breadcrumbs";
 import { Pagination } from "@/shared/components/pagination";
 import { Seller, SellersResponseType } from "@/types/seller";
-import Image from "next/image";
 
 const SellersPage = () => {
   const [globalFilter, setGlobalFilter] = useState("");
@@ -36,7 +40,7 @@ const SellersPage = () => {
           );
           return res.data;
         },
-        placeholderData: (previousData) => previousData,
+        placeholderData: keepPreviousData,
         staleTime: 1000 * 60 * 5,
       },
     );
