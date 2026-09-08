@@ -331,3 +331,16 @@ export const getAllSellers = async (
     next(error);
   }
 };
+
+export const AddCategoryToCustomization = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { categories } = req.body.body;
+  } catch (err) {
+    next(err);
+  }
+};
+export const AddSubCategoryToCustomization = () => {};

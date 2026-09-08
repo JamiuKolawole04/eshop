@@ -125,7 +125,6 @@ const OrdersTable = () => {
     return (
       <div className="max-w-5xl mx-auto px-4 py-24 flex flex-col items-center justify-center gap-3 font-poppins">
         <ButtonLoader size={28} className="text-blue-500" />
-        <p className="text-gray-400 text-xs">Loading order...</p>
       </div>
     );
   }
