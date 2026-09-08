@@ -24,3 +24,10 @@ export type UsersResponseType = {
     totalPages: number;
   };
 };
+
+export type UpdateRoleToAdminResponseType = {
+  name: string;
+  id: string;
+  email: string;
+  role: string;
+};

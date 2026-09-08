@@ -1,16 +1,21 @@
 "use client";
 
-import React, { SubmitEvent, useState } from "react";
+import React, { Fragment, SubmitEvent, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
 } from "@tanstack/react-table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 import { BreadCrumbs } from "@/shared/components/breadcrumbs";
 import axiosInstance from "@/utils/axiosInstance";
-import { AdminsResponseType } from "@/types/user";
+import {
+  AdminsResponseType,
+  UpdateRoleToAdminResponseType,
+} from "@/types/user";
 import { ButtonLoader } from "@packages/ui";
 
 const columns = [
@@ -34,7 +39,10 @@ const Page = () => {
     },
   });
 
-  const { mutate: updateRole, isPending: updating } = useMutation({
+  const { mutate: updateRole, isPending: updating } = useMutation<
+    UpdateRoleToAdminResponseType,
+    AxiosError<{ message: string }>
+  >({
     mutationFn: async () => {
       return await axiosInstance.post("/api/admin", {
         email: search,
@@ -48,7 +56,7 @@ const Page = () => {
       setSelectedRole("user");
     },
     onError: (err) => {
-      console.error("Role update failed", err);
+      toast.error(`${err?.response?.data?.message}`);
     },
   });
 
@@ -72,7 +80,7 @@ const Page = () => {
   }
 
   return (
-    <div className="w-full min-h-screen p-8 bg-gray-900 text-white text-sm font-poppins">
+    <div className="w-full min-h-screen p-8 text-white text-sm font-poppins">
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-xl font-bold tracking-wide">Team Management</h2>
         <button
@@ -87,13 +95,16 @@ const Page = () => {
         <BreadCrumbs title="Team Management" />
       </div>
 
-      <div className="!rounded shadow-xl border border-slate-700 overflow-hidden">
+      <div className="!rounded shadow-xl bg-gray-900 overflow-hidden">
         <table className="min-w-full text-left">
-          <thead className="bg-slate-900 text-slate-300">
+          <thead className="text-slate-300">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
+              <tr key={headerGroup.id} className="border-b border-gray-800">
                 {headerGroup.headers.map((header) => (
-                  <th key={header.id} className="p-3">
+                  <th
+                    key={header.id}
+                    className="text-left py-2 px-2 text-gray-400 font-medium"
+                  >
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext(),
@@ -151,7 +162,7 @@ const Page = () => {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="support@becodemy.com"
-                  className="w-full px-3 py-2 outline-none bg-slate-800 text-white border border-slate-600 rounded"
+                  className="w-full px-3 py-2 outline-none bg-slate-800 text-white border border-slate-600 !rounded"
                 />
               </div>
 
@@ -178,9 +189,16 @@ const Page = () => {
                 <button
                   type="submit"
                   disabled={updating}
-                  className="w-full bg-blue-600 text-white px-4 py-2 !rounded hover:bg-blue-700"
+                  className="w-full bg-blue-600 text-white px-4 py-2 !rounded hover:bg-blue-700 flex items-center justify-center gap-2 disabled:opacity-60"
                 >
-                  {updating ? "Updating..." : "Add Admin"}
+                  {updating ? (
+                    <Fragment>
+                      <ButtonLoader size={14} className="text-white" />
+                      Updating...
+                    </Fragment>
+                  ) : (
+                    "Add Admin"
+                  )}
                 </button>
               </div>
             </form>
