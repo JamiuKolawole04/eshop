@@ -1,5 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import { createWebSockerServer } from "./websocket";
+import { startConsumer } from "./message-consumer";
 
 const app = express();
 
@@ -18,4 +20,13 @@ app.get("/health", (req, res) => {
 const server = app.listen(port, () => {
   console.log(`Chatting service is running at http://${host}:${port}`);
 });
+
+// web socket server
+createWebSockerServer(server);
+
+// kafka consumer
+startConsumer().catch((err) => {
+  console.timeLog(`Fauled to start kafka consumer`, err);
+});
+
 server.on("error", console.error);
