@@ -32,6 +32,8 @@ const Inbox = () => {
             <div className="p-4 border-b border-b-gray-200 text-lg font-semibold text-gray-800">
               Messages
             </div>
+
+            <div className="divide-y divide-gray-200"></div>
           </div>
         </div>
       </div>
