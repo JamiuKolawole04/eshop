@@ -30,6 +30,7 @@ export const newConversation = async (
 
     if (existingGroup) {
       return res.status(200).json({
+        success: true,
         conversation: existingGroup,
         isNew: false,
       });
@@ -56,7 +57,8 @@ export const newConversation = async (
     });
 
     return res.status(201).json({
-      conversation: existingGroup,
+      success: true,
+      conversation: newGroup,
       isNew: true,
     });
   } catch (err) {
@@ -138,7 +140,10 @@ export const getUserConversations = async (
       }),
     );
 
-    return res.status(200).json({ conversations: responseData });
+    return res.status(200).json({
+      success: true,
+      conversations: responseData,
+    });
   } catch (error) {
     return next(error);
   }
@@ -218,7 +223,10 @@ export const getSellerConversations = async (
       }),
     );
 
-    return res.status(200).json({ conversations: responseData });
+    return res.status(200).json({
+      success: true,
+      conversations: responseData,
+    });
   } catch (error) {
     return next(error);
   }

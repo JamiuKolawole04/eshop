@@ -10,13 +10,19 @@
   "exclude": [],
   "references": [
     {
-      "path": "../../packages/redis/tsconfig.lib.json",
+      "path": "../../packages/middleware/tsconfig.lib.json"
     },
     {
-      "path": "../../packages/prisma/tsconfig.lib.json",
+      "path": "../../packages/kafka/tsconfig.lib.json"
     },
     {
-      "path": "../../packages/kafka/tsconfig.lib.json",
+      "path": "../../packages/redis/tsconfig.lib.json"
     },
+    {
+      "path": "../../packages/prisma/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/error-handler/tsconfig.lib.json"
+    }
   ],
 }

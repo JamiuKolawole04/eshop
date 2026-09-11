@@ -39,9 +39,9 @@ axiosInstance.interceptors.response.use(
 
     const is401 = error?.response?.status === 401;
     const isRetry = originalRequest?._retry;
-    const isAuthRequired = originalRequest?.requireAuth === true;
+    const isPublicRequest = originalRequest?.requireAuth === false;
 
-    if (is401 && !isRetry && isAuthRequired) {
+    if (is401 && !isRetry && !isPublicRequest) {
       if (isRefreshing) {
         return new Promise((resolve) => {
           subscribeTokenRefresh(() => resolve(axiosInstance(originalRequest)));

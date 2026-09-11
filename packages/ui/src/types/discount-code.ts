@@ -7,8 +7,8 @@ export type DiscountCode = {
   discountValue: number;
   discountCode: string;
   sellerId: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type CreateDiscountCodeResponseType = {

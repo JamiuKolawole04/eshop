@@ -3,13 +3,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, MapPin, ShoppingCartIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 
-import { ProductWithRelationsType } from "@packages/ui";
+import {
+  CreateConversationResponseType,
+  ProductWithRelationsType,
+} from "@packages/ui";
 import Ratings from "../ratings";
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
 import { useLocationTracking } from "@/hooks/use-location-tracking";
 import { useDeviceTracking } from "@/hooks/use-device-tracking";
+import axiosInstance from "@/utils/axiosInstance";
 
 type Props = {
   data: ProductWithRelationsType;
@@ -35,6 +40,29 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
 
   const estimatedDelivery = new Date();
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
+
+  const { mutate: createChat, isPending: isLoading } = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post<CreateConversationResponseType>(
+        "/api/chatting/conversations",
+        {
+          sellerId: data?.shop?.sellerId,
+        },
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      router.push(`/inbox?conversationId=${data.conversation.id}`);
+    },
+    onError: (error) => {
+      console.timeLog(`${error}`);
+    },
+  });
+
+  const handleChat = async () => {
+    if (isLoading) return;
+    createChat();
+  };
 
   return (
     <div
@@ -106,7 +134,7 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
 
               <button
                 className="text-xs inline-flex w-fit cursor-pointer items-center gap-2 px-2 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium hover:scale-105 transition"
-                onClick={() => router.push(`/inbox?shopId=${data?.shop?.id}`)}
+                onClick={handleChat}
               >
                 💬 Chat with Seller
               </button>

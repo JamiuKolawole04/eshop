@@ -1,7 +1,9 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+
 import { createWebSockerServer } from "./websocket";
 import { startConsumer } from "./message-consumer";
+import chattingRoutes from "./routes/chatting.routes";
 
 const app = express();
 
@@ -16,6 +18,8 @@ app.use(cookieParser());
 app.get("/health", (req, res) => {
   res.send({ message: "Welcome to chatting-service!" });
 });
+
+app.use("/", chattingRoutes);
 
 const server = app.listen(port, () => {
   console.log(`Chatting service is running at http://${host}:${port}`);

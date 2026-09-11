@@ -21,7 +21,7 @@ export const createWebSockerServer = async (server: HttpServer) => {
   const wss = new WebSocketServer({ server });
 
   await producer.connect();
-  console.log("Kafka producer conneted ");
+  console.log("Kafka producer connected");
 
   wss.on("connection", (ws: WebSocket) => {
     console.log("New web socket connection!");
