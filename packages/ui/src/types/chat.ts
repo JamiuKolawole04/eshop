@@ -52,3 +52,26 @@ export type GetSellerConversationResponseType = {
   success: true;
   conversations: SellerConversation[];
 };
+
+export type GetUserMessagesResponseType = {
+  success: boolean;
+  messages: {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    conversationId: string;
+    senderId: string;
+    senderType: string;
+    content: string | null;
+    attachments: string[];
+    status: string;
+  }[];
+  seller: {
+    id: string | null;
+    name: string;
+    avatar: string | null;
+    isOnline: boolean;
+  };
+  currentPage: number;
+  hasMore: boolean;
+};

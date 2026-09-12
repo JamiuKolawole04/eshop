@@ -293,6 +293,7 @@ export const fetchMessages = async (
     });
 
     return res.status(200).json({
+      success: true,
       messages,
       seller: {
         id: seller?.id || null,
