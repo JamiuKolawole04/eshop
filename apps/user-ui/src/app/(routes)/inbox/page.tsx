@@ -1,14 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
+import { Fragment, SubmitEvent, useEffect, useRef, useState } from "react";
 import {
-  Fragment,
-  InputEvent,
-  SubmitEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
+  InfiniteData,
   useInfiniteQuery,
   useQuery,
   useQueryClient,
@@ -25,6 +21,10 @@ import {
   UserConversation,
 } from "@packages/ui";
 import { ChatInput } from "@/shared/components/chats/chat-input";
+import { useWebSocket } from "@/shared/context/web-socket";
+
+type MessagesInfiniteData = InfiniteData<GetUserMessagesResponseType>;
+// type Message = GetUserMessagesResponseType["messages"][number];
 
 const fetchConversations = async () => {
   const response = await axiosInstance.get<GetUserConversationResponseType>(
@@ -39,6 +39,7 @@ const Inbox = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: isUserLoading } = useUser();
+  const { ws, unreadCounts } = useWebSocket();
 
   const wsRef = useRef<WebSocket | null>(null);
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
@@ -100,6 +101,12 @@ const Inbox = () => {
 
   const messages = data?.pages.flatMap((page) => page.messages).reverse() ?? [];
 
+  const lastMessageId = messages[messages.length - 1]?.id;
+
+  useEffect(() => {
+    if (lastMessageId) handleScrollToBottom();
+  }, [lastMessageId]);
+
   const handleSelectChat = (chat: UserConversation) => {
     setChats((prev) =>
       prev.map((c) =>
@@ -110,10 +117,75 @@ const Inbox = () => {
     );
 
     router.push(`?conversationId=${chat.conversationId}`);
+    ws?.send(
+      JSON.stringify({
+        type: "MARK_AS_SEEN",
+        conversationId: chat.conversationId,
+      }),
+    );
+  };
+
+  const handleScrollToBottom = () => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        scrollAnchorRef?.current?.scrollIntoView({ behavior: "smooth" });
+      }, 0);
+    });
   };
 
   const handleSendMessage = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!message.trim() || !selectedChat) {
+      return;
+    }
+
+    const payload = {
+      fromUserId: user?.id,
+      toUserId: selectedChat?.seller?.id,
+      conversationId: selectedChat?.conversationId,
+      messageBody: message,
+      senderType: "user",
+    };
+
+    ws?.send(JSON.stringify(payload));
+
+    // optimistic update — append the new message to the first (most recent) page
+    query.setQueryData<MessagesInfiniteData>(
+      ["messages", selectedChat.conversationId],
+      (old: any) => {
+        if (!old) return old;
+
+        const newMessage = {
+          content: payload.messageBody,
+          senderType: "user",
+          seen: false,
+          createdAt: new Date().toISOString(),
+        };
+
+        const [firstPage, ...restPages] = old.pages;
+
+        return {
+          ...old,
+          pages: [
+            { ...firstPage, messages: [newMessage, ...firstPage.messages] },
+            ...restPages,
+          ],
+        };
+      },
+    );
+
+    // updating sidebar's last-message preview
+    setChats((prev) =>
+      prev.map((c) =>
+        c.conversationId === selectedChat.conversationId
+          ? { ...c, lastMessage: payload.messageBody }
+          : c,
+      ),
+    );
+
+    setMessage("");
+    handleScrollToBottom();
   };
 
   return (

@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import WebSocket from "ws";
 
 const WebSocketContext = createContext<{
   ws: WebSocket | null;

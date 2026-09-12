@@ -128,9 +128,9 @@ export const createWebSockerServer = async (server: HttpServer) => {
           ],
         });
 
-        console.timeLog(`Message queued to kafka: ${conversationId}`);
+        console.log(`Message queued to kafka: ${conversationId}`);
       } catch (error) {
-        console.timeLog(`Error processing websocket message:`, error);
+        console.log(`Error processing websocket message:`, error);
       }
     });
 
@@ -153,5 +153,5 @@ export const createWebSockerServer = async (server: HttpServer) => {
     });
   });
 
-  console.timeLog(`Websocket server ready`);
+  console.log(`Websocket server ready`);
 };

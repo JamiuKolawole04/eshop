@@ -30,7 +30,7 @@ createWebSockerServer(server);
 
 // kafka consumer
 startConsumer().catch((err) => {
-  console.timeLog(`Fauled to start kafka consumer`, err);
+  console.log(`Fauled to start kafka consumer`, err);
 });
 
 server.on("error", console.error);

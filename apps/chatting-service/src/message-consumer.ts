@@ -25,7 +25,7 @@ export async function startConsumer() {
   await consumer.connect();
   await consumer.subscribe({ topic: TOPIC, fromBeginning: false });
 
-  console.timeLog(`Kafka consumer connected and subscribed to topic ${TOPIC}`);
+  console.log(`Kafka consumer connected and subscribed to topic ${TOPIC}`);
 
   await consumer.run({
     eachMessage: async ({ message }: EachMessagePayload) => {
@@ -40,7 +40,7 @@ export async function startConsumer() {
           flushTimer = setTimeout(flushBufferToDb, BATCH_INTERVAL_MS);
         }
       } catch (err) {
-        console.timeLog(`Failed to parse kafka message`, err);
+        console.log(`Failed to parse kafka message`, err);
       }
     },
   });
@@ -75,11 +75,9 @@ async function flushBufferToDb() {
       await incrementUnseenCount(receiverType, msg.conversationId);
     }
 
-    console.timeLog(
-      `Flushed ${prismaPayload.length} messages to DB and Redis.`,
-    );
+    console.log(`Flushed ${prismaPayload.length} messages to DB and Redis.`);
   } catch (err) {
-    console.timeLog(`Error inserting messages to DB:`, err);
+    console.log(`Error inserting messages to DB:`, err);
 
     buffer.unshift(...toInsert);
 
