@@ -285,10 +285,10 @@ const Inbox = () => {
                     </div>
                   )}
 
-                  {messages?.map((message) => (
+                  {messages?.map((message, index) => (
                     <div
                       className={`flex flex-col ${message?.senderType === "user" ? "items-end ml-auto" : "items-start"} max-w-[80%]`}
-                      key={message.id}
+                      key={index + 1}
                     >
                       <div
                         className={`${
