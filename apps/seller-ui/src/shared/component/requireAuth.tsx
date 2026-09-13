@@ -19,7 +19,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="animate-spin" size={30} />
+        <Loader2 className="text-white animate-spin" size={30} />
       </div>
     );
   }

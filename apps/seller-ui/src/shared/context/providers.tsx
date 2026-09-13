@@ -1,9 +1,11 @@
 "use client";
 
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
 import QueryProvider from "./query-provider";
+import { useSeller } from "@/hooks/use-seller";
+import { WebSocketProvider } from "./web-socket";
 
 interface Props {
   children: ReactNode;
@@ -12,9 +14,30 @@ interface Props {
 const Providers = ({ children }: Props) => {
   return (
     <QueryProvider>
-      {children}
+      <ProvidersWithWebSocket>{children}</ProvidersWithWebSocket>
       <Toaster position="top-center" />
     </QueryProvider>
+  );
+};
+
+const ProvidersWithWebSocket = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const { seller, isLoading } = useSeller();
+
+  if (isLoading) {
+    return null;
+  }
+  return (
+    <Fragment>
+      {seller && (
+        <WebSocketProvider seller={seller ?? null}>
+          {children}
+        </WebSocketProvider>
+      )}
+    </Fragment>
   );
 };
 

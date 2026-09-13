@@ -75,3 +75,26 @@ export type GetUserMessagesResponseType = {
   currentPage: number;
   hasMore: boolean;
 };
+
+export type GetSellerMessagesResponseType = {
+  success: boolean;
+  messages: {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    conversationId: string;
+    senderId: string;
+    senderType: string;
+    content: string | null;
+    attachments: string[];
+    status: string;
+  }[];
+  user: {
+    id: string | null;
+    name: string;
+    avatar: string | null;
+    isOnline: boolean;
+  };
+  currentPage: number;
+  hasMore: boolean;
+};
