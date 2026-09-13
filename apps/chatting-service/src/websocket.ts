@@ -40,7 +40,7 @@ export const createWebSockerServer = async (server: HttpServer) => {
           const isSeller = registeredUserId.startsWith("seller_");
           const redisKey = isSeller
             ? `online:seller:${registeredUserId.replace("seller_", "")}`
-            : `online:seller:${registeredUserId}`;
+            : `online:user:${registeredUserId}`;
 
           await redis.set(redisKey, "1");
           await redis.expire(redisKey, 300);

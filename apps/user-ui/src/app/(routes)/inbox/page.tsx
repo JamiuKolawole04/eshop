@@ -201,7 +201,9 @@ const Inbox = () => {
               {isLoading ? (
                 <div className="p-4 text-sm text-gray-500">Loading...</div>
               ) : chats.length === 0 ? (
-                <div className="p-4 text-sm text-gray-500">No conversation</div>
+                <div className="p-4 text-sm text-gray-500">
+                  No conversation yet.
+                </div>
               ) : (
                 chats?.map((chat) => {
                   const isActive =

@@ -356,7 +356,7 @@ export const fetchSellerMessages = async (
         },
       });
 
-      const redisKey = `online:user:user_${userParticipant.userId}`;
+      const redisKey = `online:user_${userParticipant.userId}`;
       const redisResult = await redis.get(redisKey);
       isOnline = !!redisResult;
     }

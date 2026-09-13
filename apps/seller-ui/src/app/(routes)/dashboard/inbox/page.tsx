@@ -54,6 +54,14 @@ const Inbox = () => {
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
   const conversationId = searchParams.get("conversationId");
 
+  const handleScrollToBottom = () => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        scrollAnchorRef?.current?.scrollIntoView({ behavior: "smooth" });
+      }, 0);
+    });
+  };
+
   const { data: conversations, isLoading } = useQuery({
     queryKey: ["conversations"],
     queryFn: fetchConversations,
@@ -106,6 +114,69 @@ const Inbox = () => {
     if (lastMessageId) handleScrollToBottom();
   }, [lastMessageId]);
 
+  useEffect(() => {
+    if (!ws) {
+      return;
+    }
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data === "NEW_MESSAGE") {
+        const newMessage = data?.payload;
+
+        if (newMessage.conversationId === conversationId) {
+          query.setQueryData<MessagesInfiniteData>(
+            ["messages", selectedChat?.conversationId],
+            (old: any) => {
+              if (!old) return old;
+
+              const newMessagePayload = {
+                content: newMessage.content,
+                senderType: newMessage.senderType,
+                seen: false,
+                createdAt: newMessage.createdAt || new Date().toISOString(),
+              };
+
+              const [firstPage, ...restPages] = old.pages;
+
+              return {
+                ...old,
+                pages: [
+                  {
+                    ...firstPage,
+                    messages: [newMessagePayload, ...firstPage.messages],
+                  },
+                  ...restPages,
+                ],
+              };
+            },
+          );
+          handleScrollToBottom();
+        }
+        // updating sidebar's last-message preview
+        setChats((prev) =>
+          prev.map((c) =>
+            c.conversationId === newMessage.conversationId
+              ? { ...c, lastMessage: newMessage.content }
+              : c,
+          ),
+        );
+      }
+
+      if (data.type === "UNSEEN_COUNT_UPDATE") {
+        const { conversationId, count } = data.payload;
+        setChats((prev) =>
+          prev.map((chat) =>
+            chat.conversationId === conversationId
+              ? { ...chat, unreadCount: count }
+              : chat,
+          ),
+        );
+      }
+    };
+  }, [ws, conversationId]);
+
   const handleSelectChat = (chat: SellerConversation) => {
     setChats((prev) =>
       prev.map((c) =>
@@ -116,26 +187,25 @@ const Inbox = () => {
     );
 
     router.push(`?conversationId=${chat.conversationId}`);
-    ws?.send(
-      JSON.stringify({
-        type: "MARK_AS_SEEN",
-        conversationId: chat.conversationId,
-      }),
-    );
-  };
-
-  const handleScrollToBottom = () => {
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        scrollAnchorRef?.current?.scrollIntoView({ behavior: "smooth" });
-      }, 0);
-    });
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(
+        JSON.stringify({
+          type: "MARK_AS_SEEN",
+          conversationId: chat.conversationId,
+        }),
+      );
+    }
   };
 
   const handleSendMessage = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!message.trim() || !selectedChat) {
+    if (
+      !message.trim() ||
+      !selectedChat ||
+      !ws ||
+      ws.readyState !== WebSocket.OPEN
+    ) {
       return;
     }
 
@@ -188,7 +258,7 @@ const Inbox = () => {
   };
 
   return (
-    <div className="w-full h-full font-Poppins">
+    <div className="w-full h-screen font-Poppins">
       <div className="flex h-full overflow-hidden">
         <div className="w-[320px] border-r border-r-gray-800 bg-[#0a0a0a]">
           <div className="p-4 border-b border-b-gray-800 text-lg font-semibold text-white">
@@ -199,7 +269,9 @@ const Inbox = () => {
             {isLoading ? (
               <div className="p-4 text-sm text-gray-400">Loading...</div>
             ) : chats.length === 0 ? (
-              <div className="p-4 text-sm text-gray-400">No conversation</div>
+              <div className="p-4 text-sm text-gray-400">
+                No conversations yet.
+              </div>
             ) : (
               chats?.map((chat) => {
                 const isActive =
@@ -209,8 +281,8 @@ const Inbox = () => {
                   <button
                     onClick={() => handleSelectChat(chat)}
                     key={chat?.conversationId}
-                    className={`w-full text-left px-4 py-3 transition hover:bg-gray-800 ${
-                      isActive ? "bg-gray-800" : ""
+                    className={`w-full text-left px-4 py-3 transition ${
+                      isActive ? "bg-blue-950" : "hover:bg-gray-800"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -234,10 +306,17 @@ const Inbox = () => {
                             <span className="w-2 h-2 rounded-full bg-green-500" />
                           )}
                         </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-gray-400 truncate max-w-[170px]">
+                            {getLastMessage(chat)}
+                          </p>
 
-                        <p className="text-xs text-gray-400 truncate max-w-[170px]">
-                          {getLastMessage(chat)}
-                        </p>
+                          {chat?.unreadCount > 0 && (
+                            <span className="ml-2 text-[10px] bg-blue-600 text-white">
+                              {chat?.unreadCount}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </button>
@@ -299,6 +378,7 @@ const Inbox = () => {
                         : "items-start"
                     } max-w-[80%]`}
                     key={index + 1}
+                    ref={messageContainerRef}
                   >
                     <div
                       className={`${
@@ -311,7 +391,7 @@ const Inbox = () => {
                     </div>
                     <div
                       className={`text-[11px] text-gray-500 mt-1 flex items-center gap-1 ${
-                        message.senderType === "user"
+                        message.senderType === "seller"
                           ? "mr-1 justify-end"
                           : "ml-1"
                       }`}
