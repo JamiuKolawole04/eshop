@@ -42,6 +42,8 @@ export const createWebSockerServer = async (server: HttpServer) => {
             ? `online:seller:${registeredUserId.replace("seller_", "")}`
             : `online:user:${registeredUserId}`;
 
+          console.log(`${redisKey} tracked successfully`);
+
           await redis.set(redisKey, "1");
           await redis.expire(redisKey, 300);
 
