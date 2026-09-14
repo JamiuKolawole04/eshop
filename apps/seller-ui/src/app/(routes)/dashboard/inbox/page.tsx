@@ -201,7 +201,6 @@ const Inbox = () => {
       !ws ||
       ws.readyState !== WebSocket.OPEN
     ) {
-      console.log(`not ready`);
       return;
     }
 

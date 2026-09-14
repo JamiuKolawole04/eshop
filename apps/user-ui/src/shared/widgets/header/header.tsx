@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Search, User, Heart, ShoppingCart } from "lucide-react";
 import { Fragment } from "react";
+import Image from "next/image";
 
 import HeaderBottom from "./headerBottom";
 import { useUser } from "@/hooks/use-user";
@@ -17,7 +18,12 @@ const Header = () => {
       <div className="w-[80%] py-5 m-auto flex items-center justify-between">
         <div>
           <Link href="/">
-            <span className="text-2xl font-semibold font-Poppins">Eshop</span>
+            <Image
+              src="https://ik.imagekit.io/jnven3dnh3/eshop-products/E-shop-logo.png"
+              alt="logo"
+              width={180}
+              height={180}
+            />
           </Link>
         </div>
 
