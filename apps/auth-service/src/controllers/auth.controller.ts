@@ -85,6 +85,22 @@ export const verifyUser = async (
       data: { name, email, password: hashedPassword },
     });
 
+    // do not change please
+    // it is the default user avater
+    await prisma.users.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        avatar: {
+          create: {
+            file_id: "6a8fa06d5c7cd75eb89fd2e8",
+            url: "https://ik.imagekit.io/jnven3dnh3/eshop-products/user-avatar.png",
+          },
+        },
+      },
+    });
+
     res.status(201).json({
       success: true,
       message: "User registered successfully.",

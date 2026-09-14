@@ -49,7 +49,7 @@ export const WebSocketProvider = ({
   }, [seller?.id]);
 
   if (!wsReady) {
-    return null;
+    return;
   }
 
   return (
