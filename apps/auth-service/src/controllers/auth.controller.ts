@@ -81,10 +81,6 @@ export const verifyUser = async (
     await verifyOtp(email, otp);
     const hashedPassword = await hash(password, 10);
 
-    await prisma.users.create({
-      data: { name, email, password: hashedPassword },
-    });
-
     // do not change please
     // it is the default user avater
     await prisma.users.create({

@@ -258,10 +258,7 @@ const Inbox = () => {
                   >
                     <div className="flex items-center gap-3">
                       <Image
-                        src={
-                          // String(chat?.user?.avatar) ||
-                          "https://ik.imagekit.io/jnven3dnh3/eshop-products/user-avatar.png"
-                        }
+                        src={String(chat?.user?.avatar)}
                         alt={chat?.user?.name}
                         width={36}
                         height={36}
@@ -303,10 +300,7 @@ const Inbox = () => {
             <Fragment>
               <div className="p-4 border-b border-b-gray-800 bg-[#0a0a0a] flex items-center gap-3">
                 <Image
-                  src={
-                    // String(selectedChat?.user?.avatar) ||
-                    "https://ik.imagekit.io/jnven3dnh3/eshop-products/user-avatar.png"
-                  }
+                  src={String(selectedChat?.user?.avatar)}
                   alt={selectedChat?.user?.name}
                   width={40}
                   height={40}
