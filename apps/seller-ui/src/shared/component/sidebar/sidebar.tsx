@@ -52,7 +52,7 @@ export const SidebarWrapper = () => {
         overflowY: "scroll",
         scrollbarWidth: "none",
       }}
-      className="sidebar-wrapper"
+      className="sidebar-wrapper font-Poppins"
     >
       <Sidebar.Header>
         <Box>

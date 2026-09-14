@@ -25,18 +25,11 @@ const ProvidersWithWebSocket = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { seller, isLoading } = useSeller();
+  const { seller } = useSeller();
 
-  if (isLoading) {
-    return null;
-  }
   return (
     <Fragment>
-      {seller && (
-        <WebSocketProvider seller={seller ?? null}>
-          {children}
-        </WebSocketProvider>
-      )}
+      <WebSocketProvider seller={seller ?? null}>{children}</WebSocketProvider>
     </Fragment>
   );
 };

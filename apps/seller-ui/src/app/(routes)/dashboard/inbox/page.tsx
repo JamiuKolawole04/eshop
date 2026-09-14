@@ -122,12 +122,12 @@ const Inbox = () => {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      if (data === "NEW_MESSAGE") {
+      if (data.type === "NEW_MESSAGE") {
         const newMessage = data?.payload;
 
         if (newMessage.conversationId === conversationId) {
           query.setQueryData<MessagesInfiniteData>(
-            ["messages", selectedChat?.conversationId],
+            ["messages", conversationId],
             (old: any) => {
               if (!old) return old;
 
@@ -175,7 +175,7 @@ const Inbox = () => {
         );
       }
     };
-  }, [ws, conversationId]);
+  }, [ws, query, conversationId]);
 
   const handleSelectChat = (chat: SellerConversation) => {
     setChats((prev) =>
@@ -206,6 +206,7 @@ const Inbox = () => {
       !ws ||
       ws.readyState !== WebSocket.OPEN
     ) {
+      console.log(`not ready`);
       return;
     }
 
@@ -218,31 +219,6 @@ const Inbox = () => {
     };
 
     ws?.send(JSON.stringify(payload));
-
-    // optimistic update — append the new message to the first (most recent) page
-    query.setQueryData<MessagesInfiniteData>(
-      ["messages", selectedChat.conversationId],
-      (old: any) => {
-        if (!old) return old;
-
-        const newMessage = {
-          content: payload.messageBody,
-          senderType: "seller",
-          seen: false,
-          createdAt: new Date().toISOString(),
-        };
-
-        const [firstPage, ...restPages] = old.pages;
-
-        return {
-          ...old,
-          pages: [
-            { ...firstPage, messages: [newMessage, ...firstPage.messages] },
-            ...restPages,
-          ],
-        };
-      },
-    );
 
     // updating sidebar's last-message preview
     setChats((prev) =>
@@ -312,7 +288,7 @@ const Inbox = () => {
                           </p>
 
                           {chat?.unreadCount > 0 && (
-                            <span className="ml-2 text-[10px] bg-blue-600 text-white">
+                            <span className="flex items-center justify-center w-4 h-4 rounded-full ml-2 text-[10px] bg-blue-600 text-white">
                               {chat?.unreadCount}
                             </span>
                           )}
@@ -382,21 +358,21 @@ const Inbox = () => {
                   >
                     <div
                       className={`${
-                        message.senderType === "seller"
+                        message?.senderType === "seller"
                           ? "bg-blue-600 text-white"
                           : "bg-gray-800 text-gray-100"
                       } px-4 py-2 rounded-lg shadow-sm w-fit`}
                     >
-                      {message.content}
+                      {message?.content}
                     </div>
                     <div
                       className={`text-[11px] text-gray-500 mt-1 flex items-center gap-1 ${
-                        message.senderType === "seller"
+                        message?.senderType === "seller"
                           ? "mr-1 justify-end"
                           : "ml-1"
                       }`}
                     >
-                      {new Date(message.createdAt).toLocaleTimeString([], {
+                      {new Date(message?.createdAt).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}

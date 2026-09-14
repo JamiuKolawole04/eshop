@@ -107,6 +107,69 @@ const Inbox = () => {
     if (lastMessageId) handleScrollToBottom();
   }, [lastMessageId]);
 
+  useEffect(() => {
+    if (!ws) {
+      return;
+    }
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === "NEW_MESSAGE") {
+        const newMessage = data?.payload;
+
+        if (newMessage.conversationId === conversationId) {
+          query.setQueryData<MessagesInfiniteData>(
+            ["messages", conversationId],
+            (old: any) => {
+              if (!old) return old;
+
+              const newMessagePayload = {
+                content: newMessage.content,
+                senderType: newMessage.senderType,
+                seen: false,
+                createdAt: newMessage.createdAt || new Date().toISOString(),
+              };
+
+              const [firstPage, ...restPages] = old.pages;
+
+              return {
+                ...old,
+                pages: [
+                  {
+                    ...firstPage,
+                    messages: [newMessagePayload, ...firstPage.messages],
+                  },
+                  ...restPages,
+                ],
+              };
+            },
+          );
+          handleScrollToBottom();
+        }
+        // updating sidebar's last-message preview
+        setChats((prev) =>
+          prev.map((c) =>
+            c.conversationId === newMessage.conversationId
+              ? { ...c, lastMessage: newMessage.content }
+              : c,
+          ),
+        );
+      }
+
+      if (data.type === "UNSEEN_COUNT_UPDATE") {
+        const { conversationId, count } = data.payload;
+        setChats((prev) =>
+          prev.map((chat) =>
+            chat.conversationId === conversationId
+              ? { ...chat, unreadCount: count }
+              : chat,
+          ),
+        );
+      }
+    };
+  }, [ws, query, conversationId]);
+
   const handleSelectChat = (chat: UserConversation) => {
     setChats((prev) =>
       prev.map((c) =>
@@ -149,31 +212,6 @@ const Inbox = () => {
     };
 
     ws?.send(JSON.stringify(payload));
-
-    // optimistic update — append the new message to the first (most recent) page
-    query.setQueryData<MessagesInfiniteData>(
-      ["messages", selectedChat.conversationId],
-      (old: any) => {
-        if (!old) return old;
-
-        const newMessage = {
-          content: payload.messageBody,
-          senderType: "user",
-          seen: false,
-          createdAt: new Date().toISOString(),
-        };
-
-        const [firstPage, ...restPages] = old.pages;
-
-        return {
-          ...old,
-          pages: [
-            { ...firstPage, messages: [newMessage, ...firstPage.messages] },
-            ...restPages,
-          ],
-        };
-      },
-    );
 
     // updating sidebar's last-message preview
     setChats((prev) =>
