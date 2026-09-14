@@ -4,8 +4,6 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import {
-  Grid2x2,
-  LayoutGrid,
   LayoutDashboard,
   ListOrdered,
   SquarePlus,
@@ -19,7 +17,6 @@ import {
   TicketPercent,
   LogOutIcon,
 } from "lucide-react";
-import { FiGrid } from "react-icons/fi";
 
 import { useSeller } from "@/hooks/use-seller";
 import { useSidebar } from "@/hooks/use-sidebar";
@@ -27,6 +24,7 @@ import { Box } from "../box";
 import { Sidebar } from "./sidebar.styles";
 import { SidebarItem } from "./sidebar.item";
 import { SidebarMenu } from "./sidebar.menu";
+import { DashbaordLogo } from "@/assets/svgs/dashbaord/dashboardLogo";
 
 export const SidebarWrapper = () => {
   const pathname = usePathname();
@@ -57,11 +55,7 @@ export const SidebarWrapper = () => {
       <Sidebar.Header>
         <Box>
           <Link href={"/"} className="flex justify-center text-center gap-2">
-            <Grid2x2 size={20} />
-
-            <LayoutGrid size={24} />
-
-            <FiGrid size={24} />
+            <DashbaordLogo className="w-6 h-6" />
 
             <Box>
               <h3 className="font-medium text-[#ecedee]">

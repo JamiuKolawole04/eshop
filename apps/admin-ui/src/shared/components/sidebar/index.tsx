@@ -16,6 +16,7 @@ import {
   Store,
   Users,
 } from "lucide-react";
+import { useEffect } from "react";
 
 import { useAdmin } from "@/hooks/use-admin";
 import { useSidebar } from "@/hooks/use-sidebar";
@@ -24,7 +25,6 @@ import { Sidebar } from "./sidebar.styles";
 import { DashbaordLogo } from "@/app/assets/svgs/dashbaord/dashboardLogo";
 import { SidebarItem } from "./sidebar.item";
 import { SidebarMenu } from "./sidebar.menu";
-import { useEffect } from "react";
 
 export const SideBarWrapper = () => {
   const pathname = usePathname();
