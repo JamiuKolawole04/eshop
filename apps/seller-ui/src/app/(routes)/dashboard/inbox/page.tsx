@@ -37,10 +37,9 @@ const Inbox = () => {
   const query = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { seller, isLoading: isUserLoading } = useSeller();
-  const { ws, unreadCounts } = useWebSocket();
+  const { seller } = useSeller();
+  const { ws } = useWebSocket();
 
-  const wsRef = useRef<WebSocket | null>(null);
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
 
@@ -49,9 +48,6 @@ const Inbox = () => {
     null,
   );
   const [message, setMessage] = useState("");
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
   const conversationId = searchParams.get("conversationId");
 
   const handleScrollToBottom = () => {
@@ -89,14 +85,13 @@ const Inbox = () => {
     const res = await axiosInstance.get<GetSellerMessagesResponseType>(
       `/api/chatting/conversations/${conversationId}/messages/seller`,
       {
-        // ...isProtected,
         params: { page: pageParam },
       },
     );
     return res.data;
   };
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["messages", conversationId],
       queryFn: fetchMessages,
@@ -282,14 +277,15 @@ const Inbox = () => {
                             <span className="w-2 h-2 rounded-full bg-green-500" />
                           )}
                         </div>
+
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-gray-400 truncate max-w-[170px]">
                             {getLastMessage(chat)}
                           </p>
 
                           {chat?.unreadCount > 0 && (
-                            <span className="flex items-center justify-center w-4 h-4 rounded-full ml-2 text-[10px] bg-blue-600 text-white">
-                              {chat?.unreadCount}
+                            <span className="flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] bg-blue-600 text-white">
+                              {chat.unreadCount > 9 ? "9+" : chat.unreadCount}
                             </span>
                           )}
                         </div>

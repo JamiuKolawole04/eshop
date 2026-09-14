@@ -24,7 +24,6 @@ import { ChatInput } from "@/shared/components/chats/chat-input";
 import { useWebSocket } from "@/shared/context/web-socket";
 
 type MessagesInfiniteData = InfiniteData<GetUserMessagesResponseType>;
-// type Message = GetUserMessagesResponseType["messages"][number];
 
 const fetchConversations = async () => {
   const response = await axiosInstance.get<GetUserConversationResponseType>(
@@ -38,10 +37,9 @@ const Inbox = () => {
   const query = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading: isUserLoading } = useUser();
-  const { ws, unreadCounts } = useWebSocket();
+  const { user } = useUser();
+  const { ws } = useWebSocket();
 
-  const wsRef = useRef<WebSocket | null>(null);
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
 
@@ -50,9 +48,6 @@ const Inbox = () => {
     null,
   );
   const [message, setMessage] = useState("");
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
   const conversationId = searchParams.get("conversationId");
 
   const { data: conversations, isLoading } = useQuery({
@@ -82,14 +77,13 @@ const Inbox = () => {
     const res = await axiosInstance.get<GetUserMessagesResponseType>(
       `/api/chatting/conversations/${conversationId}/messages`,
       {
-        // ...isProtected,
         params: { page: pageParam },
       },
     );
     return res.data;
   };
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["messages", conversationId],
       queryFn: fetchMessages,
@@ -272,9 +266,17 @@ const Inbox = () => {
                             )}
                           </div>
 
-                          <p className="text-xs text-gray-500 truncate max-w-[170px]">
-                            {getLastMessage(chat)}
-                          </p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-gray-400 truncate max-w-[170px]">
+                              {getLastMessage(chat)}
+                            </p>
+
+                            {chat?.unreadCount > 0 && (
+                              <span className="flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] bg-blue-600 text-white">
+                                {chat.unreadCount > 9 ? "9+" : chat.unreadCount}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </button>
