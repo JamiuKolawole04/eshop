@@ -39,6 +39,9 @@ export const isAuthenticated = (expectedRole: AuthRole) => {
       if (decoded.role === "user") {
         account = await prisma.users.findUnique({
           where: { id: decoded.id },
+          include: {
+            avatar: true,
+          },
         });
         req.user = account;
       } else if (decoded.role === "seller") {
@@ -50,6 +53,9 @@ export const isAuthenticated = (expectedRole: AuthRole) => {
       } else if (decoded.role === "admin") {
         account = await prisma.users.findUnique({
           where: { id: decoded.id },
+          include: {
+            avatar: true,
+          },
         });
         req.user = account;
       }

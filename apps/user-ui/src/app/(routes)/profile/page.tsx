@@ -173,10 +173,7 @@ const Page = () => {
               <div className="space-y-2 text-sm text-gray-700">
                 <div className="flex items-center gap-3">
                   <Image
-                    src={
-                      user?.avatar?.url ||
-                      "https://ik.imagekit.io/jnven3dnh3/eshop-products/user-avatar.png"
-                    }
+                    src={user?.avatar?.url}
                     alt=""
                     width={60}
                     height={60}
