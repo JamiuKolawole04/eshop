@@ -4,7 +4,7 @@ import { kafka } from "@packages/kafka";
 
 type EventData = {
   shopId: string;
-  productId: string;
+  productId?: string;
   userId: string;
   action: string;
   country?: string;

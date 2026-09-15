@@ -28,6 +28,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+app.use("/api/sellers", proxy("http://localhost:6007"));
 app.use("/api/chatting", proxy("http://localhost:6006"));
 app.use("/api/admin", proxy("http://localhost:6005"));
 app.use("/api/orders", proxy("http://localhost:6004"));
