@@ -94,7 +94,9 @@ model Shops {
   bio           String?
   category      String
   avatar        String @default("https://ik.imagekit.io/jnven3dnh3/eshop-products/shop-avater.png")
-  coverBanner   String?
+  avatarFileId      String        @default("6a8078ae5c7cd75eb81f31dc")
+  coverBanner       String        @default("https://ik.imagekit.io/jnven3dnh3/eshop-products/cover-banner.png")
+  coverBannerFileId String        @default("6a8f875d5c7cd75eb81ddeaa")
   address       String?
   opening_hours String?
   website       String?

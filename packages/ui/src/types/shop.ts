@@ -4,7 +4,7 @@ export type ShopType = {
   bio: string | null;
   category: string;
   avatar: string;
-  coverBanner: string | null;
+  coverBanner: string;
   address: string | null;
   opening_hours: string | null;
   website: string | null;
