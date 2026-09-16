@@ -13,16 +13,16 @@ export type AddressType = {
 };
 
 export type CreateUserAddressResponseType = {
-  success: true;
+  success: boolean;
   address: AddressType;
 };
 
 export type GetUserAddressResponseType = {
-  success: true;
+  success: boolean;
   addresses: Array<AddressType>;
 };
 
 export type DeleteUserAddressResponseType = {
-  success: true;
+  success: boolean;
   message: string;
 };

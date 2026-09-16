@@ -8,7 +8,7 @@ export type ShopType = {
   address: string | null;
   opening_hours: string | null;
   website: string | null;
-  socialLinks: unknown[];
+  socialLinks: { url: string; type: string }[];
   ratings: number;
   isDeleted: boolean | null;
   deletedAt: string | null;
@@ -31,3 +31,13 @@ export type GetFilteredShopsResponseType = {
 type TopShopsType = ShopType & { totalSales: number };
 
 export type GetTopShopsResponseType = { shops: Array<TopShopsType> };
+
+export type FollowShopResponseType = {
+  success: boolean;
+  message: string;
+};
+
+export type UnFollowShopResponseType = {
+  success: boolean;
+  message: string;
+};

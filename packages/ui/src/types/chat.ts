@@ -31,7 +31,7 @@ export type UserConversation = {
 };
 
 export type GetUserConversationResponseType = {
-  success: true;
+  success: boolean;
   conversations: UserConversation[];
 };
 
@@ -49,7 +49,7 @@ export type SellerConversation = {
 };
 
 export type GetSellerConversationResponseType = {
-  success: true;
+  success: boolean;
   conversations: SellerConversation[];
 };
 

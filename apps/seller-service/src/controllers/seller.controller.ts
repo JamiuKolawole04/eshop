@@ -214,3 +214,34 @@ export const unfollowShop = async (
     next(error);
   }
 };
+
+export const isFollowingShop = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id as string;
+    const { shopId } = req.params;
+
+    if (!shopId) {
+      throw new ValidationError("shopId is required");
+    }
+
+    const existing = await prisma.followers.findUnique({
+      where: {
+        userId_shopId: {
+          userId,
+          shopId,
+        },
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      isFollowing: !!existing,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

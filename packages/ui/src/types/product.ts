@@ -40,12 +40,12 @@ export type ProductWithRelationsType = ProductType & {
 };
 
 export type CreateProductResponseType = {
-  success: true;
+  success: boolean;
   newProduct: ProductType;
 };
 
 export type GetAllProductsResponseType = {
-  success: true;
+  success: boolean;
   products: ProductWithRelationsType[];
   top10By: "latest" | "topSales";
   top10Products: ProductType[];
@@ -55,7 +55,7 @@ export type GetAllProductsResponseType = {
 };
 
 export type GetProductBySlugResponseType = {
-  success: true;
+  success: boolean;
   product: ProductWithRelationsType;
 };
 
@@ -77,3 +77,16 @@ export type GetEventOffersResponseType = {
   currentPage: number;
   totalPages: number;
 };
+
+export type GetSellerProductsByUserResponseType = {
+  success: boolean;
+  products: Array<ProductWithRelationsType>;
+  total: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
+
+export type GetSellerEventsByUserResponseType =
+  GetSellerProductsByUserResponseType;

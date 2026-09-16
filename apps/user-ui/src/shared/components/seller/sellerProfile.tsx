@@ -22,7 +22,13 @@ import { sendKafkaEvents } from "@/actions/track-user";
 import { useUser } from "@/hooks/use-user";
 import { useLocationTracking } from "@/hooks/use-location-tracking";
 import { useDeviceTracking } from "@/hooks/use-device-tracking";
-import { ShopType } from "@packages/ui";
+import {
+  FollowShopResponseType,
+  GetSellerEventsByUserResponseType,
+  GetSellerProductsByUserResponseType,
+  ShopType,
+  UnFollowShopResponseType,
+} from "@packages/ui";
 
 const TABS = ["Products", "Offers", "Reviews"];
 
@@ -45,7 +51,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
   const { data: products, isLoading } = useQuery({
     queryKey: ["seller-products"],
     queryFn: async () => {
-      const res = await axiosInstance.get(
+      const res = await axiosInstance.get<GetSellerProductsByUserResponseType>(
         `/api/sellers/${shop?.id}/products?page=1&limit=10`,
       );
       return res.data.products;
@@ -72,7 +78,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
   const { data: events, isLoading: isEventsLoading } = useQuery({
     queryKey: ["seller-events"],
     queryFn: async () => {
-      const res = await axiosInstance.get(
+      const res = await axiosInstance.get<GetSellerEventsByUserResponseType>(
         `/api/sellers/${shop?.id}/events?page=1&limit=10`,
       );
       return res.data.products;
@@ -83,13 +89,19 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
   const toggleFollowMutation = useMutation({
     mutationFn: async () => {
       if (isFollowing) {
-        await axiosInstance.post("/api/sellers/unfollow-shop", {
-          shopId: shop?.id,
-        });
+        await axiosInstance.post<UnFollowShopResponseType>(
+          "/api/sellers/unfollow-shop",
+          {
+            shopId: shop?.id,
+          },
+        );
       } else {
-        await axiosInstance.post("/api/sellers/follow-shop", {
-          shopId: shop?.id,
-        });
+        await axiosInstance.post<FollowShopResponseType>(
+          "/api/sellers/follow-shop",
+          {
+            shopId: shop?.id,
+          },
+        );
       }
     },
     onSuccess: () => {
@@ -223,7 +235,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
             <div className="mt-3">
               <h3 className="text-slate-700 text-lg font-medium">Follow Us:</h3>
               <div className="flex gap-3 mt-2">
-                {shop?.socialLinks?.map((link: any, index: number) => (
+                {shop?.socialLinks?.map((link, index: number) => (
                   <a
                     key={index}
                     href={link.url}
