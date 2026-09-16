@@ -2,6 +2,7 @@ import express, { Router } from "express";
 
 import {
   followShop,
+  getSellerDetails,
   getSellerEvents,
   getSellerProducts,
   isFollowingShop,
@@ -21,5 +22,6 @@ router.get(
   isAuthenticated("user"),
   isFollowingShop,
 );
+router.get("/sellers/:id", getSellerDetails);
 
 export default router;

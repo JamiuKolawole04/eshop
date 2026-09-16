@@ -245,3 +245,34 @@ export const isFollowingShop = async (
     next(error);
   }
 };
+
+export const getSellerDetails = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+
+    const [shop, followersCount] = await Promise.all([
+      prisma.shops.findUnique({
+        where: { id },
+      }),
+      prisma.followers.count({
+        where: { shopId: id },
+      }),
+    ]);
+
+    if (!shop) {
+      throw new NotFoundError("Shop not found");
+    }
+
+    res.status(200).json({
+      success: true,
+      shop,
+      followersCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

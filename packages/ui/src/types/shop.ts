@@ -41,3 +41,8 @@ export type UnFollowShopResponseType = {
   success: boolean;
   message: string;
 };
+
+export type FollowingShopStatusResponseType = {
+  success: boolean;
+  isFollowing: boolean;
+};

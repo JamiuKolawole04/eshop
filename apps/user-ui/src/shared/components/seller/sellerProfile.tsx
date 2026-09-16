@@ -23,6 +23,7 @@ import { useUser } from "@/hooks/use-user";
 import { useLocationTracking } from "@/hooks/use-location-tracking";
 import { useDeviceTracking } from "@/hooks/use-device-tracking";
 import {
+  FollowingShopStatusResponseType,
   FollowShopResponseType,
   GetSellerEventsByUserResponseType,
   GetSellerProductsByUserResponseType,
@@ -63,7 +64,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
     const fetchFollowStatus = async () => {
       if (!shop?.id) return;
       try {
-        const res = await axiosInstance.get(
+        const res = await axiosInstance.get<FollowingShopStatusResponseType>(
           `/api/sellers/is-following/${shop?.id}`,
         );
         setIsFollowing(res.data.isFollowing ?? null);
