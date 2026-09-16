@@ -54,3 +54,56 @@ export const getSellerProducts = async (
     next(error);
   }
 };
+
+export const getSellerEvents = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { shopId } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+
+    const baseFilter = {
+      shopId,
+      AND: [
+        { starting_date: { not: null } },
+        { starting_date: { isSet: true } },
+        { ending_date: { not: null } },
+        { ending_date: { isSet: true } },
+      ],
+    };
+
+    const [products, total] = await Promise.all([
+      prisma.products.findMany({
+        skip,
+        take: limit,
+        include: {
+          images: true,
+          shop: true,
+        },
+        where: baseFilter,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.products.count({
+        where: baseFilter,
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).json({
+      success: true,
+      products,
+      total,
+      currentPage: page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

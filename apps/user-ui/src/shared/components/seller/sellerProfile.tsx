@@ -46,7 +46,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
     queryKey: ["seller-products"],
     queryFn: async () => {
       const res = await axiosInstance.get(
-        `/seller/api/get-seller-products/${shop?.id}?page=1&limit=10`,
+        `/api/sellers/${shop?.id}/products?page=1&limit=10`,
       );
       return res.data.products;
     },
@@ -58,7 +58,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
       if (!shop?.id) return;
       try {
         const res = await axiosInstance.get(
-          `/seller/api/is-following/${shop?.id}`,
+          `/api/sellers/is-following/${shop?.id}`,
         );
         setIsFollowing(res.data.isFollowing ?? null);
       } catch (error) {
@@ -73,7 +73,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
     queryKey: ["seller-events"],
     queryFn: async () => {
       const res = await axiosInstance.get(
-        `/seller/api/get-seller-events/${shop?.id}?page=1&limit=10`,
+        `/api/sellers/${shop?.id}/events?page=1&limit=10`,
       );
       return res.data.products;
     },
@@ -83,11 +83,11 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
   const toggleFollowMutation = useMutation({
     mutationFn: async () => {
       if (isFollowing) {
-        await axiosInstance.post("/seller/api/unfollow-shop", {
+        await axiosInstance.post("/api/sellers/unfollow-shop", {
           shopId: shop?.id,
         });
       } else {
-        await axiosInstance.post("/seller/api/follow-shop", {
+        await axiosInstance.post("/api/seller/follow-shop", {
           shopId: shop?.id,
         });
       }
