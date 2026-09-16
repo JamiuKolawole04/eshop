@@ -4,7 +4,14 @@ import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import Stripe from "stripe";
 
 import {
+  clearCurrentRefreshToken,
+  getCurrentRefreshToken,
+  setCurrentRefreshToken,
+} from "@packages/redis";
+
+import {
   checkOtpRestrictions,
+  clearAuthCookies,
   handleForgotPassword,
   sendOtp,
   trackOtpRequests,
@@ -150,6 +157,8 @@ export const login = async (
     setCookie(res, "access_token", accessToken);
     setCookie(res, "refresh_token", refreshToken);
 
+    await setCurrentRefreshToken("user", user.id, refreshToken);
+
     res.status(200).json({
       message: "Login successful",
       user: {
@@ -187,6 +196,17 @@ export const refreshToken = async (
       throw new JsonWebTokenError("Forbidden! Invalid refresh token.");
     }
 
+    const storedToken = await getCurrentRefreshToken(decoded.role, decoded.id);
+
+    if (!storedToken || storedToken !== refreshToken) {
+      // stale/reused token — force full logout on this account
+      await clearCurrentRefreshToken(decoded.role, decoded.id);
+      clearAuthCookies(res, decoded.role);
+      throw new AuthError(
+        "Forbidden! Refresh token reuse detected. Please log in again.",
+      );
+    }
+
     let account;
 
     if (decoded.role === "user") {
@@ -213,13 +233,24 @@ export const refreshToken = async (
       { expiresIn: "15m" },
     );
 
+    const newRefreshToken = jwt.sign(
+      { id: decoded.id, role: decoded.role },
+      String(process.env.REFRESH_TOKEN_SECRET),
+      { expiresIn: "7d" },
+    );
+
     if (decoded.role === "user") {
       setCookie(res, "access_token", newAccessToken);
+      setCookie(res, "refresh_token", newRefreshToken);
     } else if (decoded.role === "seller") {
       setCookie(res, "seller_access_token", newAccessToken);
+      setCookie(res, "seller_refresh_token", newRefreshToken);
     } else if (decoded.role === "admin") {
       setCookie(res, "access_token", newAccessToken);
+      setCookie(res, "refresh_token", newRefreshToken);
     }
+
+    await setCurrentRefreshToken(decoded.role, decoded.id, newRefreshToken);
 
     req.role = decoded.role;
 
@@ -288,8 +319,18 @@ export const resetUserPassword = async (
   }
 };
 
-export const userLogout = (req: Request, res: Response, next: NextFunction) => {
+export const userLogout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
+    const userId = req.user?.id;
+
+    if (userId) {
+      await clearCurrentRefreshToken("user", userId);
+    }
+
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
 
@@ -507,6 +548,8 @@ export const sellerLogin = async (
     setCookie(res, "seller_access_token", accessToken);
     setCookie(res, "seller_refresh_token", refreshToken);
 
+    await setCurrentRefreshToken("seller", seller.id, refreshToken);
+
     res.status(200).json({
       message: "Login successful",
       user: {
@@ -517,6 +560,30 @@ export const sellerLogin = async (
     });
   } catch (error) {
     return next(error);
+  }
+};
+
+export const sellerLogout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sellerId = req.seller?.id;
+
+    if (sellerId) {
+      await clearCurrentRefreshToken("seller", sellerId);
+    }
+
+    res.clearCookie("seller_access_token");
+    res.clearCookie("seller_refresh_token");
+
+    res.status(200).json({
+      success: true,
+      message: "seller logged out successfully",
+    });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -595,6 +662,8 @@ export const loginAdmin = async (
     setCookie(res, "refresh_token", refreshToken);
     setCookie(res, "access_token", accessToken);
 
+    await setCurrentRefreshToken("admin", user.id, refreshToken);
+
     res.status(200).json({
       message: "Login successful!",
       user: { id: user.id, email: user.email, name: user.name },
@@ -604,12 +673,17 @@ export const loginAdmin = async (
   }
 };
 
-export const adminLogout = (
+export const adminLogout = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
+    const adminId = req.user?.id;
+
+    if (adminId) {
+      await clearCurrentRefreshToken("admin", adminId);
+    }
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
 

@@ -22,6 +22,6 @@ router.get(
   isAuthenticated("user"),
   isFollowingShop,
 );
-router.get("/sellers/:id", getSellerDetails);
+router.get("/:id", getSellerDetails);
 
 export default router;

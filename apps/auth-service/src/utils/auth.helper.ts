@@ -169,3 +169,16 @@ export const verifyForgotPasswordOtp = async (
     next(error);
   }
 };
+
+export const clearAuthCookies = (
+  res: Response,
+  role: "user" | "seller" | "admin",
+) => {
+  if (role === "seller") {
+    res.clearCookie("seller_access_token");
+    res.clearCookie("seller_refresh_token");
+  } else {
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+  }
+};

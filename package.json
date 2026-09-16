@@ -15,7 +15,8 @@
     "order-service": "npx nx serve order-service --outputStyle=stream",
     "admin-ui": "npx nx dev admin-ui -- --port 3002",
     "admin-service": "npx nx serve admin-service --outputStyle=stream",
-    "chatting-service": "npx nx serve chatting-service --outputStyle=stream"
+    "chatting-service": "npx nx serve chatting-service --outputStyle=stream",
+    "seller-service": "npx nx serve seller-service --outputStyle=stream"
   },
   "private": true,
   "dependencies": {

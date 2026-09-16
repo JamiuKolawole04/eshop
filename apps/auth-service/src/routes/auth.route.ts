@@ -11,6 +11,7 @@ import {
   registerSeller,
   resetUserPassword,
   sellerLogin,
+  sellerLogout,
   userForgotPassword,
   userLogout,
   userRegistration,
@@ -41,9 +42,10 @@ router.get(
   isSeller,
   getSeller,
 );
+router.post("/auth/sellers/logout", isAuthenticated("user"), sellerLogout);
 
 router.post("/auth/admin/login", loginAdmin);
-router.post("/auth/admin/logout", isAuthenticated("user"), adminLogout);
+router.post("/auth/admin/logout", isAuthenticated("admin"), adminLogout);
 
 router.post("/shop", createShop);
 router.post("/stripe", createtripeConnectLink);
