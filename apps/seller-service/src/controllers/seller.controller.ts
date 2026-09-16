@@ -1,5 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "@packages/error-handler";
 import { prisma } from "@packages/prisma";
 
 export const getSellerProducts = async (
@@ -102,6 +107,108 @@ export const getSellerEvents = async (
       totalPages,
       hasNextPage: page < totalPages,
       hasPreviousPage: page > 1,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const followShop = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id as string;
+    const { shopId } = req.body;
+
+    if (!shopId) {
+      throw new ValidationError("shopId is required");
+    }
+
+    const existing = await prisma.followers.findUnique({
+      where: {
+        userId_shopId: {
+          userId,
+          shopId,
+        },
+      },
+    });
+
+    if (existing) {
+      throw new ConflictError("Already following this shop");
+    }
+
+    await prisma.$transaction([
+      prisma.followers.create({
+        data: {
+          userId,
+          shopId,
+        },
+      }),
+      prisma.users.update({
+        where: { id: userId },
+        data: {
+          following: {
+            push: shopId,
+          },
+        },
+      }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "Shop followed successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const unfollowShop = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id as string;
+    const { shopId } = req.body;
+
+    if (!shopId) {
+      throw new ValidationError("shopId is required");
+    }
+
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { following: true },
+    });
+
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    await prisma.$transaction([
+      prisma.followers.delete({
+        where: {
+          userId_shopId: {
+            userId,
+            shopId,
+          },
+        },
+      }),
+      prisma.users.update({
+        where: { id: userId },
+        data: {
+          following: {
+            set: user.following.filter((id) => id !== shopId),
+          },
+        },
+      }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "Shop unfollowed successfully",
     });
   } catch (error) {
     next(error);

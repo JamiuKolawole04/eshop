@@ -87,7 +87,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
           shopId: shop?.id,
         });
       } else {
-        await axiosInstance.post("/api/seller/follow-shop", {
+        await axiosInstance.post("/api/sellers/follow-shop", {
           shopId: shop?.id,
         });
       }
