@@ -53,7 +53,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
     queryKey: ["seller-products"],
     queryFn: async () => {
       const res = await axiosInstance.get<GetSellerProductsByUserResponseType>(
-        `/api/sellers/${shop?.id}/products?page=1&limit=10`,
+        `/api/sellers/shops/${shop?.id}/products?page=1&limit=10`,
       );
       return res.data.products;
     },
@@ -80,7 +80,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
     queryKey: ["seller-events"],
     queryFn: async () => {
       const res = await axiosInstance.get<GetSellerEventsByUserResponseType>(
-        `/api/sellers/${shop?.id}/events?page=1&limit=10`,
+        `/api/sellers/shops/${shop?.id}/events?page=1&limit=10`,
       );
       return res.data.products;
     },

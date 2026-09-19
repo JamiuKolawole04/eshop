@@ -3,12 +3,13 @@
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
+import React, { Fragment, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 
 import { GoogleSignInButton } from "@/shared/components/googleButton";
+import { ButtonLoader } from "@packages/ui";
 
 type FormData = {
   name: string;
@@ -184,7 +185,7 @@ const Page = () => {
                 </p>
               )}
 
-              <label htmlFor="email" className="block text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-gray-700 mb-1">
                 Password
               </label>
               <div className="relative">
@@ -208,19 +209,26 @@ const Page = () => {
                 >
                   {isPasswordVisible ? <Eye /> : <EyeOff />}
                 </button>
-                {errors.password && (
-                  <p className="text-red-500 text-sm">
-                    {String(errors.password.message)}
-                  </p>
-                )}
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-sm">
+                  {String(errors.password.message)}
+                </p>
+              )}
 
               <button
                 type="submit"
                 disabled={signupMutation.isPending}
-                className="w-full text-base cursor-pointer mt-4 bg-black text-white py-2 rounded-lg"
+                className="w-full text-base cursor-pointer mt-4 bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {signupMutation.isPending ? "Signing up ..." : "Sign up"}
+                {signupMutation.isPending ? (
+                  <Fragment>
+                    <ButtonLoader />
+                    Signing up...
+                  </Fragment>
+                ) : (
+                  "Sign up"
+                )}
               </button>
 
               {signupMutation?.isError &&

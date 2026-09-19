@@ -3,12 +3,13 @@
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { useForm } from "react-hook-form";
 import axios, { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
 
 import { GoogleSignInButton } from "@/shared/components/googleButton";
+import { ButtonLoader } from "@packages/ui";
 
 type FormData = {
   email: string;
@@ -111,7 +112,7 @@ const Page = () => {
               </p>
             )}
 
-            <label htmlFor="email" className="block text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-gray-700 mb-1">
               Password
             </label>
             <div className="relative">
@@ -135,12 +136,12 @@ const Page = () => {
               >
                 {isPasswordVisible ? <Eye /> : <EyeOff />}
               </button>
-              {errors.password && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.password.message)}
-                </p>
-              )}
             </div>
+            {errors.password && (
+              <p className="text-red-500 text-sm">
+                {String(errors.password.message)}
+              </p>
+            )}
 
             <div className="flex justify-between items-center my-4">
               <label htmlFor="" className="flex items-center text-gray-600">
@@ -161,9 +162,16 @@ const Page = () => {
             <button
               type="submit"
               disabled={loginMutation.isPending}
-              className="w-full text-base cursor-pointer bg-black text-white py-2 rounded-lg"
+              className="w-full text-base cursor-pointer bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loginMutation.isPending ? "Loggin in ..." : "Login"}
+              {loginMutation.isPending ? (
+                <Fragment>
+                  <ButtonLoader />
+                  Logging in...
+                </Fragment>
+              ) : (
+                "Login"
+              )}
             </button>
 
             {serverError && (

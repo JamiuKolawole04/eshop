@@ -58,7 +58,7 @@ const Page = async ({ params }: Params) => {
   const { id } = await params;
   const data = await fetchSellerDetails(id);
   return (
-    <div>
+    <div className="font-Poppins">
       <SellerProfile shop={data?.shop} followersCount={data?.followersCount} />
     </div>
   );
