@@ -88,6 +88,9 @@ export const updateUserAnalytics = async (event: EventData) => {
         ...extraFields,
       },
     });
+    console.log(
+      `[UserAnalytics] Updated for userId=${event.userId}, action=${event.action}`,
+    );
   } catch (err) {
     console.error("Error storing user analytics", err);
   }
@@ -139,6 +142,10 @@ export const updateProductAnalytics = async (event: EventData) => {
         lastViewedAt: new Date(),
       },
     });
+
+    console.log(
+      `[ProductAnalytics] Updated for productId=${event.productId}, action=${event.action}`,
+    );
   } catch (err) {
     console.error("Error storing product analytics", err);
   }
@@ -189,6 +196,10 @@ export const updateShopAnalytics = async (event: EventData) => {
         deviceStats,
       },
     });
+
+    console.log(
+      `[ShopAnalytics] Updated for shopId=${event.shopId}, action=shop_visit`,
+    );
   } catch (err) {
     console.error("Error storing shop analytics", err);
   }

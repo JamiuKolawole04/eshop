@@ -37,7 +37,9 @@ const processQueue = async () => {
       continue;
     }
 
-    await updateUserAnalytics(event);
+    if (event.userId) {
+      await updateUserAnalytics(event);
+    }
     await updateProductAnalytics(event);
   }
 };

@@ -13,7 +13,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { GetFilteredProducts, ProductWithRelationsType } from "@packages/ui";
+import {
+  GetFilteredProductsResponseType,
+  ProductWithRelationsType,
+} from "@packages/ui";
 import Ratings from "../ratings";
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
@@ -22,6 +25,7 @@ import { useDeviceTracking } from "@/hooks/use-device-tracking";
 import { ProductCard } from "../cards/productCard";
 import axiosInstance from "@/utils/axiosInstance";
 import ImageMagnifier from "./productImageMagnifier";
+import { sendKafkaEvents } from "@/actions/track-user";
 
 type Props = {
   product: ProductWithRelationsType;
@@ -82,7 +86,7 @@ export const ProductDetails = ({ product }: Props) => {
       query.set("page", "1");
       query.set("limit", "5");
 
-      const response = await axiosInstance.get<GetFilteredProducts>(
+      const response = await axiosInstance.get<GetFilteredProductsResponseType>(
         `/api/products/filtered-products?${query.toString()}`,
       );
 
@@ -95,6 +99,28 @@ export const ProductDetails = ({ product }: Props) => {
   useEffect(() => {
     fetchFilteredProducts();
   }, [priceRange]);
+
+  useEffect(() => {
+    if (!product?.id || !product?.shop?.id) return;
+    if (!location?.country || !location?.city || !deviceInfo) return;
+
+    sendKafkaEvents({
+      userId: user?.id,
+      productId: product.id,
+      shopId: product.shop.id,
+      action: "product_view",
+      country: location.country,
+      city: location.city,
+      device: deviceInfo,
+    });
+  }, [
+    product?.id,
+    product?.shop?.id,
+    user?.id,
+    location?.country,
+    location?.city,
+    deviceInfo,
+  ]);
 
   return (
     <div className="w-full bg-[#f5f5f5] py-5 font-Poppins">

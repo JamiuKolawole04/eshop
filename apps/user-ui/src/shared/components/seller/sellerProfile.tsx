@@ -315,7 +315,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
                   product={product}
                 />
               ))}
-              {products?.length === 0 && (
+              {events?.length === 0 && (
                 <p className="py-2">No offers available yet!</p>
               )}
             </div>
