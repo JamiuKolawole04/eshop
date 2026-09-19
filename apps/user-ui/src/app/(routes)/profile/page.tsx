@@ -66,7 +66,7 @@ const Page = () => {
 
   const logOutHandler = async () => {
     await axiosInstance.post("/api/auth/users/logout");
-    queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+    queryClient.removeQueries({ queryKey: ["user-profile"] });
 
     router.push("/login");
   };

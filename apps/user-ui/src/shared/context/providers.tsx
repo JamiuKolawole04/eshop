@@ -27,10 +27,10 @@ const ProvidersWithWebSocket = ({
 }) => {
   const { user } = useUser();
 
-  return (
-    <Fragment>
-      <WebSocketProvider user={user ?? null}>{children}</WebSocketProvider>
-    </Fragment>
+  return user ? (
+    <WebSocketProvider user={user}>{children}</WebSocketProvider>
+  ) : (
+    <Fragment>{children}</Fragment>
   );
 };
 

@@ -45,7 +45,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
 
   const queryClient = useQueryClient();
 
-  const { user } = useUser();
+  const { user, isAuthenticated } = useUser();
   const location = useLocationTracking();
   const deviceInfo = useDeviceTracking();
 
@@ -62,7 +62,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
 
   useEffect(() => {
     const fetchFollowStatus = async () => {
-      if (!shop?.id) return;
+      if (!shop?.id || !isAuthenticated) return;
       try {
         const res = await axiosInstance.get<FollowingShopStatusResponseType>(
           `/api/sellers/is-following/${shop?.id}`,
@@ -74,7 +74,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
     };
 
     fetchFollowStatus();
-  }, [shop?.id]);
+  }, [shop?.id, isAuthenticated]);
 
   const { data: events, isLoading: isEventsLoading } = useQuery({
     queryKey: ["seller-events"],
@@ -195,18 +195,28 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
               </div>
             </div>
 
-            <button
-              className={`px-6 py-2 h-[40px] rounded-lg font-semibold flex items-center gap-2 text-white transition ${
-                isFollowing
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
-              onClick={() => toggleFollowMutation.mutate()}
-              disabled={toggleFollowMutation.isPending}
-            >
-              <Heart size={18} />
-              {isFollowing ? "Unfollow" : "Follow"}
-            </button>
+            {isAuthenticated ? (
+              <button
+                className={`px-6 py-2 h-[40px] rounded-lg font-semibold flex items-center gap-2 text-white transition ${
+                  isFollowing
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                onClick={() => toggleFollowMutation.mutate()}
+                disabled={toggleFollowMutation.isPending}
+              >
+                <Heart size={18} />
+                {isFollowing ? "Unfollow" : "Follow"}
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="px-6 py-2 h-[40px] rounded-lg font-semibold flex items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 transition"
+              >
+                <Heart size={18} />
+                Follow
+              </Link>
+            )}
           </div>
         </div>
 
