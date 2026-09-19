@@ -17,11 +17,7 @@ router.get("/shops/:shopId/events", getSellerEvents);
 
 router.post("/follow-shop", isAuthenticated("user"), isUser, followShop);
 router.post("/unfollow-shop", isAuthenticated("user"), isUser, unfollowShop);
-router.get(
-  "/sellers/is-following/:id",
-  isAuthenticated("user"),
-  isFollowingShop,
-);
+router.get("/is-following/:shopId", isAuthenticated("user"), isFollowingShop);
 router.get("/:id", getSellerDetails);
 
 export default router;

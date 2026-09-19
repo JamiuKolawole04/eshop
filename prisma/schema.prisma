@@ -229,6 +229,7 @@ model ProductAnalytics {
 
 model ShopAnalytics {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  shopId        String   @unique
   totalVisitors Int      @default(0)
   countryStats  Json? //store aggregated country data {"us": 20, "IN": 50, "UK": 15}
   cityStats     Json? //store aggregated city data {"New York": 20, "Delhi": 25,}

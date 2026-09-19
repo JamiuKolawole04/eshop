@@ -143,3 +143,53 @@ export const updateProductAnalytics = async (event: EventData) => {
     console.error("Error storing product analytics", err);
   }
 };
+
+export const updateShopAnalytics = async (event: EventData) => {
+  try {
+    if (!event.shopId) return;
+
+    const existingData = await prisma.shopAnalytics.findUnique({
+      where: { shopId: event.shopId },
+      select: { countryStats: true, cityStats: true, deviceStats: true },
+    });
+
+    const countryStats =
+      (existingData?.countryStats as Record<string, number>) || {};
+    const cityStats = (existingData?.cityStats as Record<string, number>) || {};
+    const deviceStats =
+      (existingData?.deviceStats as Record<string, number>) || {};
+
+    if (event.country) {
+      countryStats[event.country] = (countryStats[event.country] || 0) + 1;
+    }
+
+    if (event.city) {
+      cityStats[event.city] = (cityStats[event.city] || 0) + 1;
+    }
+
+    if (event.device) {
+      deviceStats[event.device] = (deviceStats[event.device] || 0) + 1;
+    }
+
+    await prisma.shopAnalytics.upsert({
+      where: { shopId: event.shopId },
+      update: {
+        totalVisitors: { increment: 1 },
+        lastVisitedAt: new Date(),
+        countryStats,
+        cityStats,
+        deviceStats,
+      },
+      create: {
+        shopId: event.shopId,
+        totalVisitors: 1,
+        lastVisitedAt: new Date(),
+        countryStats,
+        cityStats,
+        deviceStats,
+      },
+    });
+  } catch (err) {
+    console.error("Error storing shop analytics", err);
+  }
+};

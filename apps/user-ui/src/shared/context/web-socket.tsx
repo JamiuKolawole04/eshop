@@ -14,15 +14,12 @@ export const WebSocketProvider = ({
   children: React.ReactNode;
   user: { id: string };
 }) => {
-  const [_, setWsReady] = useState(false);
+  const [wsReady, setWsReady] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
-  const userIdRef = useRef(user?.id);
-
-  userIdRef.current = user?.id;
 
   useEffect(() => {
-    if (!userIdRef.current) {
+    if (!user?.id) {
       return;
     }
 
@@ -33,7 +30,7 @@ export const WebSocketProvider = ({
     wsRef.current = ws;
 
     ws.onopen = () => {
-      ws.send(`user_${userIdRef.current}`);
+      ws.send(`user_${user.id}`);
       setWsReady(true);
     };
 
@@ -46,50 +43,14 @@ export const WebSocketProvider = ({
       }
     };
 
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    ws.onclose = () => {
-      setWsReady(false);
-    };
-
     return () => {
       ws.close();
     };
-  }, []);
+  }, [user?.id]);
 
-  useEffect(() => {
-    if (userIdRef.current && wsRef.current?.readyState === WebSocket.CLOSED) {
-      // Create new WebSocket with updated user ID
-      const ws = new WebSocket(
-        String(process.env.NEXT_PUBLIC_CHATTING_WEBSOCKET_URL),
-      );
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        ws.send(`user_${userIdRef.current}`);
-        setWsReady(true);
-      };
-
-      ws.onmessage = (event) => {
-        const data = JSON.parse(String(event.data));
-
-        if (data.type === "UNSEEN_COUNT_UPDATE") {
-          const { conversationId, count } = data.payload;
-          setUnreadCounts((prev) => ({ ...prev, [conversationId]: count }));
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
-      ws.onclose = () => {
-        setWsReady(false);
-      };
-    }
-  }, [userIdRef.current]);
+  if (!wsReady) {
+    return;
+  }
 
   return (
     <WebSocketContext.Provider value={{ ws: wsRef.current, unreadCounts }}>
