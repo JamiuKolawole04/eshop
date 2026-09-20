@@ -77,6 +77,9 @@
     },
     {
       "path": "./apps/seller-service"
+    },
+    {
+      "path": "./apps/worker-service"
     }
   ]
 }

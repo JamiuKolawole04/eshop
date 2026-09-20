@@ -8,6 +8,7 @@ import { Prisma, Users, prisma } from "@packages/prisma";
 import { NotFoundError, ValidationError } from "@packages/error-handler";
 import { redis } from "@packages/redis";
 import { sendMail } from "../utils/sendMail";
+import { orderConfirmationQueue } from "../bullmq/email.queue";
 
 const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY), {
   apiVersion: "2026-06-24.dahlia",
@@ -365,6 +366,21 @@ export const createOrder = async (
               ? totalAmount - coupon?.discountAmount
               : totalAmount,
             trackingUrl: `https://eshop.com/order/${order.id}`,
+          },
+        );
+
+        await orderConfirmationQueue.add(
+          "send-order-confirmation",
+          {
+            orderId: order.id,
+            userEmail: email,
+            userName: name as string,
+            cart,
+            totalAmount,
+            trackingUrl: `https://eshop.com/order/${order.id}`,
+          },
+          {
+            jobId: `order-confirmation-${order.id}`,
           },
         );
 

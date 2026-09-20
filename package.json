@@ -37,6 +37,7 @@
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.3.0",
+    "bullmq": "^6.3.8",
     "canvas-confetti": "^1.9.4",
     "cookie-parser": "^1.4.7",
     "copy-webpack-plugin": "^14.0.0",
