@@ -1,10 +1,13 @@
 import { Worker } from "bullmq";
 
 import { bullmqRedis } from "@packages/redis";
-import { processOrderConfirmationEmail } from "./email.queue";
+import {
+  ORDER_CONFIRMATION_QUEUE,
+  processOrderConfirmationEmail,
+} from "./email.queue";
 
 export const emailWorker = new Worker(
-  "order-confirmation-queue",
+  ORDER_CONFIRMATION_QUEUE,
   async (job) => {
     return await processOrderConfirmationEmail(job);
   },
