@@ -6,3 +6,6 @@ if (!redisUrl) {
 }
 
 export const redis = new Redis(redisUrl);
+export const bullmqRedis = new Redis(redisUrl, {
+  maxRetriesPerRequest: null,
+});

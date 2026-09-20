@@ -7,7 +7,6 @@ import crypto from "node:crypto";
 import { Prisma, Users, prisma } from "@packages/prisma";
 import { NotFoundError, ValidationError } from "@packages/error-handler";
 import { redis } from "@packages/redis";
-import { sendMail } from "../utils/sendMail";
 import { orderConfirmationQueue } from "../bullmq/email.queue";
 
 const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY), {
@@ -355,28 +354,16 @@ export const createOrder = async (
         }
 
         // Send email for user
-        await sendMail(
-          email,
-          "🛍 Your Eshop Order Confirmation",
-          "order-confirmation",
-          {
-            name,
-            cart,
-            totalAmount: coupon?.discountAmount
-              ? totalAmount - coupon?.discountAmount
-              : totalAmount,
-            trackingUrl: `https://eshop.com/order/${order.id}`,
-          },
-        );
-
         await orderConfirmationQueue.add(
-          "send-order-confirmation",
+          "order-confirmation",
           {
             orderId: order.id,
             userEmail: email,
             userName: name as string,
             cart,
-            totalAmount,
+            totalAmount: coupon?.discountAmount
+              ? totalAmount - coupon?.discountAmount
+              : totalAmount,
             trackingUrl: `https://eshop.com/order/${order.id}`,
           },
           {

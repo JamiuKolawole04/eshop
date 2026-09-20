@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import { ErrorMiddleware } from "@packages/error-handler";
 import orderRoutes from "./routes/order.route";
 import { createOrder } from "./controllers/order.controller";
+import "./bullmq/email.worker";
 
 const host = process.env.HOST ?? "localhost";
 const port = process.env.PORT ? Number(process.env.PORT) : 6004;

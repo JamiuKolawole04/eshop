@@ -1,4 +1,6 @@
 import { Worker } from "bullmq";
+
+import { bullmqRedis } from "@packages/redis";
 import { processOrderConfirmationEmail } from "./email.queue";
 
 export const emailWorker = new Worker(
@@ -7,11 +9,7 @@ export const emailWorker = new Worker(
     return await processOrderConfirmationEmail(job);
   },
   {
-    connection: {
-      host: process.env.REDIS_HOST || "localhost",
-      port: Number(process.env.REDIS_PORT) || 6379,
-      password: process.env.REDIS_PASSWORD || undefined,
-    },
+    connection: bullmqRedis,
     concurrency: 1,
   },
 );
@@ -24,5 +22,4 @@ emailWorker.on("failed", (job, error) => {
   console.error(`❌ Job failed: ${job?.id}`, error);
 });
 
-// Start the worker process
 console.log("📨 Order confirmation email worker started");

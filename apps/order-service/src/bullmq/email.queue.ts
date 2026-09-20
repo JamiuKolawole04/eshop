@@ -1,17 +1,15 @@
-import { Queue } from "bullmq";
+import { Job, Queue } from "bullmq";
+
 import { OrderConfirmationJob } from "./job-types";
 import { sendMail } from "../utils/sendMail";
+import { bullmqRedis } from "@packages/redis";
 
 export const ORDER_CONFIRMATION_QUEUE = "order-confirmation-queue";
 
 export const orderConfirmationQueue = new Queue<OrderConfirmationJob>(
   ORDER_CONFIRMATION_QUEUE,
   {
-    connection: {
-      host: process.env.REDIS_HOST || "localhost",
-      port: Number(process.env.REDIS_PORT) || 6379,
-      password: process.env.REDIS_PASSWORD || undefined,
-    },
+    connection: bullmqRedis,
     defaultJobOptions: {
       attempts: 3,
       backoff: {
@@ -25,7 +23,7 @@ export const orderConfirmationQueue = new Queue<OrderConfirmationJob>(
 );
 
 export const processOrderConfirmationEmail = async (
-  job: OrderConfirmationJob,
+  job: Job<OrderConfirmationJob>,
 ): Promise<void> => {
   const { orderId, userEmail, userName, cart, totalAmount, trackingUrl } =
     job.data;
