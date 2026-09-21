@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import DOMPurify from "isomorphic-dompurify";
 
 import {
   CreateConversationResponseType,
@@ -149,6 +150,11 @@ export const ProductDetails = ({ product }: Props) => {
     location?.city,
     deviceInfo,
   ]);
+
+  const cleanDescription = DOMPurify.sanitize(
+    (product?.detailed_description ?? "").replace(/&nbsp;/g, " "),
+    { FORBID_ATTR: ["style", "class", "width", "height"] },
+  );
 
   return (
     <div className="w-full bg-[#f5f5f5] py-5 font-Poppins">
@@ -461,10 +467,12 @@ export const ProductDetails = ({ product }: Props) => {
           </h3>
 
           <div
-            className="prose prose-sm text-slate-200 max-w-none"
-            dangerouslySetInnerHTML={{
-              __html: product?.detailed_description,
-            }}
+            className="prose prose-sm md:prose-base prose-slate max-w-none
+                         [overflow-wrap:anywhere]
+                          [&_*]:!whitespace-normal
+                          prose-img:max-w-full prose-img:h-auto
+                          prose-table:block prose-table:overflow-x-auto"
+            dangerouslySetInnerHTML={{ __html: cleanDescription }}
           />
         </div>
       </div>
