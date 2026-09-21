@@ -12,8 +12,11 @@ import {
   WalletMinimal,
 } from "lucide-react";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 import {
+  CreateConversationResponseType,
   GetFilteredProductsResponseType,
   ProductWithRelationsType,
 } from "@packages/ui";
@@ -32,6 +35,8 @@ type Props = {
 };
 
 export const ProductDetails = ({ product }: Props) => {
+  const router = useRouter();
+
   const [currentImage, setCurrentImage] = useState(product?.images[0].url);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isColorSelected, setIsColorSelected] = useState(
@@ -46,7 +51,7 @@ export const ProductDetails = ({ product }: Props) => {
     ProductWithRelationsType[]
   >([]);
 
-  const { user } = useUser();
+  const { user, isAuthenticated } = useUser();
   const location = useLocationTracking();
   const deviceInfo = useDeviceTracking();
 
@@ -99,6 +104,29 @@ export const ProductDetails = ({ product }: Props) => {
   useEffect(() => {
     fetchFilteredProducts();
   }, [priceRange]);
+
+  const { mutate: createChat, isPending: isLoading } = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post<CreateConversationResponseType>(
+        "/api/chatting/conversations",
+        {
+          sellerId: product?.shop?.sellerId,
+        },
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      router.push(`/inbox?conversationId=${data.conversation.id}`);
+    },
+    onError: (error) => {
+      console.log(`${error}`);
+    },
+  });
+
+  const handleChat = async () => {
+    if (isLoading) return;
+    createChat();
+  };
 
   useEffect(() => {
     if (!product?.id || !product?.shop?.id) return;
@@ -369,13 +397,24 @@ export const ProductDetails = ({ product }: Props) => {
                   </span>
                 </div>
 
-                <Link
-                  href="#"
-                  className="text-blue-500 text-sm flex items-center gap-1"
-                >
-                  <MessageSquareText size={16} />
-                  Chat Now
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    href="#"
+                    className="text-blue-500 text-sm flex items-center gap-1"
+                    onClick={handleChat}
+                  >
+                    <MessageSquareText size={16} />
+                    Chat Now
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="text-blue-500 text-sm flex items-center gap-1"
+                  >
+                    <MessageSquareText size={16} />
+                    Chat Now
+                  </Link>
+                )}
               </div>
 
               <div className="grid grid-cols-3 gap-2 border-t border-t-gray-200 mt-3 pt-3">
