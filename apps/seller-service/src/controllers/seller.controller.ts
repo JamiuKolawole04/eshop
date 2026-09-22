@@ -6,6 +6,7 @@ import {
   ValidationError,
 } from "@packages/error-handler";
 import { prisma } from "@packages/prisma";
+import { imageKit } from "@packages/imagekit";
 
 export const getSellerProducts = async (
   req: Request,
@@ -271,6 +272,60 @@ export const getSellerDetails = async (
       success: true,
       shop,
       followersCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadShopAvatar = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { fileName } = req.body;
+    const sellerId = req.seller?.id;
+
+    if (!fileName) {
+      throw new ValidationError("file is required!");
+    }
+
+    const shop = await prisma.shops.findUnique({
+      where: { sellerId },
+    });
+
+    if (!shop) {
+      throw new NotFoundError("Shop not found!");
+    }
+
+    const response = await imageKit.files.upload({
+      file: fileName,
+      fileName: `shop-avatar-${Date.now()}.jpg`,
+      folder: "/eshop-products",
+    });
+
+    const DEFAULT_AVATAR_FILE_ID = "6a8078ae5c7cd75eb81f31dc";
+    if (shop.avatarFileId && shop.avatarFileId !== DEFAULT_AVATAR_FILE_ID) {
+      try {
+        await imageKit.files.delete(shop.avatarFileId);
+      } catch (err) {
+        console.log("Failed to delete old shop avatar:", err);
+      }
+    }
+
+    const updatedShop = await prisma.shops.update({
+      where: { sellerId },
+      data: {
+        avatar: response.url,
+        avatarFileId: response.fileId,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      avatar: updatedShop.avatar,
+      avatarFileId: updatedShop.avatarFileId,
     });
   } catch (error) {
     next(error);
