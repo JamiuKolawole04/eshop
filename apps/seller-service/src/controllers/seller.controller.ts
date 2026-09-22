@@ -324,8 +324,67 @@ export const uploadShopAvatar = async (
 
     res.status(200).json({
       success: true,
+      message: "Profile image updated successfully",
       avatar: updatedShop.avatar,
       avatarFileId: updatedShop.avatarFileId,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadShopCoverBanner = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { fileName } = req.body;
+    const sellerId = req.seller?.id;
+
+    if (!fileName) {
+      throw new ValidationError("file is required!");
+    }
+
+    const shop = await prisma.shops.findUnique({
+      where: { sellerId },
+    });
+
+    if (!shop) {
+      throw new NotFoundError("Shop not found!");
+    }
+
+    const response = await imageKit.files.upload({
+      file: fileName,
+      fileName: `shop-banner-${Date.now()}.jpg`,
+      folder: "/eshop-shops/banners",
+    });
+
+    const DEFAULT_BANNER_FILE_ID = "6a8f875d5c7cd75eb81ddeaa";
+    if (
+      shop.coverBannerFileId &&
+      shop.coverBannerFileId !== DEFAULT_BANNER_FILE_ID
+    ) {
+      try {
+        await imageKit.files.delete(shop.coverBannerFileId);
+      } catch (err) {
+        console.log("Failed to delete old cover banner:", err);
+      }
+    }
+
+    const updatedShop = await prisma.shops.update({
+      where: { sellerId },
+      data: {
+        coverBanner: response.url,
+        coverBannerFileId: response.fileId,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Shop cover image updated successfully",
+      coverBanner: updatedShop.coverBanner,
+      coverBannerFileId: updatedShop.coverBannerFileId,
     });
   } catch (error) {
     next(error);

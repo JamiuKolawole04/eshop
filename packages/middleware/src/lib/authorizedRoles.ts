@@ -20,7 +20,7 @@ export const isUser = (req: Request, res: Response, next: NextFunction) => {
 
 export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
   if (req.role !== "admin") {
-    throw new AuthError("Access denied: User only");
+    throw new AuthError("Access denied: Admin only");
   }
 
   next();
