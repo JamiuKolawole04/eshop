@@ -16,6 +16,7 @@ import Image from "next/image";
 import { useUser } from "@/hooks/use-user";
 import axiosInstance from "@/utils/axiosInstance";
 import {
+  ButtonLoader,
   GetUserConversationResponseType,
   GetUserMessagesResponseType,
   UserConversation,
@@ -231,7 +232,9 @@ const Inbox = () => {
 
             <div className="divide-y divide-gray-200">
               {isLoading ? (
-                <div className="p-4 text-sm text-gray-500">Loading...</div>
+                <div className="p-4 flex items-center justify-center">
+                  <ButtonLoader className="text-gray-500 text-center" />
+                </div>
               ) : chats.length === 0 ? (
                 <div className="p-4 text-sm text-gray-500">
                   No conversation yet.

@@ -65,10 +65,12 @@ const Page = () => {
   ).length;
 
   const logOutHandler = async () => {
-    await axiosInstance.post("/api/auth/users/logout");
     queryClient.removeQueries({ queryKey: ["user-profile"] });
-
     router.push("/login");
+
+    axiosInstance.post("/api/auth/users/logout").catch((err) => {
+      console.error("Logout request failed:", err);
+    });
   };
 
   useEffect(() => {

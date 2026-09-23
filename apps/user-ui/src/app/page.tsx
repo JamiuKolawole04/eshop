@@ -12,10 +12,12 @@ import {
 } from "@packages/ui";
 import { ProductCard } from "@/shared/components/cards/productCard";
 import { ShopCard } from "@/shared/components/cards/ShopCard";
+import { isPublic } from "@/utils/protected";
 
 const fetchAllProducts = async () => {
   const response = await axiosInstance.get<GetAllProductsResponseType>(
     `/api/products?page=1&limit=10`,
+    isPublic,
   );
 
   return response.data?.products;
@@ -24,6 +26,7 @@ const fetchAllProducts = async () => {
 const fetchAllLatestProducts = async () => {
   const response = await axiosInstance.get<GetAllProductsResponseType>(
     `/api/products?page=1&limit=10&type=latest`,
+    isPublic,
   );
 
   return response.data?.products;
@@ -32,6 +35,7 @@ const fetchAllLatestProducts = async () => {
 const fetchTopShops = async () => {
   const response = await axiosInstance.get<GetTopShopsResponseType>(
     `/api/products/shops/top?page=1&limit=10&type=latest`,
+    isPublic,
   );
 
   return response.data?.shops;
@@ -40,6 +44,7 @@ const fetchTopShops = async () => {
 const fetchTopOffers = async () => {
   const response = await axiosInstance.get<GetEventOffersResponseType>(
     `/api/products/events/all?page=1&limit=10`,
+    isPublic,
   );
 
   return response.data.events;

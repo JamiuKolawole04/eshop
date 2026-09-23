@@ -3,12 +3,14 @@ import { Metadata } from "next";
 import axiosInstance from "@/utils/axiosInstance";
 import { GetProductBySlugResponseType } from "@packages/ui";
 import { ProductDetails } from "@/shared/components/product/productDetails";
+import { isPublic } from "@/utils/protected";
 
 type Params = { params: Promise<{ slug: string }> };
 
 async function fetchProductDetails(slug: string) {
   const response = await axiosInstance.get<GetProductBySlugResponseType>(
     `/api/products/${slug}`,
+    isPublic,
   );
 
   return response.data?.product;
