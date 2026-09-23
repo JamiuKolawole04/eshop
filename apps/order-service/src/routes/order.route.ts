@@ -44,7 +44,7 @@ router.get(
   getAllOrdersForAdmin,
 );
 
-router.put("/verify-coupon", isAuthenticatedAny, verifyCouponCode);
+router.put("/verify-coupon", verifyCouponCode);
 
 router.get("/:id", isAuthenticatedAny, getOrderDetails);
 
