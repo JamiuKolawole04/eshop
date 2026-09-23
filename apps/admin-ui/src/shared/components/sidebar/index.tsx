@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useAdmin } from "@/hooks/use-admin";
 import { useSidebar } from "@/hooks/use-sidebar";
@@ -25,9 +26,11 @@ import { Sidebar } from "./sidebar.styles";
 import { DashbaordLogo } from "@/app/assets/svgs/dashbaord/dashboardLogo";
 import { SidebarItem } from "./sidebar.item";
 import { SidebarMenu } from "./sidebar.menu";
+import axiosInstance from "@/utils/axiosInstance";
 
 export const SideBarWrapper = () => {
   const pathname = usePathname();
+  const queryClient = useQueryClient();
 
   const { activeSidebar, setActiveSidebar } = useSidebar();
   const { admin } = useAdmin();
@@ -38,6 +41,14 @@ export const SideBarWrapper = () => {
 
   const getIconColor = (route: string) =>
     activeSidebar === route ? "#0085ff" : "#969696";
+
+  const handleLogout = async () => {
+    queryClient.removeQueries({ queryKey: ["admin-profile"] });
+
+    axiosInstance.post("/api/auth/admin/logout").catch((err) => {
+      console.error("Admin logout request failed:", err);
+    });
+  };
 
   return (
     <Box
@@ -201,12 +212,16 @@ export const SideBarWrapper = () => {
             </SidebarMenu>
 
             <SidebarMenu title="Extras">
-              <SidebarItem
-                title="Logout"
-                href="/"
-                isActive={activeSidebar === "/logout"}
-                icon={<LogOutIcon size={20} color={getIconColor("/logout")} />}
-              />
+              <div onClick={handleLogout}>
+                <SidebarItem
+                  title="Logout"
+                  href="/"
+                  isActive={activeSidebar === "/logout"}
+                  icon={
+                    <LogOutIcon size={20} color={getIconColor("/logout")} />
+                  }
+                />
+              </div>
             </SidebarMenu>
           </div>
         </Sidebar.Body>

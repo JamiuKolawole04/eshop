@@ -196,9 +196,12 @@ export const refreshToken = async (
       throw new JsonWebTokenError("Forbidden! Invalid refresh token.");
     }
 
-    const storedToken = await getCurrentRefreshToken(decoded.role, decoded.id);
+    const storedRefreshToken = await getCurrentRefreshToken(
+      decoded.role,
+      decoded.id,
+    );
 
-    if (!storedToken || storedToken !== refreshToken) {
+    if (!storedRefreshToken || storedRefreshToken !== refreshToken) {
       // stale/reused token — force full logout on this account
       await clearCurrentRefreshToken(decoded.role, decoded.id);
       clearAuthCookies(res, decoded.role);
