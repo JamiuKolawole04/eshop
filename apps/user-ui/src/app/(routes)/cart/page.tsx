@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
@@ -46,7 +45,7 @@ const Page = () => {
   const [storedCouponCode, setStoredCouponCode] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
     "credit_card" | "cash_on_delivery"
-  >("cash_on_delivery");
+  >("credit_card");
 
   const createPaymentSession = async () => {
     if (!selectedAddressId || addresses?.length === 0) {
@@ -108,15 +107,8 @@ const Page = () => {
     0,
   );
 
-  const applyCouponCode = async () => {
-    setError("");
-
-    if (!coupon.trim()) {
-      setError("Coupon code is required");
-      return;
-    }
-
-    try {
+  const applyCouponMutation = useMutation({
+    mutationFn: async () => {
       const response = await axiosInstance.put<VerifyCouponCodeResponseType>(
         `/api/orders/verify-coupon`,
         {
@@ -125,26 +117,41 @@ const Page = () => {
         },
       );
 
-      if (response?.data?.valid) {
+      return response.data;
+    },
+
+    onSuccess: (data) => {
+      if (data.valid) {
         setStoredCouponCode(coupon.trim());
-        setDiscountAmount(parseFloat(response?.data?.discountAmount));
-        setDiscountPercentage(response?.data?.discount);
-        setDiscountedProductId(response?.data?.discountedProductId);
+        setDiscountAmount(parseFloat(data.discountAmount));
+        setDiscountPercentage(data.discount);
+        setDiscountedProductId(data.discountedProductId);
         setCoupon("");
       } else {
         setDiscountAmount(0);
         setDiscountPercentage(0);
         setDiscountedProductId("");
-        setError(
-          response?.data?.message || "Coupon not valid for any items in cart",
-        );
+        setError(data.message || "Coupon not valid for any items in cart");
       }
-    } catch (error: any) {
+    },
+
+    onError: (error: AxiosError<{ message?: string }>) => {
       setDiscountAmount(0);
       setDiscountPercentage(0);
       setDiscountedProductId("");
-      setError(error?.response?.data?.message);
+      setError(error?.response?.data?.message || "Failed to apply coupon");
+    },
+  });
+
+  const applyCouponCode = () => {
+    setError("");
+
+    if (!coupon.trim()) {
+      setError("Coupon code is required");
+      return;
     }
+
+    applyCouponMutation.mutate();
   };
 
   const { data: addresses } = useQuery({
@@ -324,10 +331,11 @@ const Page = () => {
                   />
 
                   <button
-                    className="bg-blue-500 cursor-pointer text-white px-4 rounded-r-md hover:bg-blue-500 transition-all text-sm"
-                    onClick={() => applyCouponCode()}
+                    className="bg-blue-500 cursor-pointer text-white px-4 rounded-r-md hover:bg-blue-500 transition-all text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                    onClick={applyCouponCode}
+                    disabled={applyCouponMutation.isPending}
                   >
-                    Apply
+                    {applyCouponMutation.isPending ? <ButtonLoader /> : "Apply"}
                   </button>
                 </div>
                 {error && <p className="text-sm pt-2 text-red-500">{error}</p>}
