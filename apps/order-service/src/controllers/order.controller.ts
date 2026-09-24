@@ -8,6 +8,7 @@ import { Prisma, Users, prisma } from "@packages/prisma";
 import { NotFoundError, ValidationError } from "@packages/error-handler";
 import { redis } from "@packages/redis";
 import { orderConfirmationQueue } from "../bullmq/email.queue";
+import { sendLog } from "@packages/logs";
 
 const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY), {
   apiVersion: "2026-06-24.dahlia",
@@ -620,6 +621,12 @@ export const getUserOrders = async (
   next: NextFunction,
 ) => {
   try {
+    await sendLog({
+      type: "success",
+      message: `User orders retrieved successfully ${req?.user?.email}`,
+      source: "order-service",
+    });
+
     const orders = await prisma.orders.findMany({
       where: {
         userId: req.user.id,
