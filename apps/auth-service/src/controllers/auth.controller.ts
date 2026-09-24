@@ -8,6 +8,7 @@ import {
   getCurrentRefreshToken,
   setCurrentRefreshToken,
 } from "@packages/redis";
+import { sendLog } from "@packages/logs";
 
 import {
   checkOtpRestrictions,
@@ -133,6 +134,11 @@ export const login = async (
 
     const isMatch = await compare(password, user.password);
     if (!isMatch) {
+      await sendLog({
+        type: "error",
+        message: `User login failed: Inavlid email or password`,
+        source: "auth-service",
+      });
       throw new AuthError("Invalid credentials.");
     }
 
@@ -158,6 +164,12 @@ export const login = async (
     setCookie(res, "refresh_token", refreshToken);
 
     await setCurrentRefreshToken("user", user.id, refreshToken);
+
+    await sendLog({
+      type: "success",
+      message: `User login successful: ${email}`,
+      source: "auth-service",
+    });
 
     res.status(200).json({
       message: "Login successful",
@@ -527,6 +539,11 @@ export const sellerLogin = async (
 
     const isMatch = await compare(password, seller.password);
     if (!isMatch) {
+      await sendLog({
+        type: "error",
+        message: `Seller login failed: Inavlid email or password`,
+        source: "auth-service",
+      });
       throw new AuthError("Invalid credentials.");
     }
 
@@ -552,6 +569,12 @@ export const sellerLogin = async (
     setCookie(res, "seller_refresh_token", refreshToken);
 
     await setCurrentRefreshToken("seller", seller.id, refreshToken);
+
+    await sendLog({
+      type: "success",
+      message: `Seller login successful: ${email}`,
+      source: "auth-service",
+    });
 
     res.status(200).json({
       message: "Login successful",
@@ -632,19 +655,13 @@ export const loginAdmin = async (
     const isAdmin = user.role === "admin";
 
     if (!isAdmin) {
-      // sendLog({
-      //   type: "error",
-      //   message: `Admin login failed for ${email} — not an admin`,
-      //   source: "auth-service",
-      // });
+      await sendLog({
+        type: "error",
+        message: `Admin login failed for ${email} — not an admin`,
+        source: "auth-service",
+      });
       throw new AuthError("Invalid access!");
     }
-
-    // sendLog({
-    //   type: "success",
-    //   message: `Admin login successful: ${email}`,
-    //   source: "auth-service",
-    // });
 
     const accessToken = jwt.sign(
       { id: user.id, role: "admin" },
@@ -666,6 +683,12 @@ export const loginAdmin = async (
     setCookie(res, "access_token", accessToken);
 
     await setCurrentRefreshToken("admin", user.id, refreshToken);
+
+    await sendLog({
+      type: "success",
+      message: `Admin login successful: ${email}`,
+      source: "auth-service",
+    });
 
     res.status(200).json({
       message: "Login successful!",

@@ -80,6 +80,9 @@
     },
     {
       "path": "./apps/worker-service"
+    },
+    {
+      "path": "./packages/logs"
     }
   ]
 }

@@ -7,6 +7,7 @@ import {
   ValidationError,
 } from "@packages/error-handler";
 import { prisma } from "@packages/prisma";
+import { sendLog } from "@packages/logs";
 
 export const addUserAddress = async (
   req: Request,
@@ -127,6 +128,11 @@ export const getUser = async (
 ) => {
   try {
     const user = req.user;
+    await sendLog({
+      type: "success",
+      message: `User data retrieved ${user?.email}`,
+      source: "user-service",
+    });
     res.status(200).json({
       success: true,
       user,
