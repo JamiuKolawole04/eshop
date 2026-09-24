@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 
 import { prisma } from "@packages/prisma";
-import { ValidationError } from "@packages/error-handler";
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "@packages/error-handler";
 
 export const getAdmin = async (
   req: Request,
@@ -332,18 +336,95 @@ export const getAllSellers = async (
   }
 };
 
-export const AddCategoryToCustomization = (
+export const addCategoryToCustomization = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const { categories } = req.body.body;
+    const { category } = req.body;
+
+    if (!category || typeof category !== "string") {
+      throw new ValidationError("Category is required and must be a string");
+    }
+
+    const config = await prisma.site_config.findFirst();
+
+    if (!config) {
+      throw new NotFoundError("Site config not found");
+    }
+
+    if (config.categories.includes(category)) {
+      throw new ConflictError("Category already exists");
+    }
+
+    const updatedConfig = await prisma.site_config.update({
+      where: { id: config.id },
+      data: {
+        categories: {
+          push: category,
+        },
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Category added successfully",
+      categories: updatedConfig.categories,
+    });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
-export const AddSubCategoryToCustomization = () => {};
+
+export const addSubCategoryToCustomization = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { category, subCategory } = req.body;
+
+    if (!category || !subCategory) {
+      throw new ValidationError("Category and subCategory are required");
+    }
+
+    const config = await prisma.site_config.findFirst();
+
+    if (!config) {
+      throw new NotFoundError("Site config not found");
+    }
+
+    if (!config.categories.includes(category)) {
+      throw new NotFoundError("Category does not exist");
+    }
+
+    const subCategories = config.subCategories as Record<string, string[]>;
+
+    const existing = subCategories[category] || [];
+
+    if (existing.includes(subCategory)) {
+      throw new ConflictError("Subcategory already exists");
+    }
+
+    subCategories[category] = [...existing, subCategory];
+
+    const updatedConfig = await prisma.site_config.update({
+      where: { id: config.id },
+      data: {
+        subCategories,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Subcategory added successfully",
+      subCategories: updatedConfig.subCategories,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
 
 export const getAllNotifications = async (
   req: Request,

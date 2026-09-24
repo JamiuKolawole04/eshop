@@ -2,7 +2,9 @@ import express, { Router } from "express";
 
 import { isAdmin, isAuthenticated } from "@packages/middleware";
 import {
+  addCategoryToCustomization,
   addNewAdmin,
+  addSubCategoryToCustomization,
   getAdmin,
   getAllAdmins,
   getAllCustomizations,
@@ -34,5 +36,7 @@ router.get(
   isAdmin,
   getAllNotifications,
 );
+router.post("/add-category", addCategoryToCustomization);
+router.post("/add-sub-category", addSubCategoryToCustomization);
 
 export default router;
