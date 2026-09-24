@@ -193,3 +193,29 @@ export const updateUserPassword = async (
     next(error);
   }
 };
+
+export const notifications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id;
+
+    const notifications = await prisma.notifications.findMany({
+      where: {
+        receiverId: userId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -344,3 +344,27 @@ export const AddCategoryToCustomization = (
   }
 };
 export const AddSubCategoryToCustomization = () => {};
+
+export const getAllNotifications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const notifications = await prisma.notifications.findMany({
+      where: {
+        receiverId: "admin",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

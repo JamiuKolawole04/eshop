@@ -6,6 +6,7 @@ import {
   deleteUserAddress,
   getUser,
   getUserAddresses,
+  notifications,
   updateUserPassword,
 } from "../controllers/user.controller";
 
@@ -32,5 +33,6 @@ router.delete(
 
 router.get("/profile", isAuthenticated("user"), isUser, getUser);
 router.patch("/password", isAuthenticated("user"), isUser, updateUserPassword);
+router.patch("/notifications", isAuthenticated("user"), isUser, notifications);
 
 export default router;

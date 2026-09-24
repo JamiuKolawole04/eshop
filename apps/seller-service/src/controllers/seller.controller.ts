@@ -390,3 +390,29 @@ export const uploadShopCoverBanner = async (
     next(error);
   }
 };
+
+export const sellerNotifications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sellerId = req.seller?.id;
+
+    const notifications = await prisma.notifications.findMany({
+      where: {
+        receiverId: sellerId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

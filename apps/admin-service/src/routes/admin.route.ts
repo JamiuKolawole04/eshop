@@ -7,6 +7,7 @@ import {
   getAllAdmins,
   getAllCustomizations,
   getAllEvents,
+  getAllNotifications,
   getAllProductsForAdmin,
   getAllSellers,
   getAllUsers,
@@ -27,5 +28,11 @@ router.post("/", isAuthenticated("admin"), isAdmin, addNewAdmin);
 router.get("/customizations", getAllCustomizations);
 router.get("/users", isAuthenticated("admin"), isAdmin, getAllUsers);
 router.get("/sellers", isAuthenticated("admin"), isAdmin, getAllSellers);
+router.get(
+  "/notifications",
+  isAuthenticated("admin"),
+  isAdmin,
+  getAllNotifications,
+);
 
 export default router;
