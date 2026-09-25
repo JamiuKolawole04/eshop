@@ -416,3 +416,30 @@ export const sellerNotifications = async (
     next(error);
   }
 };
+
+export const markNotificationAsRead = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { notificationId } = req.params;
+
+    if (!notificationId) {
+      throw new ValidationError("Notification id is required");
+    }
+
+    const notification = await prisma.notifications.update({
+      where: { id: notificationId },
+      data: { status: "read" },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Notification mark as read successfully",
+      notification,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

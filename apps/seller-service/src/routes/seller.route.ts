@@ -6,6 +6,7 @@ import {
   getSellerEvents,
   getSellerProducts,
   isFollowingShop,
+  markNotificationAsRead,
   sellerNotifications,
   unfollowShop,
   uploadShopAvatar,
@@ -20,6 +21,13 @@ router.get(
   isAuthenticated("seller"),
   isSeller,
   sellerNotifications,
+);
+
+router.patch(
+  "/notifications/:notificationId",
+  isAuthenticated("seller"),
+  isSeller,
+  markNotificationAsRead,
 );
 
 router.get("/shops/:shopId/products", getSellerProducts);

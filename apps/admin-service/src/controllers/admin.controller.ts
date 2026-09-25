@@ -443,6 +443,7 @@ export const getAllNotifications = async (
 
     res.status(200).json({
       success: true,
+      message: "Notifications fetched successfully",
       notifications,
     });
   } catch (error) {
