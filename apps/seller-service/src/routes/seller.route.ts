@@ -12,7 +12,12 @@ import {
   uploadShopAvatar,
   uploadShopCoverBanner,
 } from "../controllers/seller.controller";
-import { isAuthenticated, isSeller, isUser } from "@packages/middleware";
+import {
+  isAuthenticated,
+  isAuthenticatedAny,
+  isSeller,
+  isUser,
+} from "@packages/middleware";
 
 const router: Router = express.Router();
 
@@ -25,8 +30,7 @@ router.get(
 
 router.patch(
   "/notifications/:notificationId",
-  isAuthenticated("seller"),
-  isSeller,
+  isAuthenticatedAny,
   markNotificationAsRead,
 );
 

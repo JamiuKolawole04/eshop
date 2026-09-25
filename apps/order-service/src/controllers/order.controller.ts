@@ -393,7 +393,7 @@ export const createOrder = async (
               message: `A customer just ordered ${productTitle} from your shop.`,
               creatorId: userId,
               receiverId: shop.sellerId as string,
-              redirectLink: `https://eshop.com/order/${order.id}`,
+              redirectLink: `/order/${order.id}`,
             },
           });
 

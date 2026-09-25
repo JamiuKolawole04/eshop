@@ -1,4 +1,4 @@
-export type AdminNotificationsResponseType = {
+export type NotificationsResponseType = {
   success: boolean;
   message: string;
   notifications: Array<{
@@ -8,7 +8,7 @@ export type AdminNotificationsResponseType = {
     title: string;
     status: string;
     creatorId: string;
-    receiverId: "admin";
+    receiverId: string;
     redirectLink: string;
     message: string;
   }>;

@@ -3,20 +3,20 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
-import { BreadCrumbs } from "@/shared/components/breadcrumbs";
 import axiosInstance from "@/utils/axiosInstance";
-import { AdminNotificationsResponseType } from "@/types/notifications";
+import { BreadCrumbs } from "@/shared/component/breadcrumbs";
+import { NotificationsResponseType } from "@packages/ui";
 
 const fetchNotifications = async () => {
-  const response = await axiosInstance.get<AdminNotificationsResponseType>(
-    `/api/admin/notifications`,
+  const response = await axiosInstance.get<NotificationsResponseType>(
+    `/api/sellers/notifications`,
   );
 
   return response.data;
 };
 
 const Notifications = () => {
-  const { data, isLoading } = useQuery<AdminNotificationsResponseType>({
+  const { data, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: fetchNotifications,
   });
@@ -41,7 +41,7 @@ const Notifications = () => {
           {data?.notifications?.map((d) => (
             <Link
               key={d.id}
-              href={d.redirectLink}
+              href={d.redirectLink as string}
               className={`block px-5 py-4 transition ${
                 d.status !== "unread"
                   ? "hover:bg-gray-800/40"

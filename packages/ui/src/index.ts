@@ -19,3 +19,4 @@ export * from "./types/user";
 export * from "./lib/deliveryProgress";
 export * from "./types/chat";
 export * from "./types/seller";
+export * from "./types/notifications";
