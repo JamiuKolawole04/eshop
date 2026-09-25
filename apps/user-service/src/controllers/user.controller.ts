@@ -219,3 +219,20 @@ export const notifications = async (
     next(error);
   }
 };
+
+export const getLayoutData = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const layout = await prisma.site_config.findFirst();
+
+    res.status(200).json({
+      success: true,
+      layout,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

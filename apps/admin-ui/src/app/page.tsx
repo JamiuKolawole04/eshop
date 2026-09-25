@@ -99,7 +99,7 @@ const Page = () => {
           >
             {loginMutation.isPending ? (
               <Fragment>
-                <ButtonLoader size={18} className="text-white" />
+                <ButtonLoader className="text-white" />
                 Logging in...
               </Fragment>
             ) : (

@@ -13,6 +13,9 @@
       "path": "../../packages/middleware/tsconfig.lib.json"
     },
     {
+      "path": "../../packages/logs/tsconfig.lib.json"
+    },
+    {
       "path": "../../packages/prisma/tsconfig.lib.json"
     },
     {

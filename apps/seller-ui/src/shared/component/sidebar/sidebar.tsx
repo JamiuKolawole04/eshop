@@ -17,6 +17,7 @@ import {
   TicketPercent,
   LogOutIcon,
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useSeller } from "@/hooks/use-seller";
 import { useSidebar } from "@/hooks/use-sidebar";
@@ -25,9 +26,11 @@ import { Sidebar } from "./sidebar.styles";
 import { SidebarItem } from "./sidebar.item";
 import { SidebarMenu } from "./sidebar.menu";
 import { DashbaordLogo } from "@/assets/svgs/dashbaord/dashboardLogo";
+import axiosInstance from "@/utils/axiosInstance";
 
 export const SidebarWrapper = () => {
   const pathname = usePathname();
+  const queryClient = useQueryClient();
 
   const { activeSidebar, setActiveSidebar } = useSidebar();
   const { seller } = useSeller();
@@ -38,6 +41,14 @@ export const SidebarWrapper = () => {
 
   const getIconColor = (route: string) =>
     activeSidebar === route ? "#0085ff" : "#969696";
+
+  const handleLogout = async () => {
+    queryClient.removeQueries({ queryKey: ["seller-profile"] });
+
+    axiosInstance.post("/api/auth/sellers/logout").catch((err) => {
+      console.error("Seller logout request failed:", err);
+    });
+  };
 
   return (
     <Box
@@ -206,12 +217,16 @@ export const SidebarWrapper = () => {
                 }
               />
 
-              <SidebarItem
-                title="Logout"
-                href="/"
-                isActive={activeSidebar === "/logout"}
-                icon={<LogOutIcon size={20} color={getIconColor("/logout")} />}
-              />
+              <div onClick={handleLogout}>
+                <SidebarItem
+                  title="Logout"
+                  href="/"
+                  isActive={activeSidebar === "/logout"}
+                  icon={
+                    <LogOutIcon size={20} color={getIconColor("/logout")} />
+                  }
+                />
+              </div>
             </SidebarMenu>
           </div>
         </Sidebar.Body>

@@ -26,7 +26,7 @@ const Notifications = () => {
   };
 
   return (
-    <div className="w-full min-h-screen p-8">
+    <div className="w-full min-h-screen p-8 font-poppins">
       <h2 className="text-2xl text-white font-semibold mb-2">Notifications</h2>
       <BreadCrumbs title="Notifications" />
 

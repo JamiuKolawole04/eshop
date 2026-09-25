@@ -8,10 +8,12 @@ import Image from "next/image";
 import HeaderBottom from "./headerBottom";
 import { useUser } from "@/hooks/use-user";
 import { useStore } from "@/store";
+import useLayout from "@/hooks/use-layout";
 
 const Header = () => {
   const { user, isLoading } = useUser();
   const { cart, wishlist } = useStore();
+  const { layout } = useLayout();
 
   return (
     <header className="w-full bg-white">
@@ -19,10 +21,14 @@ const Header = () => {
         <div>
           <Link href="/">
             <Image
-              src="https://ik.imagekit.io/jnven3dnh3/eshop-products/E-shop-logo.png"
+              src={
+                layout?.logo ||
+                "https://ik.imagekit.io/jnven3dnh3/eshop-products/E-shop-logo.png"
+              }
               alt="logo"
               width={180}
               height={180}
+              className="object-cover"
             />
           </Link>
         </div>

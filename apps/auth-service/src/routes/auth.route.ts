@@ -42,7 +42,12 @@ router.get(
   isSeller,
   getSeller,
 );
-router.post("/auth/sellers/logout", isAuthenticated("user"), sellerLogout);
+router.post(
+  "/auth/sellers/logout",
+  isAuthenticated("seller"),
+  isSeller,
+  sellerLogout,
+);
 
 router.post("/auth/admin/login", loginAdmin);
 router.post("/auth/admin/logout", isAuthenticated("admin"), adminLogout);

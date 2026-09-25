@@ -24,6 +24,7 @@ import {
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import Link from "next/link";
 
 import { useUser } from "@/hooks/use-user";
 import { StatCard } from "@/shared/components/cards/statCard";
@@ -32,12 +33,23 @@ import { QuickActionCard } from "@/shared/components/cards/quickActionCard";
 import { ShippingAddress } from "@/shared/components/shippingAddress";
 import { ChangePassword } from "@/shared/components/changePassword";
 import { OrdersTable } from "@/shared/components/tables/ordersTable";
-import { UserOrdersResponseType } from "@packages/ui";
+import {
+  NotificationsResponseType,
+  UserOrdersResponseType,
+} from "@packages/ui";
 
 const fetchUserOrders = async () => {
   const res =
     await axiosInstance.get<UserOrdersResponseType>(`/api/orders/user`);
   return res.data.orders;
+};
+
+const fetchNotifications = async () => {
+  const response = await axiosInstance.get<NotificationsResponseType>(
+    `/api/users/notifications`,
+  );
+
+  return response.data;
 };
 
 const Page = () => {
@@ -80,6 +92,15 @@ const Page = () => {
       router.replace(`profile?${newParams.toString()}`);
     }
   }, [activeTab]);
+
+  const { data, isLoading: isNotificationsLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: fetchNotifications,
+  });
+
+  const markAsNotificationAsRead = async (notificationId: string) => {
+    await axiosInstance.patch(`/api/sellers/notifications/${notificationId}`);
+  };
 
   return (
     <div className="bg-gray-50 p-6 pb-14 font-Poppins">
@@ -212,7 +233,47 @@ const Page = () => {
             ) : activeTab === "Change Password" ? (
               <ChangePassword />
             ) : activeTab === "Notifications" ? (
-              <div className="space-y-4 text-sm"></div>
+              <div className="space-y-4 text-sm text-gray-700">
+                {!isNotificationsLoading &&
+                  data?.notifications?.length === 0 && (
+                    <p className="">No Notifications available yet!</p>
+                  )}
+
+                {!isNotificationsLoading &&
+                  (data?.notifications?.length ?? 0) > 0 && (
+                    <div className="md:w-[80%] my-6 rounded-lg divide-y divide-gray-800 bg-black/40 backdrop-blur-lg shadow-sm">
+                      {data?.notifications?.map((d) => (
+                        <Link
+                          key={d.id}
+                          href={d.redirectLink}
+                          className={`block px-5 py-4 transition ${
+                            d.status !== "unread"
+                              ? "hover:bg-gray-800/40"
+                              : "bg-gray-800/50 hover:bg-gray-800/70"
+                          }`}
+                          onClick={() => markAsNotificationAsRead(d.id)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="flex flex-col">
+                              <span className="text-white font-medium">
+                                {d.title}
+                              </span>
+                              <span className="text-gray-300 text-sm">
+                                {d.message}
+                              </span>
+                              <span className="text-gray-500 text-xs mt-1">
+                                {new Date(d.createdAt).toLocaleString("en-UK", {
+                                  dateStyle: "medium",
+                                  timeStyle: "short",
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+              </div>
             ) : (
               ""
             )}

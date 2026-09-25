@@ -1,11 +1,13 @@
 "use client";
 
+import useLayout from "@/hooks/use-layout";
 import { MoveRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export const Hero = () => {
   const router = useRouter();
+  const { layout } = useLayout();
 
   return (
     <div className="bg-[#115061] h-[85vh] flex flex-col justify-center w-full]">
@@ -36,7 +38,10 @@ export const Hero = () => {
 
         <div className="md:w-1/2 flex justify-center">
           <Image
-            src="https://ik.imagekit.io/jnven3dnh3/eshop-products/watch.png"
+            src={
+              layout?.banner ||
+              "https://ik.imagekit.io/jnven3dnh3/eshop-products/watch.png"
+            }
             alt="product"
             width={450}
             height={450}

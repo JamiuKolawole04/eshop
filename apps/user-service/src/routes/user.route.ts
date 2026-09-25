@@ -4,6 +4,7 @@ import { isAuthenticated, isUser } from "@packages/middleware";
 import {
   addUserAddress,
   deleteUserAddress,
+  getLayoutData,
   getUser,
   getUserAddresses,
   notifications,
@@ -33,6 +34,7 @@ router.delete(
 
 router.get("/profile", isAuthenticated("user"), isUser, getUser);
 router.patch("/password", isAuthenticated("user"), isUser, updateUserPassword);
-router.patch("/notifications", isAuthenticated("user"), isUser, notifications);
+router.get("/notifications", isAuthenticated("user"), isUser, notifications);
+router.get("/layouts", getLayoutData);
 
 export default router;
