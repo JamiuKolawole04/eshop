@@ -397,6 +397,28 @@ export const createOrder = async (
             },
           });
 
+          // user notification
+          await prisma.notifications.create({
+            data: {
+              title: "🎉 Order Confirmed",
+              message: `Your order has been confirmed successfully! We're now preparing your order #${order.id}.`,
+              creatorId: shop.sellerId as string,
+              receiverId: userId,
+              redirectLink: `/order/${order.id}`,
+            },
+          });
+
+          // admin notification
+          await prisma.notifications.create({
+            data: {
+              title: "📦 Platform Order Alert",
+              message: `${productTitle} was just ordered by a customer from ${shop.name}'s shop.`,
+              creatorId: userId,
+              receiverId: "admin",
+              redirectLink: `/order/${order.id}`,
+            },
+          });
+
           await redis.del(sessionKey);
         }
       }

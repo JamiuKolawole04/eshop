@@ -211,6 +211,8 @@ const Page = () => {
               <OrdersTable />
             ) : activeTab === "Change Password" ? (
               <ChangePassword />
+            ) : activeTab === "Notifications" ? (
+              <div className="space-y-4 text-sm"></div>
             ) : (
               ""
             )}
