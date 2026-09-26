@@ -4,16 +4,7 @@ import React from "react";
 import { Controller } from "react-hook-form";
 import { Plus } from "lucide-react";
 
-const defaultColors = [
-  "#000000", // black
-  "#ffffff", // white
-  "#ff0000", // Red
-  "#00ff00", // Green
-  "#0000ff", // Blue
-  "#ffff00", // Yellow
-  "#ff00ff", // Magenta
-  "#00ffff", // Cyan
-];
+import { defaultProductColors } from "../utils/color";
 
 const ColorSelector = ({ control, errors }: any) => {
   const [customColors, setCustomColors] = React.useState<string[]>([]);
@@ -30,7 +21,7 @@ const ColorSelector = ({ control, errors }: any) => {
         control={control}
         render={({ field }) => (
           <div className="flex gap-3 flex-wrap">
-            {[...defaultColors, ...customColors].map((color) => {
+            {[...defaultProductColors, ...customColors].map((color) => {
               const isSelected = (field.value || []).includes(color);
               const isLightColor = ["#ffffff", "#ffff00"].includes(color);
 

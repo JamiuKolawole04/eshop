@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Controller } from "react-hook-form";
-
-const sizes = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
+import { sizes } from "../utils/size";
 
 export const SizeSelector = ({ control, errors }: any) => {
   return (

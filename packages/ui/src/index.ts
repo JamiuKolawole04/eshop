@@ -20,3 +20,5 @@ export * from "./lib/deliveryProgress";
 export * from "./types/chat";
 export * from "./types/seller";
 export * from "./types/notifications";
+export * from "./utils/size";
+export * from "./utils/color";

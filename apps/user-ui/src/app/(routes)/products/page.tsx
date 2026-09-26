@@ -10,7 +10,9 @@ import axiosInstance from "@/utils/axiosInstance";
 import {
   GetFilteredProductsResponseType,
   ProductCategoriesTypes,
+  productColors,
   ProductWithRelationsType,
+  sizes,
 } from "@packages/ui";
 import { ProductCard } from "@/shared/components/cards/productCard";
 
@@ -26,16 +28,14 @@ const MIN = 0;
 const MAX = 1199;
 
 const colors = [
-  { name: "Black", code: "#000" },
-  { name: "Red", code: "#ff0000" },
-  { name: "Green", code: "#00ff00" },
-  { name: "Blue", code: "#0000ff" },
-  { name: "Yellow", code: "#ffff00" },
-  { name: "Magenta", code: "#ff00ff" },
-  { name: "Cyan", code: "#00ffff" },
+  { name: "Black", code: productColors.black },
+  { name: "Red", code: productColors.red },
+  { name: "Green", code: productColors.green },
+  { name: "Blue", code: productColors.blue },
+  { name: "Yellow", code: productColors.yellow },
+  { name: "Magenta", code: productColors.magenta },
+  { name: "Cyan", code: productColors.cyan },
 ];
-
-const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const Page = () => {
   const router = useRouter();
