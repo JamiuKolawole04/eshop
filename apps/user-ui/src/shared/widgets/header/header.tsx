@@ -1,111 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { Search, User, Heart, ShoppingCart } from "lucide-react";
-import { Fragment } from "react";
+import { Search } from "lucide-react";
 import Image from "next/image";
 
 import HeaderBottom from "./headerBottom";
-import { useUser } from "@/hooks/use-user";
-import { useStore } from "@/store";
+import { HeaderActions } from "./headerActions";
 import useLayout from "@/hooks/use-layout";
 
 const Header = () => {
-  const { user, isLoading } = useUser();
-  const { cart, wishlist } = useStore();
   const { layout } = useLayout();
 
   return (
     <header className="w-full bg-white">
-      <div className="w-[80%] py-5 m-auto flex items-center justify-between">
-        <div>
-          <Link href="/">
-            <Image
-              src={
-                layout?.logo ||
-                "https://ik.imagekit.io/jnven3dnh3/eshop-products/E-shop-logo.png"
-              }
-              alt="logo"
-              width={180}
-              height={180}
-              className="object-cover"
-            />
-          </Link>
-        </div>
+      <div className="w-[92%] md:w-[80%] m-auto py-3 md:py-5 flex flex-wrap md:flex-nowrap items-center justify-between gap-x-4 gap-y-3">
+        <Link href="/" className="shrink-0">
+          <Image
+            src={
+              layout?.logo ||
+              "https://ik.imagekit.io/jnven3dnh3/eshop-products/E-shop-logo.png"
+            }
+            alt="logo"
+            width={180}
+            height={180}
+            priority
+            className="object-cover h-auto w-[110px] sm:w-[140px] md:w-[150px] lg:w-[180px]"
+          />
+        </Link>
 
-        <div className="w-[50%] relative">
+        <div className="order-last md:order-none w-full md:w-auto md:flex-1 md:max-w-[600px] relative">
           <input
             type="text"
             placeholder="Search for products..."
-            className="w-full px-4 font-Poppins font-medium border-[2.5px] border-[#3489ff] outline-none h-[55px]"
+            className="w-full px-3 md:px-4 pr-14 font-Poppins font-medium text-base border-2 md:border-[2.5px] border-[#3489ff] outline-none h-[44px] md:h-[55px]"
           />
-
-          <div className="w-[60px] cursor-pointer flex items-center justify-center h-[55px] bg-[#3489ff] absolute top-0 right-0">
-            <Search color="#fff" />
-          </div>
+          <button
+            type="button"
+            aria-label="Search"
+            className="w-[48px] md:w-[60px] h-[44px] md:h-[55px] cursor-pointer flex items-center justify-center bg-[#3489ff] absolute top-0 right-0"
+          >
+            <Search color="#fff" className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
         </div>
 
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2">
-            {!isLoading && user ? (
-              <Fragment>
-                <Link href="/profile">
-                  <User size={18} className="text-gray-600" />
-                </Link>
-
-                <Link href="/profile">
-                  <span className="block font-medium text-sm font-Poppins">
-                    Hello,
-                  </span>
-                  <span className="font-semibold text-sm font-Poppins">
-                    {user?.name.split(" ")[0]}
-                  </span>
-                </Link>
-              </Fragment>
-            ) : (
-              <Fragment>
-                <Link
-                  href="/login"
-                  className="border-2 w-[40px] h-[40px] flex items-center justify-center rounded-full border-[#010f1c1a]"
-                >
-                  <User size={18} className="text-gray-600" />
-                </Link>
-
-                <Link href="/login">
-                  <span className="block font-medium text-sm font-Poppins">
-                    Hello,
-                  </span>
-                  <span className="font-semibold text-sm font-Poppins">
-                    {/*{isLoading ? "..." : "Sign In"}*/}
-                    Sign In
-                  </span>
-                </Link>
-              </Fragment>
-            )}
-          </div>
-
-          <div className="flex items-center gap-5">
-            <Link href="/wishlist" className="relative">
-              <Heart size={20} className="text-gray-600" />
-
-              <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                <span className="text-white font-medium text-sm">
-                  {wishlist?.length}
-                </span>
-              </div>
-            </Link>
-
-            <Link href="/cart" className="relative">
-              <ShoppingCart size={20} className="text-gray-600" />
-
-              <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                <span className="text-white font-medium text-sm">
-                  {cart?.length}
-                </span>
-              </div>
-            </Link>
-          </div>
-        </div>
+        <HeaderActions />
       </div>
 
       <div className="border-b border-b-[#99999938]">

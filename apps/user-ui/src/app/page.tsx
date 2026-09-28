@@ -76,7 +76,11 @@ export default function Page() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const { data: topOffers, isLoading: isTopOffersLoading } = useQuery({
+  const {
+    data: topOffers,
+    isLoading: isTopOffersLoading,
+    isError: isTopOffersError,
+  } = useQuery({
     queryKey: ["offers"],
     queryFn: fetchTopOffers,
     staleTime: 1000 * 60 * 5,
@@ -114,7 +118,11 @@ export default function Page() {
           <p className="text-center font-Roboto">No products available yet</p>
         )}
 
-        {isLoading && (
+        <div className="my-6 sm:my-8 block">
+          <SectionTitle title="Latest Products" />
+        </div>
+
+        {isLatestProductLoading && (
           <div className={GRID}>
             {Array.from({ length: 10 }).map((_, index) => (
               <div
@@ -124,10 +132,6 @@ export default function Page() {
             ))}
           </div>
         )}
-
-        <div className="my-6 sm:my-8 block">
-          <SectionTitle title="Latest Products" />
-        </div>
 
         {!isLatestProductLoading && (
           <div className={`m-auto ${GRID}`}>
@@ -145,10 +149,21 @@ export default function Page() {
           <SectionTitle title="Top Shops" />
         </div>
 
+        {isTopShopsLoading && (
+          <div className={GRID}>
+            {Array.from({ length: 10 }).map((_, index) => (
+              <div
+                key={index + 1}
+                className="h-[280px] sm:h-[350px] bg-gray-300 animate-pulse rounded-xl"
+              />
+            ))}
+          </div>
+        )}
+
         {!isTopShopsLoading && (
           <div className={`m-auto ${GRID}`}>
-            {topShops?.map((topShops) => (
-              <ShopCard key={topShops.id} shop={topShops} />
+            {topShops?.map((topShop) => (
+              <ShopCard key={topShop.id} shop={topShop} />
             ))}
           </div>
         )}
@@ -161,7 +176,7 @@ export default function Page() {
           <SectionTitle title="Top Offers" />
         </div>
 
-        {!isTopOffersLoading && !isError && (
+        {!isTopOffersLoading && !isTopOffersError && (
           <div className={`m-auto ${GRID} pb-5`}>
             {topOffers?.map((productOffers) => (
               <ProductCard
