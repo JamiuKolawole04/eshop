@@ -22,3 +22,4 @@ export * from "./types/seller";
 export * from "./types/notifications";
 export * from "./utils/size";
 export * from "./utils/color";
+export * from "./lib/ratings";

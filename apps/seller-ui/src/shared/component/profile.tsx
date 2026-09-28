@@ -14,6 +14,7 @@ import {
   GetSellerProductsByUserResponseType,
   ShopType,
 } from "@packages/ui";
+import { ProductCard } from "./cards/productCard";
 
 const TABS = ["Products", "Offers", "Reviews"];
 
@@ -187,9 +188,9 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
                     className="h-[250px] bg-slate-700/50 animate-pulse rounded-xl"
                   ></div>
                 ))}
-              {/*{products?.map((product) => (
+              {products?.map((product) => (
                 <ProductCard key={product.id} product={product} />
-              ))}*/}
+              ))}
               {products?.length === 0 && (
                 <p className="py-2">No products available yet!</p>
               )}
@@ -205,13 +206,13 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
                     className="h-[250px] bg-slate-700/50 animate-pulse rounded-xl"
                   ></div>
                 ))}
-              {/*{events?.map((product) => (
+              {events?.map((product) => (
                 <ProductCard
                   isEvent={true}
                   key={product.id}
                   product={product}
                 />
-              ))}*/}
+              ))}
               {events?.length === 0 && (
                 <p className="py-2">No offers available yet!</p>
               )}

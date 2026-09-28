@@ -8,8 +8,8 @@ import { useMutation } from "@tanstack/react-query";
 import {
   CreateConversationResponseType,
   ProductWithRelationsType,
+  Ratings,
 } from "@packages/ui";
-import Ratings from "../ratings";
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
 import { useLocationTracking } from "@/hooks/use-location-tracking";

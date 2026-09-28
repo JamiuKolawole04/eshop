@@ -2,8 +2,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Eye, Heart, ShoppingBag } from "lucide-react";
 
-import Ratings from "../ratings";
-import { ProductWithRelationsType } from "@packages/ui";
+import { ProductWithRelationsType, Ratings } from "@packages/ui";
 import { ProductDetailsCard } from "./productDetailsCard";
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
