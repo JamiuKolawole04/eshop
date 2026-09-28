@@ -50,6 +50,9 @@ const fetchTopOffers = async () => {
   return response.data.events;
 };
 
+const GRID =
+  "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5";
+
 export default function Page() {
   const {
     data: products,
@@ -80,27 +83,27 @@ export default function Page() {
   });
 
   return (
-    <div className="bg-[#f5f5f5]">
+    <div className="bg-[#f5f5f5] overflow-x-hidden">
       <Hero />
 
-      <div className="md:w-[80%] w-90% mt-10 m-auto">
-        <div className="mb-8">
+      <div className="w-[92%] md:w-[80%] mt-6 sm:mt-10 m-auto">
+        <div className="mb-6 sm:mb-8">
           <SectionTitle title="Suggested Products" />
         </div>
 
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5">
+          <div className={GRID}>
             {Array.from({ length: 10 }).map((_, index) => (
               <div
                 key={index + 1}
-                className="h-[250px] bg-gray-300 animate-pulse rounded-xl"
+                className="h-[280px] sm:h-[350px] bg-gray-300 animate-pulse rounded-xl"
               />
             ))}
           </div>
         )}
 
         {!isLoading && !isError && (
-          <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5">
+          <div className={`m-auto ${GRID}`}>
             {products?.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -112,22 +115,22 @@ export default function Page() {
         )}
 
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5">
+          <div className={GRID}>
             {Array.from({ length: 10 }).map((_, index) => (
               <div
                 key={index + 1}
-                className="h-[250px] bg-gray-300 animate-pulse rounded-xl"
+                className="h-[280px] sm:h-[350px] bg-gray-300 animate-pulse rounded-xl"
               />
             ))}
           </div>
         )}
 
-        <div className="my-8 block">
+        <div className="my-6 sm:my-8 block">
           <SectionTitle title="Latest Products" />
         </div>
 
         {!isLatestProductLoading && (
-          <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5">
+          <div className={`m-auto ${GRID}`}>
             {latestProducts?.map((latestProduct) => (
               <ProductCard key={latestProduct.id} product={latestProduct} />
             ))}
@@ -138,12 +141,12 @@ export default function Page() {
           <p className="text-center font-Roboto">No products available yet</p>
         )}
 
-        <div className="my-8 block">
+        <div className="my-6 sm:my-8 block">
           <SectionTitle title="Top Shops" />
         </div>
 
         {!isTopShopsLoading && (
-          <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5">
+          <div className={`m-auto ${GRID}`}>
             {topShops?.map((topShops) => (
               <ShopCard key={topShops.id} shop={topShops} />
             ))}
@@ -154,12 +157,12 @@ export default function Page() {
           <p className="text-center font-Roboto">No shops available yet</p>
         )}
 
-        <div className="my-8 block">
+        <div className="my-6 sm:my-8 block">
           <SectionTitle title="Top Offers" />
         </div>
 
         {!isTopOffersLoading && !isError && (
-          <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5 pb-5">
+          <div className={`m-auto ${GRID} pb-5`}>
             {topOffers?.map((productOffers) => (
               <ProductCard
                 key={productOffers.id}

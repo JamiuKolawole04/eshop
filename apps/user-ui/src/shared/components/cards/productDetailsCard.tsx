@@ -70,7 +70,7 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
       onClick={() => setIsOpen(false)}
     >
       <div
-        className="w-[90%] md:w-[70%] md:mt-14 2xl:mt-0 h-max overflow-scroll min-h-[70vh] p-4 md:p-6 bg-white shadow-md rounded-lg"
+        className="w-[95%] sm:w-[90%] md:w-[80%] lg:w-[70%] md:mt-14 2xl:mt-0 h-max max-h-[85vh] overflow-y-auto min-h-[50vh] md:min-h-[70vh] p-3 sm:p-4 md:p-6 bg-white shadow-md rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-full flex flex-col md:flex-row">
@@ -80,14 +80,14 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
               alt={data?.images[activeImage]?.url}
               width={400}
               height={400}
-              className="w-full rounded-lg object-contain"
+              className="w-full max-h-[40vh] sm:max-h-[50vh] md:max-h-none rounded-lg object-contain"
             />
 
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
               {data?.images?.map((img, index) => (
                 <div
                   key={index + 1}
-                  className={`cursor-pointer border rounded-md ${activeImage === index ? "border-gray-500 p-1" : "border-transparent"}`}
+                  className={`cursor-pointer shrink-0 border rounded-md ${activeImage === index ? "border-gray-500 p-1" : "border-transparent"}`}
                   onClick={() => setActiveImage(index)}
                 >
                   <Image
@@ -95,28 +95,28 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
                     alt={`Thumbnail ${index}`}
                     width={80}
                     height={80}
-                    className="rounded-md"
+                    className="rounded-md w-14 h-14 sm:w-20 sm:h-20 object-cover"
                   />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="w-full md:w-1/2 md:pl-8 mt-6 md:mt-0">
-            <div className="border-b relative pb-3 border-gray-200 flex items-center justify-between">
-              <div className="flex items-start gap-3">
+          <div className="w-full md:w-1/2 md:pl-8 mt-6 md:mt-0 min-w-0">
+            <div className="border-b relative pb-3 border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3 pr-6 sm:pr-0 min-w-0">
                 <Image
                   src={data?.shop?.avatar}
                   alt="shop-logo"
                   width={60}
                   height={60}
-                  className="rounded-full w-[60px] h-[60px] object-cover"
+                  className="rounded-full w-[48px] h-[48px] sm:w-[60px] sm:h-[60px] shrink-0 object-cover"
                 />
 
-                <div>
+                <div className="min-w-0">
                   <Link
                     href={`/shop/${data?.shop?.id}`}
-                    className="text-lg font-medium"
+                    className="text-base sm:text-lg font-medium break-words"
                   >
                     {data?.shop.name}
                   </Link>
@@ -126,27 +126,29 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
                   </span>
 
                   <p className="text-gray-600 mt-1 flex items-center text-xs">
-                    <MapPin size={16} className="mr-0.5" />
+                    <MapPin size={16} className="mr-0.5 shrink-0" />
                     {data?.shop?.address || "Location Not Available"}
                   </p>
                 </div>
               </div>
 
               <button
-                className="text-xs inline-flex w-fit cursor-pointer items-center gap-2 px-2 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium hover:scale-105 transition"
+                className="text-xs inline-flex w-fit shrink-0 whitespace-nowrap cursor-pointer items-center gap-2 px-2 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium hover:scale-105 transition"
                 onClick={handleChat}
               >
                 💬 Chat with Seller
               </button>
 
-              <button className="w-full absolute cursor-pointer right-[-5px] top-[-5px] flex justify-end my-2 mt-[-10px]">
+              <button className="w-fit absolute cursor-pointer right-[-5px] top-[-5px] flex justify-end my-2 mt-[-10px]">
                 <X size={22} onClick={() => setIsOpen(false)} />
               </button>
             </div>
 
-            <h3 className="text-xl font-semibold mt-3">{data?.title}</h3>
+            <h3 className="text-lg sm:text-xl font-semibold mt-3 break-words">
+              {data?.title}
+            </h3>
 
-            <p className="mt-2 text-gray-300 whitespace-pre-wrap w-full">
+            <p className="mt-2 text-gray-300 whitespace-pre-wrap break-words w-full text-sm sm:text-base">
               {data?.short_description}
             </p>
 
@@ -157,11 +159,11 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
               </p>
             )}
 
-            <div className="flex flex-col md:flex-row items-start gap-5 mt-4">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start gap-4 sm:gap-5 mt-4">
               {data?.colors?.length > 0 && (
                 <div>
                   <strong>Color:</strong>
-                  <div className="flex gap-2 mt-1">
+                  <div className="flex flex-wrap gap-2 mt-1">
                     {data.colors.map((color, index) => (
                       <button
                         key={index + 1}
@@ -177,11 +179,11 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
               {data?.sizes?.length > 0 && (
                 <div>
                   <strong>Size:</strong>
-                  <div className="flex gap-2 mt-1">
+                  <div className="flex flex-wrap gap-2 mt-1">
                     {data.sizes.map((size, index) => (
                       <button
                         key={index + 1}
-                        className={`px-4 py-1 cursor-pointer rounded-md transition ${isSizeSelected === size ? "bg-gray-800 text-white" : "bg-gray-300 text-black"}`}
+                        className={`px-3 sm:px-4 py-1 cursor-pointer rounded-md transition ${isSizeSelected === size ? "bg-gray-800 text-white" : "bg-gray-300 text-black"}`}
                         onClick={() => setIsSizeSelected(size)}
                       >
                         {size}
@@ -192,19 +194,19 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
               )}
             </div>
 
-            <div className="mt-5 flex items-center gap-4">
-              <h3 className="text-2xl font-semibold text-gray-900">
+            <div className="mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">
                 ${data?.sale_price}
               </h3>
 
               {data?.regular_price && (
-                <h3 className="text-lg text-red-600 line-through">
+                <h3 className="text-base sm:text-lg text-red-600 line-through">
                   ${data.regular_price}
                 </h3>
               )}
             </div>
 
-            <div className="mt-5 flex items-center gap-5">
+            <div className="mt-5 flex flex-wrap items-center gap-3 sm:gap-5">
               <div className="flex items-center rounded-md">
                 <button
                   className="px-3 cursor-pointer py-1 bg-gray-300 hover:bg-gray-400 text-black font-semibold rounded-l-md"
@@ -240,7 +242,7 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
                     deviceInfo,
                   )
                 }
-                className={`flex items-center gap-2 px-4 py-2 bg-[#ff5722] hover:bg-[#e64a19] text-white font-medium rounded-lg transition ${isInCart ? "cursor-not-allowed" : "cursor-pointer"}`}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base whitespace-nowrap bg-[#ff5722] hover:bg-[#e64a19] text-white font-medium rounded-lg transition ${isInCart ? "cursor-not-allowed" : "cursor-pointer"}`}
               >
                 <ShoppingCartIcon size={18} />
                 Add to cart
@@ -249,6 +251,7 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
               <button className={`opacity-[.7] cursor-pointer`}>
                 <Heart
                   size={30}
+                  className="w-6 h-6 sm:w-[30px] sm:h-[30px]"
                   onClick={() =>
                     isWishListed
                       ? removeFromWishlist(data.id, user, location, deviceInfo)
@@ -280,7 +283,7 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
               )}
             </div>
 
-            <div className="mt-3 text-gray-600 text-sm">
+            <div className="mt-3 text-gray-600 text-xs sm:text-sm">
               Estimated Delivery :
               <strong className="ml-1">
                 {estimatedDelivery.toDateString()}
