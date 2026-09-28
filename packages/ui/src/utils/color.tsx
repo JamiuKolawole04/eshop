@@ -10,3 +10,14 @@ export const productColors = {
 } as const;
 
 export const defaultProductColors = Object.values(productColors);
+
+export const EXCLUDED_COLOR_KEYS = new Set(["white"]);
+
+export const productColorOptions = (
+  Object.entries(productColors) as [keyof typeof productColors, string][]
+)
+  .filter(([key]) => !EXCLUDED_COLOR_KEYS.has(key))
+  .map(([key, code]) => ({
+    name: `${key[0].toUpperCase()}${key.slice(1)}`,
+    code,
+  }));

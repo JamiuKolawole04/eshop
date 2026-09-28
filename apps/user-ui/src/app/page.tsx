@@ -83,7 +83,7 @@ export default function Page() {
     <div className="bg-[#f5f5f5]">
       <Hero />
 
-      <div className="md:w-[80%] w-90% my-10 m-auto">
+      <div className="md:w-[80%] w-90% mt-10 m-auto">
         <div className="mb-8">
           <SectionTitle title="Suggested Products" />
         </div>
@@ -159,7 +159,7 @@ export default function Page() {
         </div>
 
         {!isTopOffersLoading && !isError && (
-          <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5">
+          <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-5 pb-5">
             {topOffers?.map((productOffers) => (
               <ProductCard
                 key={productOffers.id}
@@ -171,7 +171,9 @@ export default function Page() {
         )}
 
         {topOffers?.length === 0 && (
-          <p className="text-center font-Roboto">No offers available yet</p>
+          <p className="text-center font-Roboto pb-5">
+            No offers available yet
+          </p>
         )}
       </div>
     </div>

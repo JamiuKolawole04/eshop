@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import Providers from "@/shared/context/providers";
 import Header from "@/shared/widgets/header";
 import "./global.css";
+import { Footer } from "@/shared/components/footer";
 
 export const metadata: Metadata = {
   title: "Welcome to user-ui",
@@ -41,6 +42,7 @@ export default function RootLayout({
         <Providers>
           <Header />
           {children}
+          <Footer />
         </Providers>
       </body>
     </html>

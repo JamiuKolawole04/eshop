@@ -40,7 +40,6 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
   const router = useRouter();
 
   const [openImageModal, setOpenImageModal] = useState<boolean>(false);
-  const [isChanged, setIsChanged] = useState<boolean>(true);
   const [activeEffect, setActiveEffect] = useState<string | null>(null);
   const [pictureUploadingLoader, setPictureUploadingLoader] =
     useState<boolean>(false);
@@ -168,10 +167,6 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
     }
   };
 
-  const handleSaveDraft = async () => {
-    console.log("save draft");
-  };
-
   const onSubmit = async (data: any) => {
     try {
       setLoading(true);
@@ -190,7 +185,7 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
 
   return (
     <form
-      className="w-full mx-auto p-8 shadow-md rounded-lg text-white"
+      className="w-full mx-auto p-8 shadow-md rounded-lg text-white font-Poppins"
       onSubmit={handleSubmit(onSubmit)}
     >
       <h2 className="text-2xl py-2 font-semibold font-Poppins">
@@ -316,7 +311,7 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
               <div className="mt-2">
                 <Input
                   label="Slug *"
-                  placeholder="product_slug"
+                  placeholder="product-slug"
                   {...register("slug", {
                     required: "Slug is required!",
                     pattern: {
@@ -747,7 +742,7 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
       )}
 
       <div className="mt-6 flex justify-end gap-3">
-        {isChanged && (
+        {/*{isChanged && (
           <button
             type="button"
             className="px-4 py-2 bg-gray-700 text-white rounded-md text-sm"
@@ -755,7 +750,7 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
           >
             Save Draft
           </button>
-        )}
+        )}*/}
 
         <button
           type="submit"

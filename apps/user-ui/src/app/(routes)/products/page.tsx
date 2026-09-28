@@ -10,8 +10,8 @@ import axiosInstance from "@/utils/axiosInstance";
 import {
   GetFilteredProductsResponseType,
   ProductCategoriesTypes,
-  productColors,
   ProductWithRelationsType,
+  productColorOptions,
   sizes,
 } from "@packages/ui";
 import { ProductCard } from "@/shared/components/cards/productCard";
@@ -26,16 +26,6 @@ async function fetchProductCategories() {
 
 const MIN = 0;
 const MAX = 1199;
-
-const colors = [
-  { name: "Black", code: productColors.black },
-  { name: "Red", code: productColors.red },
-  { name: "Green", code: productColors.green },
-  { name: "Blue", code: productColors.blue },
-  { name: "Yellow", code: productColors.yellow },
-  { name: "Magenta", code: productColors.magenta },
-  { name: "Cyan", code: productColors.cyan },
-];
 
 const Page = () => {
   const router = useRouter();
@@ -238,7 +228,7 @@ const Page = () => {
               Filter by Color
             </h3>
             <ul className="space-y-2 !mt-3">
-              {colors.map((color) => (
+              {productColorOptions.map((color) => (
                 <li
                   key={color.name}
                   className="flex items-center justify-between"
