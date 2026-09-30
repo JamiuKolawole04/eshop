@@ -1,15 +1,27 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { Calendar, Clock, Globe, MapPin, Star, Users } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  CloudUpload,
+  Globe,
+  MapPin,
+  Pencil,
+  Star,
+  Trash2,
+  Users,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import axiosInstance from "@/utils/axiosInstance";
 import {
+  ButtonLoader,
   GetSellerEventsByUserResponseType,
   GetSellerProductsByUserResponseType,
   ShopType,
@@ -25,9 +37,131 @@ type Props = {
   followersCount: number;
 };
 
+type UploadTarget = "avatar" | "cover";
+
+type ImageUploadModalProps = {
+  title: string;
+  isSaving: boolean;
+  onClose: () => void;
+  onSave: (base64Image: string) => void;
+};
+
+const ImageUploadModal = ({
+  title,
+  isSaving,
+  onClose,
+  onSave,
+}: ImageUploadModalProps) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isSaving) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose, isSaving]);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => setPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleReset = () => {
+    setPreview(null);
+    if (inputRef.current) inputRef.current.value = "";
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+      onClick={() => !isSaving && onClose()}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-800 p-5 shadow-2xl"
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-white">{title}</h3>
+          <button
+            onClick={onClose}
+            disabled={isSaving}
+            aria-label="Close"
+            className="text-slate-400 transition-colors hover:text-white disabled:opacity-50"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFile}
+          className="hidden"
+        />
+
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="mt-4 flex h-52 w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-md border border-dashed border-slate-600 bg-slate-900/60 text-sm text-slate-400 transition-colors hover:border-blue-500 hover:text-slate-200"
+        >
+          {preview ? (
+            <img
+              src={preview}
+              alt="Selected preview"
+              className="h-full w-full object-contain"
+            />
+          ) : (
+            <>
+              <CloudUpload size={28} />
+              <span>Click to upload</span>
+            </>
+          )}
+        </button>
+
+        <div className="mt-4 flex items-center justify-between">
+          <button
+            onClick={handleReset}
+            disabled={!preview || isSaving}
+            className="flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Trash2 size={16} />
+            Reset
+          </button>
+
+          <button
+            onClick={() => preview && onSave(preview)}
+            disabled={!preview || isSaving}
+            className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {isSaving && <ButtonLoader size={16} />}
+            {isSaving ? "Saving..." : "Save image"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const SellerProfile = ({ shop, followersCount }: Props) => {
   const [activeTab, setActiveTab] = useState("Products");
   const [followers] = useState(followersCount);
+
+  const [uploadTarget, setUploadTarget] = useState<UploadTarget | null>(null);
+
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(shop?.avatar);
+  const [coverUrl, setCoverUrl] = useState<string | undefined>(
+    shop?.coverBanner,
+  );
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["seller-products", shop?.id],
@@ -53,12 +187,39 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
     staleTime: 1000 * 60 * 5,
   });
 
+  const uploadMutation = useMutation({
+    mutationFn: async ({
+      target,
+      image,
+    }: {
+      target: UploadTarget;
+      image: string;
+    }) => {
+      const endpoint =
+        target === "avatar"
+          ? `/api/sellers/shops/avatar`
+          : `/api/sellers/shops/cover-banner`;
+
+      const res = await axiosInstance.post<{ url?: string }>(endpoint, {
+        image,
+      });
+      return { target, image, url: res.data?.url };
+    },
+    onSuccess: ({ target, image, url }) => {
+      const finalUrl = url ?? image;
+      if (target === "avatar") setAvatarUrl(finalUrl);
+      else setCoverUrl(finalUrl);
+      setUploadTarget(null);
+    },
+  });
+
   return (
     <div>
+      {/* Cover */}
       <div className="relative w-full flex justify-center">
         <Image
           src={
-            shop?.coverBanner ||
+            coverUrl ||
             "https://ik.imagekit.io/fzoxzwtey/cover/1200%20x%20300.svg?updatedAt=1742..."
           }
           alt="Seller Cover"
@@ -66,27 +227,57 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
           width={1200}
           height={300}
         />
+
+        <button
+          onClick={() => setUploadTarget("cover")}
+          className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-md bg-slate-900/80 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-slate-900"
+        >
+          <Pencil size={14} />
+          Edit Cover
+        </button>
       </div>
 
       {/* Seller Info Section */}
       <div className="w-[85%] lg:w-[70%] mt-[-50px] mx-auto relative z-20 flex flex-col lg:flex-row gap-6">
         <div className={`${CARD} p-6 flex-1`}>
           <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-            <div className="relative w-[100px] h-[100px] shrink-0 rounded-full border-4 border-slate-600 overflow-hidden">
-              <Image
-                src={
-                  shop?.avatar ||
-                  "https://ik.imagekit.io/fzoxzwtey/avatar/amazon.jpeg"
-                }
-                alt="Seller Avatar"
-                layout="fill"
-                objectFit="cover"
-              />
+            <div className="relative w-[100px] h-[100px] shrink-0">
+              <div className="relative h-full w-full rounded-full border-4 border-slate-600 overflow-hidden">
+                <Image
+                  src={
+                    avatarUrl ||
+                    "https://ik.imagekit.io/fzoxzwtey/avatar/amazon.jpeg"
+                  }
+                  alt="Seller Avatar"
+                  layout="fill"
+                  objectFit="cover"
+                />
+              </div>
+
+              <button
+                onClick={() => setUploadTarget("avatar")}
+                aria-label="Edit profile picture"
+                className="absolute bottom-0 right-0 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-slate-600 bg-blue-600 text-white transition-colors hover:bg-blue-500"
+              >
+                <Pencil size={13} />
+              </button>
             </div>
+
             <div className="flex-1 w-full">
-              <h1 className="text-2xl font-semibold text-white">
-                {shop?.name}
-              </h1>
+              <div className="flex items-start justify-between gap-3">
+                <h1 className="text-2xl font-semibold text-white">
+                  {shop?.name}
+                </h1>
+
+                <Link
+                  href="/dashboard/shop/edit"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-600"
+                >
+                  <Pencil size={14} />
+                  Edit Profile
+                </Link>
+              </div>
+
               <p className="text-slate-400 text-sm mt-1">
                 {shop?.bio || "No bio available."}
               </p>
@@ -189,7 +380,11 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
                   ></div>
                 ))}
               {products?.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/product/${product?.slug}`}
+                />
               ))}
               {products?.length === 0 && (
                 <p className="py-2">No products available yet!</p>
@@ -211,6 +406,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
                   isEvent={true}
                   key={product.id}
                   product={product}
+                  href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/product/${product?.slug}`}
                 />
               ))}
               {events?.length === 0 && (
@@ -226,6 +422,22 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
           )}
         </div>
       </div>
+
+      {/* Upload modals */}
+      {uploadTarget && (
+        <ImageUploadModal
+          title={
+            uploadTarget === "avatar"
+              ? "Edit Profile Picture"
+              : "Edit Cover Photo"
+          }
+          isSaving={uploadMutation.isPending}
+          onClose={() => setUploadTarget(null)}
+          onSave={(image) =>
+            uploadMutation.mutate({ target: uploadTarget, image })
+          }
+        />
+      )}
     </div>
   );
 };

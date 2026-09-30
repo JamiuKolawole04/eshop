@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import {
@@ -31,6 +31,7 @@ import axiosInstance from "@/utils/axiosInstance";
 export const SidebarWrapper = () => {
   const pathname = usePathname();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { activeSidebar, setActiveSidebar } = useSidebar();
   const { seller } = useSeller();
@@ -44,6 +45,7 @@ export const SidebarWrapper = () => {
 
   const handleLogout = async () => {
     queryClient.removeQueries({ queryKey: ["seller-profile"] });
+    router.push("/login");
 
     axiosInstance.post("/api/auth/sellers/logout").catch((err) => {
       console.error("Seller logout request failed:", err);
