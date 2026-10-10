@@ -240,7 +240,7 @@ const SellerProfile = ({ shop, followersCount, sellerId }: Props) => {
         <Image
           src={
             coverUrl ||
-            "https://ik.imagekit.io/fzoxzwtey/cover/1200%20x%20300.svg?updatedAt=1742..."
+            "https://ik.imagekit.io/fzoxzwtey/cover/1200%20x%20300.svg"
           }
           alt="Seller Cover"
           className="w-full h-40 sm:h-64 lg:h-[400px] object-cover"
