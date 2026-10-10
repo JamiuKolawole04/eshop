@@ -6,8 +6,8 @@ import Link from "next/link";
 
 import { useSeller } from "@/hooks/use-seller";
 import axiosInstance from "@/utils/axiosInstance";
-import { FetchSellerDetailsResponseType } from "@packages/ui";
-import SellerProfile from "@/shared/component/profile";
+import { FetchSellerDetailsResponseType, ButtonLoader } from "@packages/ui";
+import SellerProfile from "@/shared/component/shop/profile";
 
 async function fetchSellerDetails(id: string) {
   const response = await axiosInstance.get<FetchSellerDetailsResponseType>(
@@ -29,7 +29,9 @@ const Page = () => {
 
   if (isLoading)
     return (
-      <p className="font-Poppins text-white text-center">Loading shop...</p>
+      <div className="flex items-center justify-center">
+        <ButtonLoader className="text-white mt-5" />
+      </div>
     );
   if ((!isLoading && isError) || !data?.shop)
     return (
@@ -47,7 +49,11 @@ const Page = () => {
           Back to Dashboard
         </Link>
       </div>
-      <SellerProfile shop={data?.shop} followersCount={data?.followersCount} />
+      <SellerProfile
+        shop={data?.shop}
+        followersCount={data?.followersCount}
+        sellerId={seller?.id}
+      />
     </div>
   );
 };

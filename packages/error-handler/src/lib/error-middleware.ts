@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 
 import { AppError } from "./error-handler.js";
 
+type BodyParserError = Error & { type?: string };
+
 export const ErrorMiddleware = (
   err: Error,
   req: Request,
@@ -29,6 +31,22 @@ export const ErrorMiddleware = (
       status: "error",
       message: err.message,
       ...(err.cause ? { details: err.cause } : {}),
+    });
+  }
+
+  const bodyError = err as BodyParserError;
+
+  if (bodyError.type === "entity.too.large") {
+    return res.status(413).json({
+      status: "error",
+      message: "The uploaded file is too large. Please choose a smaller image.",
+    });
+  }
+
+  if (bodyError.type === "entity.parse.failed") {
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid request body.",
     });
   }
 

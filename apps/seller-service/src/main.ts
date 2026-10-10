@@ -9,6 +9,10 @@ const port = process.env.PORT ? Number(process.env.PORT) : 6007;
 
 const app = express();
 
+app.use(
+  ["/shops/avatar", "/shops/cover-banner"],
+  express.json({ limit: "10mb" }),
+);
 app.use(express.json());
 app.use(cookieParser());
 

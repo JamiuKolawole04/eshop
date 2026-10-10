@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import {
@@ -18,6 +18,8 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 import axiosInstance from "@/utils/axiosInstance";
 import {
@@ -26,7 +28,7 @@ import {
   GetSellerProductsByUserResponseType,
   ShopType,
 } from "@packages/ui";
-import { ProductCard } from "./cards/productCard";
+import { ProductCard } from "../cards/productCard";
 
 const TABS = ["Products", "Offers", "Reviews"];
 
@@ -35,6 +37,7 @@ const CARD = "bg-slate-800 border border-slate-700/60 rounded-lg shadow-lg";
 type Props = {
   shop: ShopType;
   followersCount: number;
+  sellerId: string;
 };
 
 type UploadTarget = "avatar" | "cover";
@@ -66,6 +69,12 @@ const ImageUploadModal = ({
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image must be 5MB or smaller.");
+      toast("Image must be 5MB or smaller.");
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = () => setPreview(reader.result as string);
@@ -152,7 +161,8 @@ const ImageUploadModal = ({
   );
 };
 
-const SellerProfile = ({ shop, followersCount }: Props) => {
+const SellerProfile = ({ shop, followersCount, sellerId }: Props) => {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("Products");
   const [followers] = useState(followersCount);
 
@@ -200,16 +210,26 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
           ? `/api/sellers/shops/avatar`
           : `/api/sellers/shops/cover-banner`;
 
-      const res = await axiosInstance.post<{ url?: string }>(endpoint, {
-        image,
+      const res = await axiosInstance.post(endpoint, {
+        fileName: image,
       });
-      return { target, image, url: res.data?.url };
+      return { target, image, url: res.data?.avatar ?? res.data?.coverBanner };
     },
     onSuccess: ({ target, image, url }) => {
+      queryClient.invalidateQueries({ queryKey: ["shop-details", sellerId] });
+
       const finalUrl = url ?? image;
       if (target === "avatar") setAvatarUrl(finalUrl);
       else setCoverUrl(finalUrl);
       setUploadTarget(null);
+    },
+    onError: (err) => {
+      const fallback = "Something went wrong.Please try again later";
+
+      const error = axios.isAxiosError(err)
+        ? (err.response?.data?.message ?? fallback)
+        : fallback;
+      toast(error);
     },
   });
 
@@ -223,14 +243,14 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
             "https://ik.imagekit.io/fzoxzwtey/cover/1200%20x%20300.svg?updatedAt=1742..."
           }
           alt="Seller Cover"
-          className="w-full h-[400px] object-cover"
+          className="w-full h-40 sm:h-64 lg:h-[400px] object-cover"
           width={1200}
           height={300}
         />
 
         <button
           onClick={() => setUploadTarget("cover")}
-          className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-md bg-slate-900/80 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-slate-900"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 flex items-center gap-1.5 rounded-md bg-slate-900/80 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-slate-900"
         >
           <Pencil size={14} />
           Edit Cover
@@ -238,8 +258,8 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
       </div>
 
       {/* Seller Info Section */}
-      <div className="w-[85%] lg:w-[70%] mt-[-50px] mx-auto relative z-20 flex flex-col lg:flex-row gap-6">
-        <div className={`${CARD} p-6 flex-1`}>
+      <div className="w-[92%] sm:w-[85%] lg:w-[70%] mt-[-40px] sm:mt-[-50px] mx-auto relative z-20 flex flex-col lg:flex-row gap-4 sm:gap-6">
+        <div className={`${CARD} p-4 sm:p-6 flex-1`}>
           <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
             <div className="relative w-[100px] h-[100px] shrink-0">
               <div className="relative h-full w-full rounded-full border-4 border-slate-600 overflow-hidden">
@@ -263,15 +283,15 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
               </button>
             </div>
 
-            <div className="flex-1 w-full">
-              <div className="flex items-start justify-between gap-3">
-                <h1 className="text-2xl font-semibold text-white">
+            <div className="flex-1 w-full text-center md:text-left">
+              <div className="flex flex-col items-center gap-2 md:flex-row md:items-start md:justify-between md:gap-3">
+                <h1 className="text-xl sm:text-2xl font-semibold text-white break-words">
                   {shop?.name}
                 </h1>
 
                 <Link
                   href="/dashboard/shop/edit"
-                  className="flex shrink-0 items-center gap-1.5 rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-600"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-600 mt-5"
                 >
                   <Pencil size={14} />
                   Edit Profile
@@ -357,7 +377,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`py-3 px-6 text-lg font-semibold border-b-2 -mb-px transition-colors ${
+              className={`shrink-0 whitespace-nowrap py-3 px-4 sm:px-6 text-base sm:text-lg font-semibold border-b-2 -mb-px transition-colors ${
                 activeTab === tab
                   ? "text-white border-blue-500"
                   : "text-slate-400 border-transparent hover:text-slate-200"
@@ -371,7 +391,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
         {/* Content */}
         <div className={`${CARD} my-4 text-slate-400`}>
           {activeTab === "Products" && (
-            <div className="m-auto grid grid-cols-1 p-4 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="m-auto grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 sm:gap-4 sm:p-4 lg:grid-cols-4">
               {isLoading &&
                 Array.from({ length: 10 }).map((_, index) => (
                   <div
@@ -393,7 +413,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
           )}
 
           {activeTab === "Offers" && (
-            <div className="m-auto grid grid-cols-1 p-4 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="m-auto grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 sm:gap-4 sm:p-4 lg:grid-cols-4">
               {isEventsLoading &&
                 Array.from({ length: 10 }).map((_, index) => (
                   <div

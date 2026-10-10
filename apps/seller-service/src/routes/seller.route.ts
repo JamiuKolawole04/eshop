@@ -9,6 +9,7 @@ import {
   markNotificationAsRead,
   sellerNotifications,
   unfollowShop,
+  updateShopProfile,
   uploadShopAvatar,
   uploadShopCoverBanner,
 } from "../controllers/seller.controller";
@@ -48,6 +49,13 @@ router.post(
   isAuthenticated("seller"),
   isSeller,
   uploadShopCoverBanner,
+);
+
+router.patch(
+  "/shops/profile",
+  isAuthenticated("seller"),
+  isSeller,
+  updateShopProfile,
 );
 
 router.post("/follow-shop", isAuthenticated("user"), isUser, followShop);

@@ -7,6 +7,107 @@ import {
 } from "@packages/error-handler";
 import { prisma } from "@packages/prisma";
 import { imageKit } from "@packages/imagekit";
+import {
+  cleanString,
+  countWords,
+  hostMatches,
+  parseHttpUrl,
+} from "../utils/shop.util";
+import { SOCIAL_HOSTS, SocialType } from "../types/shop.type";
+
+const MAX_NAME_LENGTH = 60;
+const MAX_BIO_WORDS = 100;
+const MAX_SOCIAL_LINKS = 5;
+
+export const updateShopProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sellerId = req.seller?.id;
+
+    const shop = sellerId
+      ? await prisma.shops.findUnique({ where: { sellerId } })
+      : null;
+
+    if (!shop || shop.isDeleted) {
+      throw new NotFoundError("Shop not found");
+    }
+
+    const name = cleanString(req.body.name);
+    const bio = cleanString(req.body.bio);
+    const openingHours = cleanString(req.body.opening_hours);
+    const address = cleanString(req.body.address);
+    const website = cleanString(req.body.website);
+    const rawLinks = req.body.socialLinks ?? [];
+
+    if (!name) {
+      throw new ValidationError("Shop name is required");
+    }
+    if (name.length > MAX_NAME_LENGTH) {
+      throw new ValidationError(
+        `Shop name must be ${MAX_NAME_LENGTH} characters or fewer`,
+      );
+    }
+    if (countWords(bio) > MAX_BIO_WORDS) {
+      throw new ValidationError(
+        `Shop bio must be ${MAX_BIO_WORDS} words or fewer`,
+      );
+    }
+    if (website && !parseHttpUrl(website)) {
+      throw new ValidationError("Website must be a valid http(s) URL");
+    }
+
+    if (!Array.isArray(rawLinks)) {
+      throw new ValidationError("socialLinks must be an array");
+    }
+    if (rawLinks.length > MAX_SOCIAL_LINKS) {
+      throw new ValidationError(
+        `You can add at most ${MAX_SOCIAL_LINKS} social links`,
+      );
+    }
+
+    const socialLinks: { type: SocialType; url: string }[] = [];
+
+    for (const link of rawLinks) {
+      const type = cleanString(link?.type) as SocialType;
+      const rawUrl = cleanString(link?.url);
+
+      if (!rawUrl) continue;
+
+      if (!(type in SOCIAL_HOSTS)) {
+        throw new ValidationError(`Unsupported social link type: ${type}`);
+      }
+
+      const url = parseHttpUrl(rawUrl);
+      if (!url || !hostMatches(url.hostname, SOCIAL_HOSTS[type])) {
+        throw new ValidationError(`Invalid ${type} link: ${rawUrl}`);
+      }
+
+      socialLinks.push({ type, url: url.toString() });
+    }
+
+    const updatedShop = await prisma.shops.update({
+      where: { id: shop.id },
+      data: {
+        name,
+        bio: bio || null,
+        opening_hours: openingHours || null,
+        address: address || null,
+        website: website || null,
+        socialLinks,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      shop: updatedShop,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getSellerProducts = async (
   req: Request,
@@ -357,7 +458,7 @@ export const uploadShopCoverBanner = async (
     const response = await imageKit.files.upload({
       file: fileName,
       fileName: `shop-banner-${Date.now()}.jpg`,
-      folder: "/eshop-shops/banners",
+      folder: "/eshop-products",
     });
 
     const DEFAULT_BANNER_FILE_ID = "6a8f875d5c7cd75eb81ddeaa";
