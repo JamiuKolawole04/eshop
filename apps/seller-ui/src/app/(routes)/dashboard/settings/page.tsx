@@ -20,20 +20,9 @@ import axiosInstance from "@/utils/axiosInstance";
 import {
   ButtonLoader,
   FetchSellerDetailsResponseType,
-  ShopType,
+  NotificationChannel,
 } from "@packages/ui";
 import { useSeller } from "@/hooks/use-seller";
-
-type NotificationChannel = "email" | "web" | "app" | "all";
-
-type ShopSettingsFields = {
-  lowStockThreshold?: number;
-  orderNotificationChannel?: NotificationChannel;
-};
-
-type SellerDetailsResponse = Omit<FetchSellerDetailsResponseType, "shop"> & {
-  shop: ShopType & ShopSettingsFields;
-};
 
 type SectionKey = "low-stock" | "order-notifications";
 
@@ -51,7 +40,7 @@ const RESTORE_WINDOW_DAYS = 28;
 const CARD = "bg-slate-800 border border-slate-700/60 rounded-lg shadow-lg";
 
 async function fetchSellerDetails(id: string) {
-  const response = await axiosInstance.get<SellerDetailsResponse>(
+  const response = await axiosInstance.get<FetchSellerDetailsResponseType>(
     `/api/sellers/${id}`,
   );
 
@@ -300,26 +289,18 @@ const SettingsPage = () => {
   const toggleSection = (key: SectionKey) =>
     setOpenSection((current) => (current === key ? null : key));
 
-  /** Patch the cached shop so the UI updates without waiting for a refetch. */
-  const patchShop = (patch: Partial<ShopSettingsFields>) =>
-    queryClient.setQueryData<SellerDetailsResponse>(queryKey, (old) =>
-      old ? { ...old, shop: { ...old.shop, ...patch } } : old,
-    );
-
   /* ------------------------------- Mutations ------------------------------ */
 
   const lowStockMutation = useMutation({
     mutationFn: async (value: number) => {
-      const res = await axiosInstance.put(
-        `/api/sellers/shops/settings/low-stock`,
-        {
-          threshold: value,
-        },
-      );
+      const res = await axiosInstance.put(`/api/sellers/shops/low-stock`, {
+        threshold: value,
+      });
       return res.data;
     },
-    onSuccess: (_res, value) => {
-      patchShop({ lowStockThreshold: value });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shop-details"] });
+
       toast.success("Low stock alert threshold updated.");
       setOpenSection(null);
     },
@@ -329,15 +310,16 @@ const SettingsPage = () => {
   const notificationMutation = useMutation({
     mutationFn: async (value: NotificationChannel) => {
       const res = await axiosInstance.put(
-        `api/sellers/shops/settings/order-notifications`,
+        `/api/sellers/shops/order-notifications`,
         {
           channel: value,
         },
       );
       return res.data;
     },
-    onSuccess: (_res, value) => {
-      patchShop({ orderNotificationChannel: value });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shop-details"] });
+
       toast.success("Order notification preference updated.");
       setOpenSection(null);
     },
@@ -346,12 +328,11 @@ const SettingsPage = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const res = await axiosInstance.delete(`/api/sellers/shops/delete`);
+      const res = await axiosInstance.delete(`/api/sellers/shops`);
       return res.data;
     },
     onSuccess: () => {
-      // Refetch so isDeleted / deletedAt come from the server
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["shop-details"] });
       toast.success(
         `Shop scheduled for deletion. You can restore it within ${RESTORE_WINDOW_DAYS} days.`,
       );
@@ -362,7 +343,7 @@ const SettingsPage = () => {
 
   const restoreMutation = useMutation({
     mutationFn: async () => {
-      const res = await axiosInstance.put(`api/sellers/shops/restore`);
+      const res = await axiosInstance.put(`/api/sellers/shops/restore`);
       return res.data;
     },
     onSuccess: () => {
@@ -401,7 +382,7 @@ const SettingsPage = () => {
       </nav>
 
       {/* Tabs */}
-      <div className="mt-6 flex overflow-x-auto border-b border-slate-700">
+      <div className="mt-6 flex overflow border-b border-slate-700">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -525,13 +506,13 @@ const SettingsPage = () => {
       )}
 
       {activeTab === "Custom Domains" && (
-        <div className={`${CARD} mt-6 max-w-2xl p-6 text-sm text-slate-400`}>
+        <div className={`${CARD} mt-6 max-w-2xl p-4 text-sm text-slate-400`}>
           Custom domain settings coming soon.
         </div>
       )}
 
       {activeTab === "Withdraw Method" && (
-        <div className={`${CARD} mt-6 max-w-2xl p-6 text-sm text-slate-400`}>
+        <div className={`${CARD} mt-6 max-w-2xl p-4 text-sm text-slate-400`}>
           Withdraw method settings coming soon.
         </div>
       )}

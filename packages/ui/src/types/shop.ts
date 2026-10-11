@@ -1,3 +1,5 @@
+export type NotificationChannel = "email" | "web" | "app" | "all";
+
 export type ShopType = {
   id: string;
   name: string;
@@ -17,6 +19,8 @@ export type ShopType = {
   followers: string[];
   createdAt: string;
   updatedAt: string;
+  lowStockThreshold?: number;
+  orderNotificationChannel?: NotificationChannel;
 };
 
 export type GetFilteredShopsResponseType = {

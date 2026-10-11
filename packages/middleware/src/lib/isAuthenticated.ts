@@ -5,6 +5,7 @@ type AuthRole = "user" | "seller" | "admin";
 
 import { prisma } from "@packages/prisma";
 
+// cookies
 const cookieNameByRole: Record<AuthRole, string> = {
   user: "access_token",
   admin: "access_token",

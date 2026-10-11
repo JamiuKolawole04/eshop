@@ -544,3 +544,124 @@ export const markNotificationAsRead = async (
     next(error);
   }
 };
+
+const getSellerShop = async (sellerId: string) => {
+  const shop = await prisma.shops.findUnique({ where: { sellerId } });
+  if (!shop) throw new NotFoundError("Shop not found");
+
+  return shop;
+};
+
+export const updateLowStockThreshold = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { threshold } = req.body;
+
+    if (!Number.isInteger(threshold) || threshold < 0) {
+      return next(
+        new ValidationError("Threshold must be a whole number of 0 or more"),
+      );
+    }
+
+    const sellerId = req.seller?.id as string;
+
+    const shop = await getSellerShop(sellerId);
+
+    const updated = await prisma.shops.update({
+      where: { id: shop.id },
+      data: { lowStockThreshold: threshold },
+      select: { lowStockThreshold: true },
+    });
+
+    return res.status(200).json({ success: true, ...updated });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateOrderNotifications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { channel } = req.body;
+
+    if (!NOTIFICATION_CHANNELS.includes(channel)) {
+      return next(new ValidationError("Invalid notification channel"));
+    }
+
+    const sellerId = req.seller?.id as string;
+
+    const shop = await getSellerShop(sellerId);
+
+    const updated = await prisma.shops.update({
+      where: { id: shop.id },
+      data: { orderNotificationChannel: channel },
+      select: { orderNotificationChannel: true },
+    });
+
+    return res.status(200).json({ success: true, ...updated });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteShop = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sellerId = req.seller?.id as string;
+
+    const shop = await getSellerShop(sellerId);
+
+    if (shop.isDeleted) {
+      return next(
+        new ValidationError("Shop is already scheduled for deletion"),
+      );
+    }
+
+    await prisma.shops.update({
+      where: { id: shop.id },
+      data: { isDeleted: true, deletedAt: new Date() },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Shop scheduled for deletion. You can restore it within 28 days.",
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const restoreShop = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sellerId = req.seller?.id as string;
+
+    const shop = await getSellerShop(sellerId);
+
+    if (!shop.isDeleted || !shop.deletedAt) {
+      return next(new ValidationError("Shop is not scheduled for deletion"));
+    }
+
+    await prisma.shops.update({
+      where: { id: shop.id },
+      data: { isDeleted: false, deletedAt: null },
+    });
+
+    return res.status(200).json({ success: true, message: "Shop restored." });
+  } catch (error) {
+    return next(error);
+  }
+};

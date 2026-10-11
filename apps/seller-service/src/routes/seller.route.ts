@@ -1,14 +1,18 @@
 import express, { Router } from "express";
 
 import {
+  deleteShop,
   followShop,
   getSellerDetails,
   getSellerEvents,
   getSellerProducts,
   isFollowingShop,
   markNotificationAsRead,
+  restoreShop,
   sellerNotifications,
   unfollowShop,
+  updateLowStockThreshold,
+  updateOrderNotifications,
   updateShopProfile,
   uploadShopAvatar,
   uploadShopCoverBanner,
@@ -62,6 +66,23 @@ router.post("/follow-shop", isAuthenticated("user"), isUser, followShop);
 router.post("/unfollow-shop", isAuthenticated("user"), isUser, unfollowShop);
 router.get("/is-following/:shopId", isAuthenticated("user"), isFollowingShop);
 
+router.put(
+  "/shops/low-stock",
+  isAuthenticated("seller"),
+  isSeller,
+  updateLowStockThreshold,
+);
+
+router.put(
+  "/shops/order-notifications",
+  isAuthenticated("seller"),
+  isSeller,
+  updateOrderNotifications,
+);
+
 router.get("/:id", getSellerDetails);
+
+router.delete("/shops", isAuthenticated("seller"), isSeller, deleteShop);
+router.put("/shops/restore ", isAuthenticated("seller"), isSeller, restoreShop);
 
 export default router;

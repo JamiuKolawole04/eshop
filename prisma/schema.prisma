@@ -20,6 +20,14 @@ enum AddressType {
   Other
 }
 
+enum NotificationChannel {
+  email
+  web
+  app
+  all
+}
+
+
 model Images {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   file_id String
@@ -117,6 +125,9 @@ model Shops {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   images    Images?
+
+  lowStockThreshold        Int                 @default(10)
+  orderNotificationChannel NotificationChannel @default(email)
 }
 
 model Sellers {
