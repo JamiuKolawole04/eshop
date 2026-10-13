@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 
-import { DiscountCode } from "@/types/api.type";
+import { DiscountCode } from "@packages/ui";
 
 type Props = {
   discount: DiscountCode;

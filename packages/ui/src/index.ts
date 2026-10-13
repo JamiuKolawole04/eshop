@@ -23,3 +23,6 @@ export * from "./types/notifications";
 export * from "./utils/size";
 export * from "./utils/color";
 export * from "./lib/ratings";
+export * from "./lib/box";
+export * from "./lib/geographical-map";
+export * from "./lib/sale-chart";

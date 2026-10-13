@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   ComposableMap,
   createCoordinates,
@@ -8,6 +8,12 @@ import {
   Geography,
 } from "@vnedyalk0v/react19-simple-maps";
 import { motion, AnimatePresence } from "framer-motion";
+
+type GeoTopology = {
+  type: string;
+  objects: Record<string, unknown>;
+  arcs: number[][][];
+};
 
 const countryData = [
   { name: "United States of America", users: 120, sellers: 30 },
@@ -27,7 +33,7 @@ const getColor = (countryName: string) => {
 };
 
 export const GeographicalMap = () => {
-  const [geoData, setGeoData] = useState(null);
+  const [geoData, setGeoData] = useState<GeoTopology | null>(null);
   const [hovered, setHovered] = useState<{
     name: string;
     users: number;
@@ -38,7 +44,7 @@ export const GeographicalMap = () => {
   useEffect(() => {
     fetch("/api/geo/countries")
       .then((res) => res.json())
-      .then((data) => setGeoData(data))
+      .then((data) => setGeoData(data as GeoTopology))
       .catch((err) => console.error("Failed to load geo data:", err));
   }, []);
 

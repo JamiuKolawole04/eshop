@@ -23,8 +23,7 @@ type Order = {
   status: string;
 };
 
-import { GeographicalMap } from "@/shared/components/charts/geographicalmap-chart";
-import { SalesChart } from "@/shared/components/charts/sale-chart";
+import { GeographicalMap, SalesChart } from "@packages/ui";
 
 const deviceData = [
   { name: "Phone", value: 55 },

@@ -21,12 +21,12 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useSeller } from "@/hooks/use-seller";
 import { useSidebar } from "@/hooks/use-sidebar";
-import { Box } from "../box";
 import { Sidebar } from "./sidebar.styles";
 import { SidebarItem } from "./sidebar.item";
 import { SidebarMenu } from "./sidebar.menu";
 import { DashbaordLogo } from "@/assets/svgs/dashbaord/dashboardLogo";
 import axiosInstance from "@/utils/axiosInstance";
+import { Box } from "@packages/ui";
 
 export const SidebarWrapper = () => {
   const pathname = usePathname();

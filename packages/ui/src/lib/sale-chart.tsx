@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
 import Chart, { Props } from "react-apexcharts";
-import { Box } from "../box";
+import { Box } from "./box";
 
 export const SalesChart = ({
   revenueData,
