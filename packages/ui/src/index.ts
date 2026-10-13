@@ -26,3 +26,4 @@ export * from "./lib/ratings";
 export * from "./lib/box";
 export * from "./lib/geographical-map";
 export * from "./lib/sale-chart";
+export * from "./lib/device-stat";

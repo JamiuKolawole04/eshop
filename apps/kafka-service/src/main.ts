@@ -10,37 +10,52 @@ const consumer = kafka.consumer({ groupId: "user-events-group" });
 
 const eventQueue: EventData[] = [];
 
+// Guards against setInterval re-entering processQueue while a batch is still
+// being processed. Concurrent passes would interleave read-modify-write cycles
+// on the ShopAnalytics JSON counters and silently drop increments.
+let isProcessing = false;
+
 const processQueue = async () => {
-  if (eventQueue.length === 0) {
+  if (isProcessing) {
     return;
   }
 
-  const events = [...eventQueue];
-  eventQueue.length = 0;
+  isProcessing = true;
 
-  for (const event of events) {
-    if (event.action === "shop_visit") {
-      await updateShopAnalytics(event);
-
-      continue;
+  try {
+    if (eventQueue.length === 0) {
+      return;
     }
 
-    const validActions = [
-      "add_to_wishlist",
-      "add_to_cart",
-      "product_view",
-      "remove_from_wishlist",
-      "remove_from_cart",
-    ];
+    const events = [...eventQueue];
+    eventQueue.length = 0;
 
-    if (!event.action || !validActions.includes(event.action)) {
-      continue;
-    }
+    for (const event of events) {
+      if (event.action === "shop_visit") {
+        await updateShopAnalytics(event);
 
-    if (event.userId) {
-      await updateUserAnalytics(event);
+        continue;
+      }
+
+      const validActions = [
+        "add_to_wishlist",
+        "add_to_cart",
+        "product_view",
+        "remove_from_wishlist",
+        "remove_from_cart",
+      ];
+
+      if (!event.action || !validActions.includes(event.action)) {
+        continue;
+      }
+
+      if (event.userId) {
+        await updateUserAnalytics(event);
+      }
+      await updateProductAnalytics(event);
     }
-    await updateProductAnalytics(event);
+  } finally {
+    isProcessing = false;
   }
 };
 

@@ -124,7 +124,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
 
   useEffect(() => {
     if (!isLoading) {
-      if (!location || !deviceInfo || !user?.id) return;
+      if (!location || !deviceInfo) return;
       sendKafkaEvents({
         userId: user?.id,
         shopId: shop?.id,
@@ -134,7 +134,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
         device: deviceInfo || "Unknown Device",
       });
     }
-  }, [location, deviceInfo, isLoading]);
+  }, [location, deviceInfo, isLoading, user]);
 
   return (
     <div>
