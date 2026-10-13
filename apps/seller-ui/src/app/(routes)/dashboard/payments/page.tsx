@@ -14,7 +14,7 @@ import Link from "next/link";
 
 import { BreadCrumbs } from "@/shared/component/breadcrumbs";
 import axiosInstance from "@/utils/axiosInstance";
-import { Order, SellerOrdersResponseType } from "@packages/ui";
+import { ButtonLoader, Order, SellerOrdersResponseType } from "@packages/ui";
 
 const fetchOrders = async () => {
   const response =
@@ -138,7 +138,9 @@ const SellerPayments = () => {
 
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
         {isLoading ? (
-          <p className="text-center text-white">Loading payments...</p>
+          <div className="flex items-center justify-center">
+            <ButtonLoader className="text-white mt-5" />
+          </div>
         ) : (
           <table className="w-full text-white text-sm">
             <thead>

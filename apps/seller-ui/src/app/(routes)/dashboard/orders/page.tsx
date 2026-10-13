@@ -12,7 +12,7 @@ import {
 import { Search, Eye } from "lucide-react";
 import Link from "next/link";
 
-import { Order, SellerOrdersResponseType } from "@packages/ui";
+import { ButtonLoader, Order, SellerOrdersResponseType } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 import { BreadCrumbs } from "@/shared/component/breadcrumbs";
 
@@ -127,7 +127,9 @@ const OrdersTable = () => {
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
         {isLoading ? (
-          <p className="text-center text-white">Loading orders...</p>
+          <div className="flex items-center justify-center">
+            <ButtonLoader className="text-white mt-5" />
+          </div>
         ) : (
           <table className="w-full text-white">
             <thead>

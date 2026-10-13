@@ -16,6 +16,7 @@ import Image from "next/image";
 import { useSeller } from "@/hooks/use-seller";
 import axiosInstance from "@/utils/axiosInstance";
 import {
+  ButtonLoader,
   GetSellerConversationResponseType,
   GetSellerMessagesResponseType,
   SellerConversation,
@@ -237,7 +238,9 @@ const Inbox = () => {
 
           <div className="divide-y divide-gray-800">
             {isLoading ? (
-              <div className="p-4 text-sm text-gray-400">Loading...</div>
+              <div className="p-4 flex items-center justify-center">
+                <ButtonLoader className="text-gray-500 text-center" />
+              </div>
             ) : chats.length === 0 ? (
               <div className="p-4 text-sm text-gray-400">
                 No conversations yet.

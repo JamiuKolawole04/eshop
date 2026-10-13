@@ -83,6 +83,6 @@ router.put(
 router.get("/:id", getSellerDetails);
 
 router.delete("/shops", isAuthenticated("seller"), isSeller, deleteShop);
-router.put("/shops/restore ", isAuthenticated("seller"), isSeller, restoreShop);
+router.put("/shops/restore", isAuthenticated("seller"), isSeller, restoreShop);
 
 export default router;

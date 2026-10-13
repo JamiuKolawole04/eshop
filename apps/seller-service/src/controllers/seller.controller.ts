@@ -5,7 +5,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "@packages/error-handler";
-import { prisma } from "@packages/prisma";
+import { NotificationChannel, prisma } from "@packages/prisma";
 import { imageKit } from "@packages/imagekit";
 import {
   cleanString,
@@ -590,7 +590,7 @@ export const updateOrderNotifications = async (
   try {
     const { channel } = req.body;
 
-    if (!NOTIFICATION_CHANNELS.includes(channel)) {
+    if (!Object.values(NotificationChannel).includes(channel)) {
       return next(new ValidationError("Invalid notification channel"));
     }
 

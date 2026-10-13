@@ -25,7 +25,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
 import { DeleteConfirmationModal } from "@/shared/component/modals/delete-confirmation-modal";
-import { ProductType } from "@packages/ui";
+import { ButtonLoader, ProductType } from "@packages/ui";
 
 const fetchProducts = async () => {
   const response = await axiosInstance.get(`/api/products/shop-products`);
@@ -221,7 +221,9 @@ const Page = () => {
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
         {isLoading ? (
-          <p className="text-center text-white">Loading products...</p>
+          <div className="flex items-center justify-center">
+            <ButtonLoader className="text-white mt-5" />
+          </div>
         ) : products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-white text-base font-medium">

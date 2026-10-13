@@ -9,7 +9,12 @@ import { Controller, useForm } from "react-hook-form";
 import { AxiosError } from "axios";
 
 import axiosInstance from "@/utils/axiosInstance";
-import { Input, AllDiscountCodeResponseType, DiscountCode } from "@packages/ui";
+import {
+  Input,
+  AllDiscountCodeResponseType,
+  DiscountCode,
+  ButtonLoader,
+} from "@packages/ui";
 import { DeleteDiscountCodeModal } from "@/shared/component/modals/delete-discount-modal";
 
 const defaultValues = {
@@ -108,9 +113,9 @@ const Page = () => {
         </h3>
 
         {isLoading ? (
-          <p className="text-gray-400 text-center text-xs">
-            Loading discounts...
-          </p>
+          <div className="flex items-center justify-center">
+            <ButtonLoader className="text-white mt-5" />
+          </div>
         ) : (
           <table className="w-full text-white">
             <thead>
