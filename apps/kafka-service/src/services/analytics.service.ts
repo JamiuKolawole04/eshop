@@ -157,7 +157,12 @@ export const updateShopAnalytics = async (event: EventData) => {
 
     const existingData = await prisma.shopAnalytics.findUnique({
       where: { shopId: event.shopId },
-      select: { countryStats: true, cityStats: true, deviceStats: true },
+      select: {
+        countryStats: true,
+        cityStats: true,
+        deviceStats: true,
+        deviceCategories: true,
+      },
     });
 
     const countryStats =
@@ -165,6 +170,8 @@ export const updateShopAnalytics = async (event: EventData) => {
     const cityStats = (existingData?.cityStats as Record<string, number>) || {};
     const deviceStats =
       (existingData?.deviceStats as Record<string, number>) || {};
+    const deviceCategories =
+      (existingData?.deviceCategories as Record<string, number>) || {};
 
     if (event.country) {
       countryStats[event.country] = (countryStats[event.country] || 0) + 1;
@@ -175,7 +182,13 @@ export const updateShopAnalytics = async (event: EventData) => {
     }
 
     if (event.device) {
+      const getDeviceCategory = (device: string): string =>
+        device.split(" - ")[0]?.trim() || "Unknown";
+
       deviceStats[event.device] = (deviceStats[event.device] || 0) + 1;
+
+      const category = getDeviceCategory(event.device);
+      deviceCategories[category] = (deviceCategories[category] || 0) + 1;
     }
 
     await prisma.shopAnalytics.upsert({
@@ -186,6 +199,7 @@ export const updateShopAnalytics = async (event: EventData) => {
         countryStats,
         cityStats,
         deviceStats,
+        deviceCategories,
       },
       create: {
         shopId: event.shopId,
@@ -194,6 +208,7 @@ export const updateShopAnalytics = async (event: EventData) => {
         countryStats,
         cityStats,
         deviceStats,
+        deviceCategories,
       },
     });
 

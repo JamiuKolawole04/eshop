@@ -245,6 +245,7 @@ model ShopAnalytics {
   countryStats  Json? //store aggregated country data {"us": 20, "IN": 50, "UK": 15}
   cityStats     Json? //store aggregated city data {"New York": 20, "Delhi": 25,}
   deviceStats   Json? //store aggregated device data {"Mobile": 20, "Desktop": 50, }
+  deviceCategories  Json?
   lastVisitedAt DateTime
 
   createdAt DateTime @default(now())
