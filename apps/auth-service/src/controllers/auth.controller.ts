@@ -27,7 +27,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "@packages/error-handler";
-import { setCookie } from "@packages/cookies";
+import { setCookie, setSessionFlag } from "@packages/cookies";
 
 const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY), {
   apiVersion: "2026-06-24.dahlia",
@@ -162,6 +162,7 @@ export const login = async (
 
     setCookie(res, "access_token", accessToken);
     setCookie(res, "refresh_token", refreshToken);
+    setSessionFlag(res);
 
     await setCurrentRefreshToken("user", user.id, refreshToken);
 
@@ -257,6 +258,7 @@ export const refreshToken = async (
     if (decoded.role === "user") {
       setCookie(res, "access_token", newAccessToken);
       setCookie(res, "refresh_token", newRefreshToken);
+      setSessionFlag(res);
     } else if (decoded.role === "seller") {
       setCookie(res, "seller_access_token", newAccessToken);
       setCookie(res, "seller_refresh_token", newRefreshToken);
@@ -346,8 +348,7 @@ export const userLogout = async (
       await clearCurrentRefreshToken("user", userId);
     }
 
-    res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
+    clearAuthCookies(res, "user");
 
     res.status(200).json({
       success: true,
@@ -601,8 +602,7 @@ export const sellerLogout = async (
       await clearCurrentRefreshToken("seller", sellerId);
     }
 
-    res.clearCookie("seller_access_token");
-    res.clearCookie("seller_refresh_token");
+    clearAuthCookies(res, "seller");
 
     res.status(200).json({
       success: true,
@@ -710,8 +710,8 @@ export const adminLogout = async (
     if (adminId) {
       await clearCurrentRefreshToken("admin", adminId);
     }
-    res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
+
+    clearAuthCookies(res, "admin");
 
     res.status(200).json({
       success: true,

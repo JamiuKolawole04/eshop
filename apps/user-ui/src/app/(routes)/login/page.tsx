@@ -10,6 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import { GoogleSignInButton } from "@/shared/components/googleButton";
 import { ButtonLoader } from "@packages/ui";
+import { useAuthStore } from "@/store/auth";
 
 type FormData = {
   email: string;
@@ -24,6 +25,8 @@ const Page = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+
+  const { setIsLoggedIn } = useAuthStore();
 
   const {
     register,
@@ -43,6 +46,7 @@ const Page = () => {
     },
     onSuccess: () => {
       setServerError(null);
+      setIsLoggedIn(true);
       router.push(redirectPath || "/");
     },
 

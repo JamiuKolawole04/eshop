@@ -6,6 +6,7 @@ import { NotFoundError, ValidationError } from "@packages/error-handler";
 import { sendMail } from "./sendMail";
 import { redis } from "@packages/redis";
 import { prisma } from "@packages/prisma";
+import { clearSessionFlag } from "@packages/cookies";
 
 const emailRegex = /^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/;
 
@@ -180,5 +181,9 @@ export const clearAuthCookies = (
   } else {
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
+  }
+
+  if (role === "user") {
+    clearSessionFlag(res);
   }
 };

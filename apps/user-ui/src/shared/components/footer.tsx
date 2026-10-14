@@ -120,8 +120,9 @@ export const Footer = () => {
       <div className="border-t border-gray-200">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <p className="text-xs text-gray-600">
-            © {new Date().getFullYear()} All Rights Reserved | Becodemy Private
-            Ltd
+            © {new Date().getFullYear()} All Rights Reserved
+            {/*| Becodemy Private
+            Ltd*/}
           </p>
           <button
             type="button"

@@ -21,11 +21,22 @@ import {
 
 const router: Router = express.Router();
 
-router.post("/payment-intent", isAuthenticatedAny, createPaymentIntent);
-router.post("/payment-session", isAuthenticatedAny, createPaymentSession);
+router.post(
+  "/payment-intent",
+  isAuthenticated("user"),
+  isUser,
+  createPaymentIntent,
+);
+router.post(
+  "/payment-session",
+  isAuthenticated("user"),
+  isUser,
+  createPaymentSession,
+);
 router.get(
   "/verify-payment-session",
-  isAuthenticatedAny,
+  isAuthenticated("user"),
+  isUser,
   verifyingPaymentSession,
 );
 router.get("/seller", isAuthenticated("seller"), isSeller, getSellerOrders);

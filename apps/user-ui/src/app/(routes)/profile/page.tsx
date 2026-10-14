@@ -37,6 +37,7 @@ import {
   NotificationsResponseType,
   UserOrdersResponseType,
 } from "@packages/ui";
+import { useAuthStore } from "@/store/auth";
 
 const fetchUserOrders = async () => {
   const res =
@@ -58,6 +59,8 @@ const Page = () => {
   const queryClient = useQueryClient();
 
   const { isLoading, user } = useUser();
+  const { setIsLoggedIn } = useAuthStore();
+
   const queryTab = searchParams.get("active") || "Profile";
   const [activeTab, setActiveTab] = useState(queryTab);
 
@@ -78,6 +81,8 @@ const Page = () => {
 
   const logOutHandler = async () => {
     queryClient.removeQueries({ queryKey: ["user-profile"] });
+    setIsLoggedIn(false);
+
     router.push("/login");
 
     axiosInstance.post("/api/auth/users/logout").catch((err) => {

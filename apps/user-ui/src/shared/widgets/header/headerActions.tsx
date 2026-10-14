@@ -5,6 +5,7 @@ import { User, Heart, ShoppingCart } from "lucide-react";
 
 import { useUser } from "@/hooks/use-user";
 import { useStore } from "@/store";
+import { useAuthStore } from "@/store/auth";
 
 type Props = {
   showGreeting?: boolean;
@@ -23,10 +24,10 @@ export const HeaderActions = ({
   showGreeting = true,
   className = "",
 }: Props) => {
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
   const { cart, wishlist } = useStore();
+  const { isLoggedIn } = useAuthStore();
 
-  const isLoggedIn = !isLoading && !!user;
   const accountHref = isLoggedIn ? "/profile" : "/login";
   const firstName = user?.name?.split(" ")[0];
 

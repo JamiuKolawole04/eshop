@@ -5,14 +5,20 @@ import axiosInstance from "@/utils/axiosInstance";
 import { useAuthStore } from "@/store/auth";
 import { isProtected } from "@/utils/protected";
 
-const fetchUser = async (isLoggedIn: boolean) => {
-  const config = isLoggedIn ? isProtected : {};
-  const response = await axiosInstance.get("/api/users/profile", config);
+const fetchUser = async () => {
+  const response = await axiosInstance.get("/api/users/profile", isProtected);
   return response.data?.user ?? null;
 };
 
 export const useUser = () => {
-  const { isLoggedIn, setIsLoggedIn } = useAuthStore();
+  const { setIsLoggedIn, isLoggedIn } = useAuthStore();
+
+  useEffect(() => {
+    const has = document.cookie
+      .split("; ")
+      .some((c) => c.startsWith("has_session="));
+    setIsLoggedIn(has);
+  }, []);
 
   const {
     data: user,
@@ -22,7 +28,8 @@ export const useUser = () => {
     isSuccess,
   } = useQuery({
     queryKey: ["user-profile"],
-    queryFn: () => fetchUser(isLoggedIn),
+    queryFn: fetchUser,
+    enabled: isLoggedIn,
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
@@ -32,12 +39,6 @@ export const useUser = () => {
       setIsLoggedIn(true);
     }
   }, [isSuccess, user]);
-
-  useEffect(() => {
-    if (isError) {
-      setIsLoggedIn(false);
-    }
-  }, [isError]);
 
   return {
     user,
