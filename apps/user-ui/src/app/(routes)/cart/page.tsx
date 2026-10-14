@@ -169,8 +169,8 @@ const Page = () => {
   return (
     <div className="w-full bg-white font-Poppins">
       <div className="md:w-[80%] w-[95%] mx-auto min-h-screen">
-        <div className="pb-[50px]">
-          <h1 className="md:pt-[50px] font-medium text-[44px] leading-[1] mb-4">
+        <div className="pb-6 md:pb-[50px]">
+          <h1 className="pt-6 md:pt-[50px] font-medium text-3xl md:text-[44px] leading-[1] mb-4">
             Shopping Cart
           </h1>
 
@@ -189,63 +189,70 @@ const Page = () => {
           </div>
         ) : (
           <div className="lg:flex items-start gap-10">
-            <table className="w-full lg:w-[70%] border-collapse">
-              <thead className="bg-[#f1f3f4] rounded">
+            <table className="w-full lg:w-[70%] border-collapse block md:table">
+              <thead className="hidden md:table-header-group bg-[#f1f3f4] rounded">
                 <tr>
                   <th className="py-3 text-left pl-6 align-middle">Product</th>
-                  <th className="py-3 text-center  align-middle">Price</th>
-                  <th className="py-3 text-center  align-middle">Quantity</th>
-                  <th className="py-3 text-center  align-middle"></th>
-                  <th className="py-3 text-center  align-middle"></th>
+                  <th className="py-3 text-center align-middle">Price</th>
+                  <th className="py-3 text-center align-middle">Quantity</th>
+                  <th className="py-3 text-center align-middle"></th>
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody className="block md:table-row-group">
                 {cart?.map((item) => (
-                  <tr key={item.id} className="border-b border-b-[#0000000e]">
-                    <td className="flex items-center gap-4 p-4">
-                      <Image
-                        src={item.images[0].url}
-                        alt={item.title}
-                        width={80}
-                        height={80}
-                        className="rounded"
-                      />
+                  <tr
+                    key={item.id}
+                    className="block md:table-row border-b border-b-[#0000000e] py-3 md:py-0"
+                  >
+                    {/* Product */}
+                    <td className="flex items-center gap-3 md:gap-4 p-2 md:p-4 md:table-cell">
+                      <div className="flex items-center gap-3 md:gap-4">
+                        <Image
+                          src={item.images[0].url}
+                          alt={item.title}
+                          width={80}
+                          height={80}
+                          className="rounded w-16 h-16 md:w-20 md:h-20 object-cover shrink-0"
+                        />
 
-                      <div className="flex flex-col">
-                        <span className="font-medium">{item.title}</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-medium text-sm md:text-base line-clamp-2">
+                            {item.title}
+                          </span>
 
-                        {item?.selectedOptions && (
-                          <div className="text-sm text-gray-500">
-                            {item?.selectedOptions?.color && (
-                              <span>
-                                Color: {}
-                                <span
-                                  style={{
-                                    backgroundColor:
-                                      item?.selectedOptions?.color,
-                                    width: "12px",
-                                    height: "12px",
-                                    borderRadius: "100%",
-                                    display: "inline-block",
-                                  }}
-                                />
-                              </span>
-                            )}
+                          {item?.selectedOptions && (
+                            <div className="text-xs md:text-sm text-gray-500 flex items-center gap-2">
+                              {item?.selectedOptions?.color && (
+                                <span className="flex items-center gap-1">
+                                  Color:
+                                  <span
+                                    style={{
+                                      backgroundColor:
+                                        item?.selectedOptions?.color,
+                                    }}
+                                    className="inline-block w-3 h-3 rounded-full"
+                                  />
+                                </span>
+                              )}
 
-                            {item?.selectedOptions.size && (
-                              <span className="ml-2">
-                                size: {item?.selectedOptions?.size}
-                              </span>
-                            )}
-                          </div>
-                        )}
+                              {item?.selectedOptions.size && (
+                                <span>size: {item?.selectedOptions?.size}</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
 
-                    <td className="px-6 text-lg text-center">
+                    {/* Price */}
+                    <td className="flex justify-between items-center px-2 md:px-6 py-1 md:py-0 md:table-cell md:text-center md:text-lg">
+                      <span className="md:hidden text-sm text-gray-500">
+                        Price
+                      </span>
+
                       {item?.id === discountedProductId ? (
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-end md:items-center">
                           <span className="line-through text-gray-500 text-sm">
                             ${item.sale_price.toFixed(2)}
                           </span>
@@ -266,28 +273,45 @@ const Page = () => {
                       )}
                     </td>
 
-                    <td>
-                      <div className="flex justify-center items-center border border-gray-200 rounded-[20px] w-[70px] p-[2px]">
-                        <button
-                          className="text-black cursor-pointer text-xl"
-                          onClick={() => decreaseQuantity(item.id)}
-                        >
-                          -
-                        </button>
+                    {/* Quantity + Remove (mobile) */}
+                    <td className="flex justify-between items-center px-2 py-1 md:py-0 md:table-cell">
+                      <div className="flex items-center justify-between md:justify-center gap-3 w-full">
+                        <div className="flex justify-center items-center border border-gray-200 rounded-[20px] w-[80px] p-[2px] md:mx-auto">
+                          <button
+                            type="button"
+                            aria-label="Decrease quantity"
+                            className="text-black cursor-pointer text-xl px-1"
+                            onClick={() => decreaseQuantity(item.id)}
+                          >
+                            -
+                          </button>
 
-                        <span className="px-2">{item?.quantity}</span>
+                          <span className="px-2">{item?.quantity}</span>
+
+                          <button
+                            type="button"
+                            aria-label="Increase quantity"
+                            className="text-black cursor-pointer text-xl px-1"
+                            onClick={() => increaseQuantity(item?.id)}
+                          >
+                            +
+                          </button>
+                        </div>
 
                         <button
-                          className="text-black cursor-pointer text-xl"
-                          onClick={() => increaseQuantity(item?.id)}
+                          type="button"
+                          className="md:hidden text-[#818487] text-xs cursor-pointer hover:text-[#ff1826] transition duration-200"
+                          onClick={() => removeItem(item.id)}
                         >
-                          +
+                          X Remove
                         </button>
                       </div>
                     </td>
 
-                    <td className="text-center">
+                    {/* Remove (desktop only) */}
+                    <td className="hidden md:table-cell text-center">
                       <button
+                        type="button"
                         className="text-[#818487] text-xs cursor-pointer hover:text-[#ff1826] transition duration-200"
                         onClick={() => removeItem(item.id)}
                       >
@@ -299,7 +323,7 @@ const Page = () => {
               </tbody>
             </table>
 
-            <div className="p-6 shadow-md w-full lg:w-[30%] bg-[#f9f9f9] rounded-lg">
+            <div className="p-4 md:p-6 mt-6 lg:mt-0 shadow-md w-full lg:w-[30%] bg-[#f9f9f9] rounded-lg">
               {discountAmount > 0 && (
                 <div className="flex justify-between items-center text-[#010f1c] text-base font-medium pb-2">
                   <span className="">Discount ({discountPercentage}%)</span>
@@ -309,7 +333,7 @@ const Page = () => {
                 </div>
               )}
 
-              <div className="flex justify-between items-center text-[#010f1c] text-xl font-[550] pb-3">
+              <div className="flex justify-between items-center text-[#010f1c] text-lg md:text-xl font-[550] pb-3">
                 <span className="">Subtotal</span>
                 <span className="">
                   ${(subTotal - discountAmount).toFixed(2)}
@@ -327,7 +351,7 @@ const Page = () => {
                     value={coupon}
                     onChange={({ target: { value } }) => setCoupon(value)}
                     placeholder="Enter coupon code"
-                    className="w-full p-2 border border-gray-200 rounded-l-md focus:outline-none focus:border-blue-500"
+                    className="w-full min-w-0 p-2 border border-gray-200 rounded-l-md focus:outline-none focus:border-blue-500"
                   />
 
                   <button
@@ -392,7 +416,7 @@ const Page = () => {
 
                 <hr className="my-4 text-slate-200" />
 
-                <div className="flex items-center justify-between text-[#010f1c] text-xl font-[550] pb-3">
+                <div className="flex items-center justify-between text-[#010f1c] text-lg md:text-xl font-[550] pb-3">
                   <span className="">Total</span>
                   <span className="">
                     ${(subTotal - discountAmount).toFixed(2)}
