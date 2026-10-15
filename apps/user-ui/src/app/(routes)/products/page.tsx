@@ -27,6 +27,12 @@ async function fetchProductCategories() {
 const MIN = 0;
 const MAX = 1199;
 
+// Product grid: 1 col (phones) -> 2 (>=480px) -> 2 (lg, sidebar takes space) -> 3 (xl) -> 4 (2xl)
+const GRID_CLASSES =
+  "grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5";
+
+const SECTION_TITLE = "text-xl font-medium border-b border-b-slate-300 pb-1";
+
 const Page = () => {
   const router = useRouter();
   const [isProductLoading, setIsProductLoading] = useState(false);
@@ -38,6 +44,8 @@ const Page = () => {
   const [products, setProducts] = useState<ProductWithRelationsType[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [tempPriceRange, setTempPriceRange] = useState([0, 1199]);
+  // UI only: opens/closes the filter panel on screens smaller than lg
+  const [showFilters, setShowFilters] = useState(false);
 
   const updateURL = () => {
     const params = new URLSearchParams();
@@ -124,11 +132,13 @@ const Page = () => {
       prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size],
     );
   };
+
   return (
     <div className="w-full bg-[#f5f5f5] pb-10 font-Poppins">
-      <div className="w-[90%] lg:w-[80%] m-auto">
-        <div className="pb-[50px]">
-          <h1 className="md:pt-10 font-medium text-[40px] leading-1 mb-3.5">
+      <div className="w-[92%] sm:w-[90%] lg:w-[85%] xl:w-[80%] m-auto">
+        {/* Page heading + breadcrumb */}
+        <div className="pt-6 pb-6 md:pt-10 md:pb-[50px]">
+          <h1 className="font-medium text-3xl sm:text-4xl md:text-[40px] leading-tight mb-3">
             All Product
           </h1>
 
@@ -140,140 +150,159 @@ const Page = () => {
           <span className="text-[#55585b]">All products</span>
         </div>
 
-        <div className="w-full flex flex-col lg:flex-row gap-8">
-          <aside className="w-full lg:w-[270px] !rounded bg-white p-4 space-y-6 shadow-md">
-            <h3 className="text-xl font-medium">Price Filter</h3>
-            <div className="ml-2">
-              <Range
-                step={1}
-                min={MIN}
-                max={MAX}
-                values={tempPriceRange}
-                onChange={(values) => setTempPriceRange(values)}
-                renderTrack={({ props, children }) => {
-                  const [min, max] = tempPriceRange;
-                  const percentageLeft = ((min - MIN) / (MAX - MIN)) * 100;
-                  const percentageRight = ((max - MIN) / (MAX - MIN)) * 100;
+        {/* lg:items-start is required so the sticky sidebar doesn't stretch to full height */}
+        <div className="w-full flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-8">
+          {/* Filter toggle (hidden on lg+) */}
+          <button
+            type="button"
+            onClick={() => setShowFilters((prev) => !prev)}
+            aria-expanded={showFilters}
+            className="lg:hidden w-full flex items-center justify-between bg-white shadow-md !rounded px-4 py-3 text-base font-medium"
+          >
+            <span>Filters</span>
+            <span className="text-sm text-gray-500">
+              {showFilters ? "Hide" : "Show"}
+            </span>
+          </button>
 
-                  return (
-                    <div
-                      {...props}
-                      className="h-[6px] bg-blue-200 rounded relative"
-                      style={{ ...props.style }}
-                    >
+          {/* Sidebar: collapsible below lg, normal static sidebar on lg+ */}
+          <aside
+            className={`${showFilters ? "block" : "hidden"} lg:block w-full lg:w-[270px] lg:shrink-0 lg:self-start !rounded bg-white p-4 shadow-md`}
+          >
+            <div className="space-y-6">
+              {/* Price */}
+              <h3 className="text-xl font-medium">Price Filter</h3>
+              <div className="mx-2">
+                <Range
+                  step={1}
+                  min={MIN}
+                  max={MAX}
+                  values={tempPriceRange}
+                  onChange={(values) => setTempPriceRange(values)}
+                  renderTrack={({ props, children }) => {
+                    const [min, max] = tempPriceRange;
+                    const percentageLeft = ((min - MIN) / (MAX - MIN)) * 100;
+                    const percentageRight = ((max - MIN) / (MAX - MIN)) * 100;
+
+                    return (
                       <div
-                        className="absolute h-full bg-blue-600 rounded"
-                        style={{
-                          left: `${percentageLeft}%`,
-                          width: `${percentageRight - percentageLeft}%`,
-                        }}
+                        {...props}
+                        className="h-[6px] bg-blue-200 rounded relative"
+                        style={{ ...props.style }}
+                      >
+                        <div
+                          className="absolute h-full bg-blue-600 rounded"
+                          style={{
+                            left: `${percentageLeft}%`,
+                            width: `${percentageRight - percentageLeft}%`,
+                          }}
+                        />
+                        {children}
+                      </div>
+                    );
+                  }}
+                  renderThumb={({ props }) => {
+                    const { key, ...rest } = props;
+                    return (
+                      <div
+                        key={key}
+                        {...rest}
+                        className="w-5 h-5 lg:w-[16px] lg:h-[16px] bg-blue-600 rounded-full shadow"
                       />
-                      {children}
-                    </div>
-                  );
-                }}
-                renderThumb={({ props }) => {
-                  const { key, ...rest } = props;
-                  return (
-                    <div
-                      key={key}
-                      {...rest}
-                      className="w-[16px] h-[16px] bg-blue-600 rounded-full shadow"
-                    />
-                  );
-                }}
-              />
-            </div>
-            <div className="flex justify-between items-center mt-2">
-              <div className="text-sm text-gray-600">
-                ${tempPriceRange[0]} - ${tempPriceRange[1]}
+                    );
+                  }}
+                />
+              </div>
+              <div className="flex flex-wrap justify-between items-center gap-2 mt-2">
+                <div className="text-sm text-gray-600">
+                  ${tempPriceRange[0]} - ${tempPriceRange[1]}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setPriceRange(tempPriceRange);
+                    setPage(1);
+                  }}
+                  className="text-sm px-4 py-1.5 bg-gray-200 hover:bg-blue-600 hover:text-white transition !rounded"
+                >
+                  Apply
+                </button>
               </div>
 
-              <button
-                onClick={() => {
-                  setPriceRange(tempPriceRange);
-                  setPage(1);
-                }}
-                className="text-sm px-4 py-1 bg-gray-200 hover:bg-blue-600 hover:text-white transition !rounded"
-              >
-                Apply
-              </button>
-            </div>
-            <h3 className="text-xl font-medium border-b border-b-slate-300 pb-1">
-              Categories
-            </h3>
-            <ul className="space-y-2 !mt-3">
-              {isLoading ? (
-                <p>Loading...</p>
-              ) : (
-                data?.categories?.map((category) => (
+              {/* Categories */}
+              <h3 className={SECTION_TITLE}>Categories</h3>
+              <ul className="grid grid-cols-2 lg:grid-cols-1 gap-x-4 gap-y-2 !mt-3">
+                {isLoading ? (
+                  <p>Loading...</p>
+                ) : (
+                  data?.categories?.map((category) => (
+                    <li
+                      key={category}
+                      className="flex items-center justify-between"
+                    >
+                      <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(category)}
+                          onChange={() => toggleCategory(category)}
+                          className="accent-blue-600"
+                        />
+                        {category}
+                      </label>
+                    </li>
+                  ))
+                )}
+              </ul>
+
+              {/* Colors */}
+              <h3 className={`${SECTION_TITLE} mt-6`}>Filter by Color</h3>
+              <ul className="grid grid-cols-2 lg:grid-cols-1 gap-x-4 gap-y-2 !mt-3">
+                {productColorOptions.map((color) => (
                   <li
-                    key={category}
+                    key={color.name}
                     className="flex items-center justify-between"
                   >
+                    <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={selectedColors.includes(color.name)}
+                        onChange={() => toggleColor(color.name)}
+                        className="accent-blue-600"
+                      />
+                      <span
+                        className="w-[16px] h-[16px] rounded-full border border-gray-200"
+                        style={{ backgroundColor: color.code }}
+                      ></span>
+                      {color.name}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Sizes */}
+              <h3 className={`${SECTION_TITLE} mt-6`}>Filter by Size</h3>
+              <ul className="grid grid-cols-3 lg:grid-cols-1 gap-x-4 gap-y-2 !mt-3">
+                {sizes.map((size) => (
+                  <li key={size} className="flex items-center justify-between">
                     <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={selectedCategories.includes(category)}
-                        onChange={() => toggleCategory(category)}
+                        checked={selectedSizes.includes(size)}
+                        onChange={() => toggleSize(size)}
                         className="accent-blue-600"
                       />
-                      {category}
+                      <span className="font-medium">{size}</span>
                     </label>
                   </li>
-                ))
-              )}
-            </ul>
-            <h3 className="text-xl font-medium border-b border-b-slate-300 pb-1 mt-6">
-              Filter by Color
-            </h3>
-            <ul className="space-y-2 !mt-3">
-              {productColorOptions.map((color) => (
-                <li
-                  key={color.name}
-                  className="flex items-center justify-between"
-                >
-                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={selectedColors.includes(color.name)}
-                      onChange={() => toggleColor(color.name)}
-                      className="accent-blue-600"
-                    />
-                    <span
-                      className="w-[16px] h-[16px] rounded-full border border-gray-200"
-                      style={{ backgroundColor: color.code }}
-                    ></span>
-                    {color.name}
-                  </label>
-                </li>
-              ))}
-            </ul>
-
-            <h3 className="text-xl font-medium border-b border-b-slate-300 pb-1 mt-6">
-              Filter by Size
-            </h3>
-
-            <ul className="space-y-2 !mt-3">
-              {sizes.map((size) => (
-                <li key={size} className="flex items-center justify-between">
-                  <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedSizes.includes(size)}
-                      onChange={() => toggleSize(size)}
-                      className="accent-blue-600"
-                    />
-                    <span className="font-medium">{size}</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
+                ))}
+              </ul>
+            </div>
           </aside>
 
-          <div className="flex-1 px-2 lg:px-3">
+          {/* Products */}
+          <div className="flex-1 min-w-0 lg:px-3">
             {isProductLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5">
+              <div className={GRID_CLASSES}>
                 {Array.from({ length: 10 }).map((_, index) => (
                   <div
                     key={index + 1}
@@ -284,7 +313,7 @@ const Page = () => {
             ) : (
               <div>
                 {products.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5">
+                  <div className={GRID_CLASSES}>
                     {products?.map((product) => (
                       <ProductCard key={product.id} product={product} />
                     ))}
@@ -294,7 +323,7 @@ const Page = () => {
                 )}
 
                 {totalPages > 1 && (
-                  <div className="flex justify-center mt-8 gap-2">
+                  <div className="flex flex-wrap justify-center mt-8 gap-2">
                     {Array.from({ length: totalPages }).map((_, i) => (
                       <button
                         key={i + 1}
