@@ -693,7 +693,7 @@ export const getFilteredShops = async (
   next: NextFunction,
 ) => {
   try {
-    const { categories = [], countries = [], page = 1, limit = 12 } = req.query;
+    const { categories = [], page = 1, limit = 12 } = req.query;
 
     const parsedPage = Number(page);
     const parsedLimit = Number(limit);
@@ -706,12 +706,6 @@ export const getFilteredShops = async (
         in: Array.isArray(categories)
           ? categories
           : String(categories).split(","),
-      };
-    }
-
-    if (countries && String(countries).length > 0) {
-      filters.country = {
-        in: Array.isArray(countries) ? countries : String(countries).split(","),
       };
     }
 

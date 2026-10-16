@@ -11,13 +11,11 @@ import {
   ShopType,
 } from "@packages/ui";
 import { ShopCard } from "@/shared/components/cards/ShopCard";
-import { countries } from "@/utils/countries";
 
 const Page = () => {
   const router = useRouter();
   const [isShopLoading, setIsShopLoading] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [page, setPage] = useState<number>(1);
   const [shops, setShops] = useState<ShopType[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -28,10 +26,6 @@ const Page = () => {
 
     if (selectedCategories.length > 0) {
       params.set("categories", selectedCategories.join(","));
-    }
-
-    if (selectedCountries.length > 0) {
-      params.set("categories", selectedCountries.join(","));
     }
 
     params.set("page", page.toString());
@@ -46,10 +40,6 @@ const Page = () => {
 
       if (selectedCategories.length > 0) {
         query.set("categories", selectedCategories.join(","));
-      }
-
-      if (selectedCountries.length > 0) {
-        query.set("categories", selectedCountries.join(","));
       }
 
       query.set("page", page.toString());
@@ -77,14 +67,6 @@ const Page = () => {
     setSelectedCategories((prev) =>
       prev.includes(label)
         ? prev.filter((cat) => cat !== label)
-        : [...prev, label],
-    );
-  };
-
-  const toggleCountry = (label: string) => {
-    setSelectedCountries((prev) =>
-      prev.includes(label)
-        ? prev.filter((country) => country !== label)
         : [...prev, label],
     );
   };
@@ -138,28 +120,6 @@ const Page = () => {
                         className="accent-blue-600 shrink-0"
                       />
                       {category.value}
-                    </label>
-                  </li>
-                ))}
-              </ul>
-
-              <h3 className="text-xl font-medium border-b border-b-slate-300 pb-1">
-                Countries
-              </h3>
-              <ul className="grid grid-cols-2 lg:grid-cols-1 gap-x-4 gap-y-2 !mt-3">
-                {countries?.map((country) => (
-                  <li
-                    key={country}
-                    className="flex items-center justify-between"
-                  >
-                    <label className="flex items-center gap-3 w-full min-h-[44px] lg:min-h-0 text-sm text-gray-700 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedCountries.includes(country)}
-                        onChange={() => toggleCountry(country)}
-                        className="accent-blue-600 shrink-0"
-                      />
-                      {country}
                     </label>
                   </li>
                 ))}
