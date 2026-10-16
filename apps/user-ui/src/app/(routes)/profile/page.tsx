@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BadgeCheck,
   Bell,
@@ -53,6 +53,23 @@ const fetchNotifications = async () => {
   return response.data;
 };
 
+// The five real tabs of this page, in the same order as the desktop sidebar.
+// "Inbox" (navigates to /inbox) and "Logout" (an action) are handled separately.
+const profileTabs = [
+  { label: "Profile", Icon: User },
+  { label: "My Orders", Icon: ShoppingBag },
+  { label: "Notifications", Icon: Bell },
+  { label: "Shipping Address", Icon: MapPin },
+  { label: "Change Password", Icon: Lock },
+];
+
+const navItemTone = (active?: boolean, danger?: boolean) =>
+  active
+    ? "bg-blue-100 text-blue-600"
+    : danger
+      ? "text-red-500 hover:bg-red-50"
+      : "text-gray-700 hover:bg-gray-100";
+
 const Page = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -63,6 +80,9 @@ const Page = () => {
 
   const queryTab = searchParams.get("active") || "Profile";
   const [activeTab, setActiveTab] = useState(queryTab);
+
+  const tabsStripRef = useRef<HTMLElement | null>(null);
+  const activeTabRef = useRef<HTMLButtonElement | null>(null);
 
   const { data: orders = [] } = useQuery({
     queryKey: ["user-orders"],
@@ -98,6 +118,24 @@ const Page = () => {
     }
   }, [activeTab]);
 
+  // Mobile only: keep the selected tab in view inside the scrollable strip.
+  useEffect(() => {
+    const strip = tabsStripRef.current;
+    const active = activeTabRef.current;
+
+    if (!strip || !active) return;
+
+    const stripRect = strip.getBoundingClientRect();
+
+    // The mobile strip is hidden on desktop, where it reports zero width.
+    if (!stripRect.width) return;
+
+    const activeRect = active.getBoundingClientRect();
+
+    strip.scrollLeft +=
+      activeRect.left - stripRect.left - (stripRect.width - activeRect.width) / 2;
+  }, [activeTab]);
+
   const { data, isLoading: isNotificationsLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: fetchNotifications,
@@ -124,7 +162,7 @@ const Page = () => {
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-3 gap-6">
           <StatCard title="Total Orders" count={totalOrders} Icon={Clock} />
           <StatCard
             title="Processing Orders"
@@ -140,7 +178,53 @@ const Page = () => {
 
         <div className="mt-10 flex flex-col md:flex-row gap-6">
           <div className="bg-white p-4 rounded-md shadow-sm border border-gray-100 w-full md:w-1/5">
-            <nav className="space-y-2">
+            {/* Mobile: compact switcher - a scrollable strip of the five tabs,
+                with Inbox and Logout split out below it. */}
+            <div className="md:hidden">
+              <nav
+                ref={tabsStripRef}
+                className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {profileTabs.map(({ label, Icon }) => (
+                  <button
+                    key={label}
+                    ref={activeTab === label ? activeTabRef : null}
+                    onClick={() => setActiveTab(label)}
+                    className={`shrink-0 flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-md text-sm font-medium transition ${navItemTone(
+                      activeTab === label,
+                    )}`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {label}
+                  </button>
+                ))}
+              </nav>
+
+              <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-3">
+                <button
+                  onClick={() => router.push("/inbox")}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition ${navItemTone(
+                    activeTab === "Inbox",
+                  )}`}
+                >
+                  <Inbox className="w-4 h-4" />
+                  Inbox
+                </button>
+
+                <button
+                  onClick={() => logOutHandler()}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition ${navItemTone(
+                    false,
+                    true,
+                  )}`}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            </div>
+
+            <nav className="hidden md:block space-y-2">
               <NavItem
                 label="Profile"
                 Icon={User}
@@ -284,7 +368,7 @@ const Page = () => {
             )}
           </div>
 
-          <div className="w-full md:w-1/4 space-y-4">
+          <div className="w-full md:w-1/4 grid grid-cols-2 gap-4 md:block md:space-y-4 [&>*:last-child]:col-span-2">
             <QuickActionCard
               Icon={Gift}
               title="Referral Program"
@@ -334,13 +418,10 @@ type NavItemProps = {
 const NavItem = ({ label, Icon, active, danger, onClick }: NavItemProps) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition ${
-      active
-        ? "bg-blue-100 text-blue-600"
-        : danger
-          ? "text-red-500 hover:bg-red-50"
-          : "text-gray-700 hover:bg-gray-100"
-    }`}
+    className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition ${navItemTone(
+      active,
+      danger,
+    )}`}
   >
     <Icon className="w-4 h-4" />
     {label}
