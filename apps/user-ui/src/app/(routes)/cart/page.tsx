@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Image from "next/image";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -157,6 +157,7 @@ const Page = () => {
   const { data: addresses } = useQuery({
     queryKey: ["user-shipping-addresses"],
     queryFn: fetchUserAddress,
+    enabled: isAuthenticated,
   });
 
   useEffect(() => {
@@ -370,7 +371,7 @@ const Page = () => {
                     Select Shipping Address
                   </h4>
 
-                  {addresses?.length !== 0 && (
+                  {!!addresses && addresses.length > 0 && (
                     <select
                       className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:border-blue-500"
                       value={selectedAddressId}
@@ -386,10 +387,23 @@ const Page = () => {
                     </select>
                   )}
 
-                  {addresses?.length === 0 && (
+                  {isAuthenticated && addresses?.length === 0 && (
                     <p className="text-sm text-slate-800">
                       Please add an address from profile to create an order!
                     </p>
+                  )}
+
+                  {!isAuthenticated && (
+                    <div className="text-sm text-slate-800">
+                      <p>Sign in to use your saved addresses.</p>
+
+                      <Link
+                        href={`/login?redirect=${encodeURIComponent("/cart")}`}
+                        className="inline-block mt-2 text-[#0989ff] font-medium hover:underline"
+                      >
+                        Sign in
+                      </Link>
+                    </div>
                   )}
                 </div>
 
@@ -433,16 +447,22 @@ const Page = () => {
                     {isLoading ? "Redirecting..." : "Proceed to checkout"}
                   </button>
                 ) : (
-                  <button
-                    className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
-                    onClick={() =>
-                      router.push(
-                        `/login?redirect=${encodeURIComponent(window.location.pathname)}`,
-                      )
-                    }
-                  >
-                    Log in
-                  </button>
+                  <Fragment>
+                    <button
+                      className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
+                      onClick={() =>
+                        router.push(
+                          `/login?redirect=${encodeURIComponent(window.location.pathname)}`,
+                        )
+                      }
+                    >
+                      Proceed to checkout
+                    </button>
+
+                    <p className="text-xs text-slate-600 text-center mt-2">
+                      You&apos;ll be asked to sign in to complete your order.
+                    </p>
+                  </Fragment>
                 )}
               </div>
             </div>
