@@ -12,6 +12,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 
 import { useUser } from "@/hooks/use-user";
 import axiosInstance from "@/utils/axiosInstance";
@@ -69,6 +70,9 @@ const Inbox = () => {
       );
 
       setSelectedChat(chat ?? null);
+    } else if (!conversationId) {
+      // no ?conversationId= in the URL means no conversation is open (mobile back to list)
+      setSelectedChat(null);
     }
   }, [conversationId, chats]);
 
@@ -225,7 +229,11 @@ const Inbox = () => {
     <div className="w-full font-Poppins">
       <div className="md:w-[80%] mx-auto pt-5">
         <div className="flex h-[80vh] shadow-sm overflow-hidden">
-          <div className="w-[320px] border-r border-r-gray-200 bg-gray-50">
+          <div
+            className={`w-full md:w-[320px] md:shrink-0 border-r border-r-gray-200 bg-gray-50 ${
+              selectedChat ? "hidden md:block" : ""
+            }`}
+          >
             <div className="p-4 border-b border-b-gray-200 text-lg font-semibold text-gray-800">
               Messages
             </div>
@@ -256,26 +264,26 @@ const Inbox = () => {
                           alt={chat?.seller?.name}
                           width={36}
                           height={36}
-                          className="rounded-full border w-[40px] object-cover"
+                          className="shrink-0 rounded-full border w-[40px] object-cover"
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-800 font-semibold">
+                            <span className="text-sm text-gray-800 font-semibold truncate">
                               {chat?.seller?.name}
                             </span>
 
                             {chat?.seller?.isOnline && (
-                              <span className="w-2 h-2 rounded-full bg-green-500" />
+                              <span className="shrink-0 w-2 h-2 rounded-full bg-green-500" />
                             )}
                           </div>
 
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-2">
                             <p className="text-xs text-gray-400 truncate max-w-[170px]">
                               {getLastMessage(chat)}
                             </p>
 
                             {chat?.unreadCount > 0 && (
-                              <span className="flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] bg-blue-600 text-white">
+                              <span className="shrink-0 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] bg-blue-600 text-white">
                                 {chat.unreadCount > 9 ? "9+" : chat.unreadCount}
                               </span>
                             )}
@@ -289,20 +297,36 @@ const Inbox = () => {
             </div>
           </div>
 
-          <div className="flex flex-col flex-1 bg-gray-100">
+          {/* min-w-0: without it this flex child can't shrink below its content
+              width, so on mobile the pane grows wider than the screen and gets
+              clipped (messages/input hugging the edge, send button cut off). */}
+          <div
+            className={`flex-col flex-1 min-w-0 bg-gray-100 ${
+              selectedChat ? "flex" : "hidden md:flex"
+            }`}
+          >
             {selectedChat ? (
               <Fragment>
-                <div className="p-4 border-b-gray-200 bg-white flex items-center gap-3">
+                <div className="px-3 py-3 sm:px-4 sm:py-4 border-b-gray-200 bg-white flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/inbox")}
+                    aria-label="Back to messages"
+                    className="shrink-0 md:hidden -ml-1 p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
+                  >
+                    <ArrowLeft size={20} />
+                  </button>
+
                   <Image
                     src={String(selectedChat?.seller?.avatar)}
                     alt={selectedChat?.seller?.name}
                     width={40}
                     height={40}
-                    className="rounded-full border w-[40px] h-[40px] object-cover border-gray-200"
+                    className="shrink-0 rounded-full border w-[40px] h-[40px] object-cover border-gray-200"
                   />
 
-                  <div>
-                    <h2 className="text-gray-800 font-semibold text-base">
+                  <div className="min-w-0">
+                    <h2 className="text-gray-800 font-semibold text-base truncate">
                       {selectedChat?.seller?.name}
                     </h2>
 
@@ -314,7 +338,7 @@ const Inbox = () => {
 
                 <div
                   ref={messageContainerRef}
-                  className="flex-1 overflow-y-auto px-6 py-6 space-y-4 text-sm"
+                  className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6 space-y-4 text-sm"
                 >
                   {hasNextPage && (
                     <div className="flex justify-center mb-2">
@@ -340,7 +364,7 @@ const Inbox = () => {
                           message.senderType === "user"
                             ? "bg-blue-600 text-white"
                             : "bg-white text-gray-800"
-                        } px-4 py-2 rounded-lg shadow-sm w-fit`}
+                        } px-4 py-2 rounded-lg shadow-sm w-fit max-w-full break-words [overflow-wrap:anywhere]`}
                       >
                         {message.content}
                       </div>

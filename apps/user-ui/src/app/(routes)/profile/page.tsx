@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BadgeCheck,
   Bell,
@@ -53,11 +53,13 @@ const fetchNotifications = async () => {
   return response.data;
 };
 
-// The five real tabs of this page, in the same order as the desktop sidebar.
-// "Inbox" (navigates to /inbox) and "Logout" (an action) are handled separately.
-const profileTabs = [
+// Mobile navigation tiles, in the same order as the desktop sidebar.
+// Items with `href` navigate to another page; the rest switch the active tab.
+// Logout is an action, so it is rendered separately below the grid.
+const mobileNavItems: { label: string; Icon: LucideIcon; href?: string }[] = [
   { label: "Profile", Icon: User },
   { label: "My Orders", Icon: ShoppingBag },
+  { label: "Inbox", Icon: Inbox, href: "/inbox" },
   { label: "Notifications", Icon: Bell },
   { label: "Shipping Address", Icon: MapPin },
   { label: "Change Password", Icon: Lock },
@@ -80,9 +82,6 @@ const Page = () => {
 
   const queryTab = searchParams.get("active") || "Profile";
   const [activeTab, setActiveTab] = useState(queryTab);
-
-  const tabsStripRef = useRef<HTMLElement | null>(null);
-  const activeTabRef = useRef<HTMLButtonElement | null>(null);
 
   const { data: orders = [] } = useQuery({
     queryKey: ["user-orders"],
@@ -116,24 +115,6 @@ const Page = () => {
       newParams.set("active", activeTab);
       router.replace(`profile?${newParams.toString()}`);
     }
-  }, [activeTab]);
-
-  // Mobile only: keep the selected tab in view inside the scrollable strip.
-  useEffect(() => {
-    const strip = tabsStripRef.current;
-    const active = activeTabRef.current;
-
-    if (!strip || !active) return;
-
-    const stripRect = strip.getBoundingClientRect();
-
-    // The mobile strip is hidden on desktop, where it reports zero width.
-    if (!stripRect.width) return;
-
-    const activeRect = active.getBoundingClientRect();
-
-    strip.scrollLeft +=
-      activeRect.left - stripRect.left - (stripRect.width - activeRect.width) / 2;
   }, [activeTab]);
 
   const { data, isLoading: isNotificationsLoading } = useQuery({
@@ -178,42 +159,41 @@ const Page = () => {
 
         <div className="mt-10 flex flex-col md:flex-row gap-6">
           <div className="bg-white p-4 rounded-md shadow-sm border border-gray-100 w-full md:w-1/5">
-            {/* Mobile: compact switcher - a scrollable strip of the five tabs,
-                with Inbox and Logout split out below it. */}
+            {/* Mobile: every option visible at once as a 3-column grid of tiles
+                (icon above label). No horizontal scrolling, nothing hidden.
+                Logout sits apart below so it is not tapped by accident. */}
             <div className="md:hidden">
               <nav
-                ref={tabsStripRef}
-                className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                aria-label="Account sections"
+                className="grid grid-cols-3 gap-2"
               >
-                {profileTabs.map(({ label, Icon }) => (
-                  <button
-                    key={label}
-                    ref={activeTab === label ? activeTabRef : null}
-                    onClick={() => setActiveTab(label)}
-                    className={`shrink-0 flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-md text-sm font-medium transition ${navItemTone(
-                      activeTab === label,
-                    )}`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {label}
-                  </button>
-                ))}
+                {mobileNavItems.map(({ label, Icon, href }) => {
+                  const active = activeTab === label;
+
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      aria-current={active ? "page" : undefined}
+                      onClick={() =>
+                        href ? router.push(href) : setActiveTab(label)
+                      }
+                      className={`flex min-h-[72px] flex-col items-center justify-center gap-1.5 rounded-lg px-1.5 py-3 text-center text-xs font-medium leading-tight transition ${navItemTone(
+                        active,
+                      )} ${active ? "ring-1 ring-blue-200" : "bg-gray-50"}`}
+                    >
+                      <Icon className="w-5 h-5 shrink-0" />
+                      <span>{label}</span>
+                    </button>
+                  );
+                })}
               </nav>
 
-              <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-3">
+              <div className="mt-3 pt-3 border-t border-gray-100">
                 <button
-                  onClick={() => router.push("/inbox")}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition ${navItemTone(
-                    activeTab === "Inbox",
-                  )}`}
-                >
-                  <Inbox className="w-4 h-4" />
-                  Inbox
-                </button>
-
-                <button
+                  type="button"
                   onClick={() => logOutHandler()}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition ${navItemTone(
+                  className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition ${navItemTone(
                     false,
                     true,
                   )}`}
