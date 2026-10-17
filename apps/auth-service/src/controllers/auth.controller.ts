@@ -27,7 +27,14 @@ import {
   NotFoundError,
   ValidationError,
 } from "@packages/error-handler";
-import { setCookie, setSessionFlag } from "@packages/cookies";
+import {
+  setCookie,
+  setSessionFlag,
+  refreshCookieNameByRole,
+  isAuthRole,
+  cookieNameByRole,
+} from "@packages/cookies";
+import type { AuthRole } from "@packages/cookies";
 
 const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY), {
   apiVersion: "2026-06-24.dahlia",
@@ -160,8 +167,8 @@ export const login = async (
       { expiresIn: "7d" },
     );
 
-    setCookie(res, "access_token", accessToken);
-    setCookie(res, "refresh_token", refreshToken);
+    setCookie(res, cookieNameByRole["user"], accessToken);
+    setCookie(res, refreshCookieNameByRole["user"], refreshToken);
     setSessionFlag(res);
 
     await setCurrentRefreshToken("user", user.id, refreshToken);
@@ -191,9 +198,15 @@ export const refreshToken = async (
   next: NextFunction,
 ) => {
   try {
+    const header = req.headers["x-client-role"];
+    if (!isAuthRole(header)) {
+      throw new ValidationError("Unauthorized! Missing x-client-role header.");
+    }
+
+    const caller: AuthRole = header;
+
     const refreshToken =
-      req.cookies.refresh_token ||
-      req.cookies.seller_refresh_token ||
+      req.cookies[refreshCookieNameByRole[caller]] ||
       req.headers.authorization?.split(" ")[1];
 
     if (!refreshToken) {
@@ -203,10 +216,16 @@ export const refreshToken = async (
     const decoded = jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET as string,
-    ) as { id: string; role: "user" | "seller" | "admin" };
+    ) as { id: string; role: AuthRole };
 
     if (!decoded || !decoded.id || !decoded.role) {
       throw new JsonWebTokenError("Forbidden! Invalid refresh token.");
+    }
+
+    if (decoded.role !== caller) {
+      throw new AuthError(
+        "Forbidden! Refresh token does not match this client.",
+      );
     }
 
     const storedRefreshToken = await getCurrentRefreshToken(
@@ -255,16 +274,11 @@ export const refreshToken = async (
       { expiresIn: "7d" },
     );
 
+    setCookie(res, cookieNameByRole[decoded.role], newAccessToken);
+    setCookie(res, refreshCookieNameByRole[decoded.role], newRefreshToken);
+
     if (decoded.role === "user") {
-      setCookie(res, "access_token", newAccessToken);
-      setCookie(res, "refresh_token", newRefreshToken);
       setSessionFlag(res);
-    } else if (decoded.role === "seller") {
-      setCookie(res, "seller_access_token", newAccessToken);
-      setCookie(res, "seller_refresh_token", newRefreshToken);
-    } else if (decoded.role === "admin") {
-      setCookie(res, "access_token", newAccessToken);
-      setCookie(res, "refresh_token", newRefreshToken);
     }
 
     await setCurrentRefreshToken(decoded.role, decoded.id, newRefreshToken);
@@ -566,8 +580,8 @@ export const sellerLogin = async (
       { expiresIn: "7d" },
     );
 
-    setCookie(res, "seller_access_token", accessToken);
-    setCookie(res, "seller_refresh_token", refreshToken);
+    setCookie(res, cookieNameByRole["seller"], accessToken);
+    setCookie(res, refreshCookieNameByRole["seller"], refreshToken);
 
     await setCurrentRefreshToken("seller", seller.id, refreshToken);
 
@@ -679,8 +693,8 @@ export const loginAdmin = async (
       },
     );
 
-    setCookie(res, "refresh_token", refreshToken);
-    setCookie(res, "access_token", accessToken);
+    setCookie(res, cookieNameByRole["admin"], accessToken);
+    setCookie(res, refreshCookieNameByRole["admin"], refreshToken);
 
     await setCurrentRefreshToken("admin", user.id, refreshToken);
 

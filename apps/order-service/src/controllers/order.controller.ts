@@ -14,45 +14,6 @@ const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY), {
   apiVersion: "2026-06-24.dahlia",
 });
 
-export const createPaymentIntent = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  const { amount, sellerStripeAccountId, sessionId } = req.body;
-
-  const customerAccount = Math.round(amount * 100);
-  const platformFee = Math.floor(customerAccount * 0.1);
-
-  try {
-    await stripe.accounts.update(sellerStripeAccountId, {
-      capabilities: {
-        card_payments: { requested: true },
-        transfers: { requested: true },
-      },
-    });
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: customerAccount,
-      currency: "usd",
-      payment_method_types: ["card"],
-      application_fee_amount: platformFee,
-      transfer_data: {
-        destination: sellerStripeAccountId,
-      },
-      metadata: {
-        sessionId,
-        userId: (req.user as Users).id,
-      },
-    });
-
-    res.send({ clientSecret: paymentIntent.client_secret });
-  } catch (err) {
-    console.log({ err });
-    next(err);
-  }
-};
-
 export const createPaymentSession = async (
   req: Request,
   res: Response,
@@ -186,6 +147,45 @@ export const verifyingPaymentSession = async (
     });
   } catch (error) {
     return next(error);
+  }
+};
+
+export const createPaymentIntent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { amount, sellerStripeAccountId, sessionId } = req.body;
+
+  const customerAccount = Math.round(amount * 100);
+  const platformFee = Math.floor(customerAccount * 0.1);
+
+  try {
+    await stripe.accounts.update(sellerStripeAccountId, {
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+    });
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: customerAccount,
+      currency: "usd",
+      payment_method_types: ["card"],
+      application_fee_amount: platformFee,
+      transfer_data: {
+        destination: sellerStripeAccountId,
+      },
+      metadata: {
+        sessionId,
+        userId: (req.user as Users).id,
+      },
+    });
+
+    res.send({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.log({ err });
+    next(err);
   }
 };
 

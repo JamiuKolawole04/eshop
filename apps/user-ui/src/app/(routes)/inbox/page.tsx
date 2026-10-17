@@ -71,7 +71,6 @@ const Inbox = () => {
 
       setSelectedChat(chat ?? null);
     } else if (!conversationId) {
-      // no ?conversationId= in the URL means no conversation is open (mobile back to list)
       setSelectedChat(null);
     }
   }, [conversationId, chats]);
@@ -297,9 +296,6 @@ const Inbox = () => {
             </div>
           </div>
 
-          {/* min-w-0: without it this flex child can't shrink below its content
-              width, so on mobile the pane grows wider than the screen and gets
-              clipped (messages/input hugging the edge, send button cut off). */}
           <div
             className={`flex-col flex-1 min-w-0 bg-gray-100 ${
               selectedChat ? "flex" : "hidden md:flex"
@@ -364,7 +360,7 @@ const Inbox = () => {
                           message.senderType === "user"
                             ? "bg-blue-600 text-white"
                             : "bg-white text-gray-800"
-                        } px-4 py-2 rounded-lg shadow-sm w-fit max-w-full break-words [overflow-wrap:anywhere]`}
+                        } px-4 py-2 rounded-lg shadow-sm w-fit max-w-full break-words`}
                       >
                         {message.content}
                       </div>

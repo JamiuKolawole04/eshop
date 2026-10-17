@@ -11,6 +11,9 @@
   "include": ["src/**/*.ts", "../types/src/express.d.ts"],
   "references": [
     {
+      "path": "../cookies/tsconfig.lib.json"
+    },
+    {
       "path": "../prisma/tsconfig.lib.json"
     },
     {

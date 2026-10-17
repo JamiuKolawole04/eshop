@@ -1,16 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-type AuthRole = "user" | "seller" | "admin";
-
 import { prisma } from "@packages/prisma";
-
-// cookies
-const cookieNameByRole: Record<AuthRole, string> = {
-  user: "access_token",
-  admin: "access_token",
-  seller: "seller_access_token",
-};
+import { AuthRole, cookieNameByRole } from "@packages/cookies";
 
 export const isAuthenticated = (expectedRole: AuthRole) => {
   return async (req: Request, res: Response, next: NextFunction) => {

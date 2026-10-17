@@ -55,7 +55,7 @@ axiosInstance.interceptors.response.use(
         await axios.post(
           `${process.env.NEXT_PUBLIC_SERVER_URI}/api/auth/refresh-token`,
           {},
-          { withCredentials: true },
+          { withCredentials: true, headers: { "x-client-role": "user" } },
         );
 
         isRefreshing = false;

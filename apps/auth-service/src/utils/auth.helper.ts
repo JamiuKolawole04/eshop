@@ -6,7 +6,12 @@ import { NotFoundError, ValidationError } from "@packages/error-handler";
 import { sendMail } from "./sendMail";
 import { redis } from "@packages/redis";
 import { prisma } from "@packages/prisma";
-import { clearSessionFlag } from "@packages/cookies";
+import {
+  AuthRole,
+  clearSessionFlag,
+  cookieNameByRole,
+  refreshCookieNameByRole,
+} from "@packages/cookies";
 
 const emailRegex = /^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/;
 
@@ -171,17 +176,9 @@ export const verifyForgotPasswordOtp = async (
   }
 };
 
-export const clearAuthCookies = (
-  res: Response,
-  role: "user" | "seller" | "admin",
-) => {
-  if (role === "seller") {
-    res.clearCookie("seller_access_token");
-    res.clearCookie("seller_refresh_token");
-  } else {
-    res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
-  }
+export const clearAuthCookies = (res: Response, role: AuthRole) => {
+  res.clearCookie(cookieNameByRole[role]);
+  res.clearCookie(refreshCookieNameByRole[role]);
 
   if (role === "user") {
     clearSessionFlag(res);
