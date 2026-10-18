@@ -1,6 +1,14 @@
 import { kafka } from "@packages/kafka";
 
-const producer = kafka.producer();
+let producer: ReturnType<typeof kafka.producer> | null = null;
+let connecting: Promise<void> | null = null;
+
+const getProducer = async () => {
+  producer ??= kafka.producer();
+  connecting ??= producer.connect();
+  await connecting;
+  return producer;
+};
 
 export async function sendLog({
   type = "info",
@@ -18,10 +26,18 @@ export async function sendLog({
     source,
   };
 
-  await producer.connect();
-  await producer.send({
-    topic: "logs",
-    messages: [{ value: JSON.stringify(logPayload) }],
-  });
-  await producer.disconnect();
+  try {
+    const client = await getProducer();
+    await client.send({
+      topic: "logs",
+      messages: [{ value: JSON.stringify(logPayload) }],
+    });
+  } catch (err) {
+    producer = null;
+    connecting = null;
+    console.error(
+      `[sendLog:${type}] ${source} — ${message}`,
+      err instanceof Error ? err.message : err,
+    );
+  }
 }
