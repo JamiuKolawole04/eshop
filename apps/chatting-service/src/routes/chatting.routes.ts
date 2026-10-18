@@ -7,16 +7,11 @@ import {
   getUserConversations,
   newConversation,
 } from "../controllers/chatting.controller";
-import {
-  isAuthenticated,
-  isAuthenticatedAny,
-  isSeller,
-  isUser,
-} from "@packages/middleware";
+import { isAuthenticated, isSeller, isUser } from "@packages/middleware";
 
 const router: Router = express.Router();
 
-router.post("/conversations", isAuthenticatedAny, newConversation);
+router.post("/conversations", isAuthenticated("user"), isUser, newConversation);
 router.get(
   "/conversations/user",
   isAuthenticated("user"),

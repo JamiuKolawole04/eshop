@@ -21,10 +21,15 @@ app.set("trust proxy", 1);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: (req) => (req.user ? 1000 : 100),
-  message: "Too many requests, please try again later!",
-  standardHeaders: true,
-  legacyHeaders: true,
+  limit: (req) => (req.user ? 1000 : 100),
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many requests, please try again later!",
+    });
+  },
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
 });
 app.use(limiter);
 

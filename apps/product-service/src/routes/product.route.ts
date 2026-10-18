@@ -1,10 +1,6 @@
 import express, { Router } from "express";
 
-import {
-  isAuthenticated,
-  isSeller,
-  isAuthenticatedAny,
-} from "@packages/middleware";
+import { isAuthenticated, isSeller } from "@packages/middleware";
 
 import {
   createDiscountCode,
@@ -60,7 +56,12 @@ router.post(
   isSeller,
   createDiscountCode,
 );
-router.get("/discount-code", isAuthenticatedAny, getDiscountCodes);
+router.get(
+  "/discount-code",
+  isAuthenticated("seller"),
+  isSeller,
+  getDiscountCodes,
+);
 router.delete(
   "/discount-code/:id",
   isAuthenticated("seller"),

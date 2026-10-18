@@ -75,9 +75,9 @@ export const isAuthenticatedAny = async (
 ) => {
   try {
     const token =
-      req.cookies.access_token ||
-      req.cookies.seller_access_token ||
-      req.headers.authorization?.split(" ")[1];
+      Object.values(cookieNameByRole)
+        .map((name) => req.cookies[name])
+        .find(Boolean) || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({

@@ -36,7 +36,17 @@ router.get(
   isAdmin,
   getAllNotifications,
 );
-router.post("/add-category", addCategoryToCustomization);
-router.post("/add-sub-category", addSubCategoryToCustomization);
+router.post(
+  "/add-category",
+  isAuthenticated("admin"),
+  isAdmin,
+  addCategoryToCustomization,
+);
+router.post(
+  "/add-sub-category",
+  isAuthenticated("admin"),
+  isAdmin,
+  addSubCategoryToCustomization,
+);
 
 export default router;
