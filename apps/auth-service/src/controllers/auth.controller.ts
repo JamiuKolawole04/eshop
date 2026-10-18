@@ -364,11 +364,6 @@ export const userLogout = async (
 
     clearAuthCookies(res, "user");
 
-    console.log({
-      ip: req.ip,
-      forwardedFor: req.headers["x-forwarded-for"],
-    });
-
     res.status(200).json({
       success: true,
       message: "user logged out successfully",
