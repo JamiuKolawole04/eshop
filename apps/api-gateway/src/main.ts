@@ -1,14 +1,23 @@
-import express from "express";
 import * as path from "node:path";
-import proxy from "express-http-proxy";
+import express from "express";
+import proxy, { ProxyOptions } from "express-http-proxy";
 import morgan from "morgan";
-import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 
 import { initializeConfig } from "./libs/initializeSiteConfig";
 import { corsMiddleware } from "./shared/middlewares/cors";
+import { globalLimiter } from "@packages/middleware/rate-limit";
 
 const app = express();
+const withClientIp: ProxyOptions = {
+  proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+    const prior = srcReq.headers["x-forwarded-for"];
+    proxyReqOpts.headers["x-forwarded-for"] = prior
+      ? `${prior}, ${srcReq.ip}`
+      : srcReq.ip;
+    return proxyReqOpts;
+  },
+};
 app.disable("x-powered-by");
 
 app.use(corsMiddleware);
@@ -19,27 +28,15 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use(cookieParser());
 app.set("trust proxy", 1);
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: (req) => (req.user ? 1000 : 100),
-  handler: (req, res) => {
-    res.status(429).json({
-      success: false,
-      message: "Too many requests, please try again later!",
-    });
-  },
-  standardHeaders: "draft-8",
-  legacyHeaders: false,
-});
-app.use(limiter);
+app.use(globalLimiter);
 
-app.use("/api/sellers", proxy("http://localhost:6007"));
-app.use("/api/chatting", proxy("http://localhost:6006"));
-app.use("/api/admin", proxy("http://localhost:6005"));
-app.use("/api/orders", proxy("http://localhost:6004"));
-app.use("/api/users", proxy("http://localhost:6003"));
-app.use("/api/products", proxy("http://localhost:6002"));
-app.use("/", proxy("http://localhost:6001"));
+app.use("/api/sellers", proxy("http://localhost:6007", withClientIp));
+app.use("/api/chatting", proxy("http://localhost:6006", withClientIp));
+app.use("/api/admin", proxy("http://localhost:6005", withClientIp));
+app.use("/api/orders", proxy("http://localhost:6004", withClientIp));
+app.use("/api/users", proxy("http://localhost:6003", withClientIp));
+app.use("/api/products", proxy("http://localhost:6002", withClientIp));
+app.use("/", proxy("http://localhost:6001", withClientIp));
 
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 

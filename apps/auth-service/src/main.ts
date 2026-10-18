@@ -14,6 +14,7 @@ app.disable("x-powered-by");
 
 app.use(express.json({ limit: "100mb" }));
 app.use(cookieParser());
+app.set("trust proxy", 1);
 
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.get("/docs-json", (req, res: Response) => {
