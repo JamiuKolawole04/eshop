@@ -15,6 +15,7 @@ import {
   GeographicalMap,
   Order,
   SalesChart,
+  SellerDeviceUsageResponseType,
   SellerOrdersResponseType,
 } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
@@ -30,6 +31,14 @@ const fetchOrders = async () => {
     await axiosInstance.get<SellerOrdersResponseType>(`/api/orders/seller`);
 
   return response.data.orders;
+};
+
+const fetchDeviceUsage = async () => {
+  const response = await axiosInstance.get<SellerDeviceUsageResponseType>(
+    `/api/sellers/device-usage`,
+  );
+
+  return response.data.deviceUsage;
 };
 
 const OrdersTable = () => {
@@ -142,6 +151,11 @@ const OrdersTable = () => {
 
 // Dashboard Layout
 const DashboardPage = () => {
+  const { data: deviceData = [], isLoading: isDeviceDataLoading } = useQuery({
+    queryKey: ["seller-device-usage"],
+    queryFn: fetchDeviceUsage,
+    staleTime: 1000 * 60 * 5,
+  });
   return (
     <div className="p-4 sm:p-6 lg:p-8 font-Poppins">
       {/* Top Charts */}
@@ -167,9 +181,15 @@ const DashboardPage = () => {
               How users access your platform
             </span>
           </h2>
-          <div className="mt-6 sm:mt-10 lg:mt-14">
-            <DeviceStat deviceData={deviceData} />
-          </div>
+          {isDeviceDataLoading ? (
+            <div className="flex items-center justify-center">
+              <ButtonLoader className="text-white mt-5" />
+            </div>
+          ) : (
+            <div className="mt-6 sm:mt-10 lg:mt-14">
+              <DeviceStat deviceData={deviceData} />
+            </div>
+          )}
         </div>
       </div>
 
