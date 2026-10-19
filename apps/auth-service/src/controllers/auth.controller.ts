@@ -382,10 +382,9 @@ export const registerSeller = async (
     validateRegistrationData(req.body, "seller");
 
     const { name, email } = req.body;
-    const existingSeller = await prisma.users.findUnique({
+    const existingSeller = await prisma.sellers.findUnique({
       where: { email },
     });
-
     if (existingSeller) {
       throw new ConflictError("Seller already exists.");
     }

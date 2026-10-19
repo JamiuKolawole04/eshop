@@ -3,10 +3,12 @@
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { useForm } from "react-hook-form";
 import axios, { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
+
+import { ButtonLoader } from "@packages/ui";
 
 type FormData = {
   email: string;
@@ -78,9 +80,9 @@ const Login = () => {
           </p>
 
           <div className="flex items-center my-5 text-gray-400 text-sm font-Poppins">
-            <div className="flex-1 border-t border-gray-300"></div>
-            <span className="px-3">or sign in with Email</span>
-            <div className="flex-1 border-t border-gray-300"></div>
+            {/*<div className="flex-1 border-t border-gray-300"></div>*/}
+            {/*<span className="px-3">or sign in with Email</span>*/}
+            {/*<div className="flex-1 border-t border-gray-300"></div>*/}
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -155,9 +157,16 @@ const Login = () => {
             <button
               type="submit"
               disabled={loginMutation.isPending}
-              className="w-full text-base cursor-pointer bg-black text-white py-2 rounded-lg"
+              className="w-full text-base cursor-pointer bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loginMutation.isPending ? "Loggin in ..." : "Login"}
+              {loginMutation.isPending ? (
+                <Fragment>
+                  <ButtonLoader />
+                  Logging in...
+                </Fragment>
+              ) : (
+                "Login"
+              )}
             </button>
 
             {serverError && (

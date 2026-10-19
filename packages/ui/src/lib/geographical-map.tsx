@@ -9,6 +9,8 @@ import {
 } from "@vnedyalk0v/react19-simple-maps";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { ButtonLoader } from "./button-loader";
+
 type GeoTopology = {
   type: string;
   objects: Record<string, unknown>;
@@ -51,7 +53,7 @@ export const GeographicalMap = () => {
   if (!geoData) {
     return (
       <div className="relative w-full px-0 py-5 h-[35vh] flex items-center justify-center text-gray-400 text-sm">
-        Loading map…
+        <ButtonLoader />
       </div>
     );
   }

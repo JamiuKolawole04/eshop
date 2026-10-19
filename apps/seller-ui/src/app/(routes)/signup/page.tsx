@@ -10,6 +10,7 @@ import { SiStripe } from "react-icons/si";
 
 import { countries } from "@/utils/countries";
 import { CreateShop } from "@/shared/modules/auth/create-shop";
+import { ButtonLoader } from "@packages/ui";
 
 type FormData = {
   name: string;
@@ -133,7 +134,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center pt-10 min-h-screen font-Poppins">
+    <div className="w-full flex flex-col items-center bg-[#f1f1f1] pt-10 min-h-screen font-Poppins">
       <div className="relative flex items-center justify-between md:w-[50%] mb-8">
         <div className="absolute top-[25%] left-0 w-[80%] md:w-[90%] h-1 bg-gray-300 -z-10" />
 
@@ -287,9 +288,16 @@ const Signup = () => {
                 <button
                   type="submit"
                   disabled={signupMutation.isPending}
-                  className="w-full text-base cursor-pointer mt-4 bg-black text-white py-2 rounded-lg"
+                  className="mt-4 w-full text-base cursor-pointer bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {signupMutation.isPending ? "Signing up ..." : "Sign up"}
+                  {signupMutation.isPending ? (
+                    <Fragment>
+                      <ButtonLoader />
+                      Signing up ...
+                    </Fragment>
+                  ) : (
+                    "Sign up"
+                  )}
                 </button>
 
                 {signupMutation?.isError &&
