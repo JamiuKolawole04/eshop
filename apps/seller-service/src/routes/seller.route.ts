@@ -3,6 +3,7 @@ import express, { Router } from "express";
 import {
   deleteShop,
   followShop,
+  getDeviceUsage,
   getSellerDetails,
   getSellerEvents,
   getSellerProducts,
@@ -78,6 +79,13 @@ router.put(
   isAuthenticated("seller"),
   isSeller,
   updateOrderNotifications,
+);
+
+router.get(
+  "/device-usage",
+  isAuthenticated("seller"),
+  isSeller,
+  getDeviceUsage,
 );
 
 router.get("/:id", getSellerDetails);

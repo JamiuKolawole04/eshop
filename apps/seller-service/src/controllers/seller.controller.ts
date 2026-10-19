@@ -19,6 +19,12 @@ const MAX_NAME_LENGTH = 60;
 const MAX_BIO_WORDS = 100;
 const MAX_SOCIAL_LINKS = 5;
 
+const DEVICE_LABELS: Record<string, string> = {
+  desktop: "Computer",
+  mobile: "Phone",
+  tablet: "Tablet",
+};
+
 export const updateShopProfile = async (
   req: Request,
   res: Response,
@@ -661,6 +667,36 @@ export const restoreShop = async (
     });
 
     return res.status(200).json({ success: true, message: "Shop restored." });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getDeviceUsage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const shop = await getSellerShop(req.seller?.id as string);
+
+    const analytics = await prisma.shopAnalytics.findUnique({
+      where: { shopId: shop.id },
+      select: { deviceCategories: true },
+    });
+
+    const categories = (analytics?.deviceCategories ?? {}) as Record<
+      string,
+      number
+    >;
+
+    return res.status(200).json({
+      success: true,
+      deviceUsage: Object.entries(categories).map(([device, value]) => ({
+        name: DEVICE_LABELS[device.toLowerCase()] ?? device,
+        value,
+      })),
+    });
   } catch (error) {
     return next(error);
   }
