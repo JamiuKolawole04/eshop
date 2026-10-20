@@ -17,7 +17,17 @@ type GeoTopology = {
   arcs: number[][][];
 };
 
-const countryData = [
+export type CountryStat = {
+  name: string;
+  users: number;
+  sellers?: number;
+};
+
+type Prop = {
+  data?: CountryStat[];
+};
+
+const countryData: CountryStat[] = [
   { name: "United States of America", users: 120, sellers: 30 },
   { name: "India", users: 100, sellers: 20 },
   { name: "United Kingdom", users: 85, sellers: 15 },
@@ -25,21 +35,43 @@ const countryData = [
   { name: "Canada", users: 60, sellers: 5 },
 ];
 
-const getColor = (countryName: string) => {
-  const country = countryData.find((c) => c.name === countryName);
-  if (!country) return "#1e293b";
-  const total = country.users + country.sellers;
-  if (total > 100) return "#22c55e";
-  if (total > 0) return "#3b82f6";
-  return "#1e293b";
+const COUNTRY_ALIASES: Record<string, string> = {
+  "united states": "United States of America",
+  "ivory coast": "Côte d'Ivoire",
+  "democratic republic of the congo": "Dem. Rep. Congo",
+  "republic of the congo": "Congo",
 };
 
-export const GeographicalMap = () => {
+const normalizeCountry = (name: string) =>
+  (COUNTRY_ALIASES[name.toLowerCase()] ?? name).toLowerCase();
+
+export const GeographicalMap = ({ data }: Prop) => {
+  const stats = data ?? countryData;
+  const max = stats.reduce(
+    (highest, country) =>
+      Math.max(highest, country.users + (country.sellers ?? 0)),
+    0,
+  );
+
+  const findStat = (countryName: string) =>
+    stats.find(
+      (country) =>
+        normalizeCountry(country.name) === normalizeCountry(countryName),
+    );
+
+  const getColor = (stat?: CountryStat) => {
+    const total = (stat?.users ?? 0) + (stat?.sellers ?? 0);
+    if (total <= 0) return "#1e293b";
+    return total >= max / 2 ? "#22c55e" : "#3b82f6";
+  };
+
+  const hasSellers = stats.some((country) => country.sellers !== undefined);
+
   const [geoData, setGeoData] = useState<GeoTopology | null>(null);
   const [hovered, setHovered] = useState<{
     name: string;
     users: number;
-    sellers: number;
+    sellers?: number;
   } | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
@@ -80,8 +112,8 @@ export const GeographicalMap = () => {
           {({ geographies }) =>
             geographies.map((geo) => {
               const countryName = geo.properties.name;
-              const match = countryData.find((c) => c.name === countryName);
-              const baseColor = getColor(countryName);
+              const match = findStat(countryName);
+              const baseColor = getColor(match);
 
               return (
                 <Geography
@@ -92,7 +124,7 @@ export const GeographicalMap = () => {
                     setHovered({
                       name: countryName,
                       users: match?.users || 0,
-                      sellers: match?.sellers || 0,
+                      sellers: match?.sellers,
                     });
                   }}
                   onMouseMove={(e) => {
@@ -137,8 +169,13 @@ export const GeographicalMap = () => {
             <strong>{hovered.name}</strong>
             <br />
             Users: <span className="text-green-400">{hovered.users}</span>
-            <br />
-            Sellers: <span className="text-yellow-400">{hovered.sellers}</span>
+            {hasSellers && (
+              <>
+                <br />
+                Sellers:{" "}
+                <span className="text-yellow-400">{hovered.sellers ?? 0}</span>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

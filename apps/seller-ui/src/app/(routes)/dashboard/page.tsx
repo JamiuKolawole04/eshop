@@ -16,6 +16,7 @@ import {
   Order,
   SalesChart,
   SellerDeviceUsageResponseType,
+  SellerGeoStatsResponseType,
   SellerOrdersResponseType,
   SellerRevenueData,
 } from "@packages/ui";
@@ -42,6 +43,14 @@ const fetchSellerRevenue = async () => {
   );
 
   return response.data.revenueData;
+};
+
+const fetchGeoStats = async () => {
+  const response = await axiosInstance.get<SellerGeoStatsResponseType>(
+    `/api/sellers/geo/stats`,
+  );
+
+  return response.data.data;
 };
 
 const OrdersTable = () => {
@@ -165,6 +174,12 @@ const DashboardPage = () => {
     queryFn: fetchSellerRevenue,
     staleTime: 1000 * 60 * 5,
   });
+
+  const { data: geoData = [], isLoading: isGeoDataLoading } = useQuery({
+    queryKey: ["seller-geo-stats"],
+    queryFn: fetchGeoStats,
+    staleTime: 1000 * 60 * 5,
+  });
   return (
     <div className="p-4 sm:p-6 lg:p-8 font-Poppins">
       {/* Top Charts */}
@@ -214,12 +229,18 @@ const DashboardPage = () => {
         {/* Map */}
         <div className="w-full lg:w-[60%]">
           <h2 className="text-white text-lg sm:text-xl font-semibold mt-6 lg:mt-6">
-            User &amp; Seller Distribution
+            Where your visitors come from
             <span className="block text-sm text-slate-400 font-normal">
-              Visual breakdown of global user &amp; seller activity.
+              Visual breakdown of user activity.
             </span>
           </h2>
-          <GeographicalMap />
+          {isGeoDataLoading ? (
+            <div className="flex items-center justify-center h-[35vh]">
+              <ButtonLoader className="text-white mt-5" />
+            </div>
+          ) : (
+            <GeographicalMap data={geoData} />
+          )}
         </div>
 
         {/* Orders Table */}

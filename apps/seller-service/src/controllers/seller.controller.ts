@@ -701,3 +701,32 @@ export const getDeviceUsage = async (
     return next(error);
   }
 };
+
+export const getGeoDistribution = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const shop = await getSellerShop(req.seller?.id as string);
+
+    const analytics = await prisma.shopAnalytics.findUnique({
+      where: { shopId: shop.id },
+      select: { countryStats: true },
+    });
+
+    const countryStats = (analytics?.countryStats ?? {}) as Record<
+      string,
+      number
+    >;
+
+    return res.status(200).json({
+      success: true,
+      data: Object.entries(countryStats)
+        .map(([name, users]) => ({ name, users }))
+        .sort((a, b) => b.users - a.users),
+    });
+  } catch (error) {
+    return next(error);
+  }
+};

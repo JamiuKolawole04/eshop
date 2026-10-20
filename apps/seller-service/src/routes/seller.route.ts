@@ -4,6 +4,7 @@ import {
   deleteShop,
   followShop,
   getDeviceUsage,
+  getGeoDistribution,
   getSellerDetails,
   getSellerEvents,
   getSellerProducts,
@@ -86,6 +87,13 @@ router.get(
   isAuthenticated("seller"),
   isSeller,
   getDeviceUsage,
+);
+
+router.get(
+  "/geo/stats",
+  isAuthenticated("seller"),
+  isSeller,
+  getGeoDistribution,
 );
 
 router.get("/:id", getSellerDetails);
