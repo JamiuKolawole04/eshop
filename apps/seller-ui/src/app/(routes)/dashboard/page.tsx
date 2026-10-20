@@ -17,14 +17,9 @@ import {
   SalesChart,
   SellerDeviceUsageResponseType,
   SellerOrdersResponseType,
+  SellerRevenueData,
 } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
-
-const deviceData = [
-  { name: "Phone", value: 55 },
-  { name: "Tablet", value: 20 },
-  { name: "Computer", value: 25 },
-];
 
 const fetchOrders = async () => {
   const response =
@@ -39,6 +34,14 @@ const fetchDeviceUsage = async () => {
   );
 
   return response.data.deviceUsage;
+};
+
+const fetchSellerRevenue = async () => {
+  const response = await axiosInstance.get<SellerRevenueData>(
+    `/api/orders/seller/revenue`,
+  );
+
+  return response.data.revenueData;
 };
 
 const OrdersTable = () => {
@@ -156,6 +159,12 @@ const DashboardPage = () => {
     queryFn: fetchDeviceUsage,
     staleTime: 1000 * 60 * 5,
   });
+
+  const { data, isLoading: isRevenueDataLoading } = useQuery({
+    queryKey: ["seller-revenue"],
+    queryFn: fetchSellerRevenue,
+    staleTime: 1000 * 60 * 5,
+  });
   return (
     <div className="p-4 sm:p-6 lg:p-8 font-Poppins">
       {/* Top Charts */}
@@ -169,7 +178,14 @@ const DashboardPage = () => {
                 Last 6 months performance
               </span>
             </h2>
-            <SalesChart />
+
+            {isRevenueDataLoading ? (
+              <div className="flex items-center justify-center">
+                <ButtonLoader className="text-white mt-5" />
+              </div>
+            ) : (
+              <SalesChart revenueData={data} />
+            )}
           </div>
         </div>
 

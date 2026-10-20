@@ -5,3 +5,11 @@ export type FetchSellerDetailsResponseType = {
   shop: ShopType;
   followersCount: number;
 };
+
+export type SellerRevenueData = {
+  success: true;
+  revenueData: {
+    month: string;
+    amount: number;
+  }[];
+};

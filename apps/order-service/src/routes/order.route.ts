@@ -6,6 +6,7 @@ import {
   getAllOrdersForAdmin,
   getOrderDetails,
   getSellerOrders,
+  getSellerRevenue,
   getUserOrders,
   updateDeliveryStatus,
   verifyCouponCode,
@@ -40,6 +41,12 @@ router.get(
   verifyingPaymentSession,
 );
 router.get("/seller", isAuthenticated("seller"), isSeller, getSellerOrders);
+router.get(
+  "/seller/revenue",
+  isAuthenticated("seller"),
+  isSeller,
+  getSellerRevenue,
+);
 router.get("/user", isAuthenticated("user"), isUser, getUserOrders);
 router.patch(
   "/:orderId/status",
