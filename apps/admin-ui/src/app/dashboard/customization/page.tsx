@@ -43,16 +43,18 @@ const Customization = () => {
   }, [categories, selectedCategory]);
 
   const addCategoryMutation = useMutation({
-    mutationFn: async (updatedCategories: string[]) => {
-      const res = await axiosInstance.post("/api/admin/add-category", {
-        categories: updatedCategories,
-      });
+    mutationFn: async (category: string) => {
+      const res = await axiosInstance.post<{
+        success: boolean;
+        message: string;
+        categories: string[];
+      }>("/api/admin/add-category", { category });
       return res.data;
     },
-    onSuccess: (_, updatedCategories) => {
+    onSuccess: (data) => {
       queryClient.setQueryData<WebsiteCustomizationResponse>(
         ["customization"],
-        (old) => (old ? { ...old, categories: updatedCategories } : old),
+        (old) => (old ? { ...old, categories: data.categories } : old),
       );
       setNewCategory("");
     },
@@ -62,16 +64,24 @@ const Customization = () => {
   });
 
   const addSubCategoryMutation = useMutation({
-    mutationFn: async (updatedSubCategories: Record<string, string[]>) => {
-      const res = await axiosInstance.post("/api/admin/add-sub-category", {
-        subCategories: updatedSubCategories,
-      });
+    mutationFn: async ({
+      category,
+      subCategory,
+    }: {
+      category: string;
+      subCategory: string;
+    }) => {
+      const res = await axiosInstance.post<{
+        success: boolean;
+        message: string;
+        subCategories: Record<string, string[]>;
+      }>("/api/admin/add-sub-category", { category, subCategory });
       return res.data;
     },
-    onSuccess: (_, updatedSubCategories) => {
+    onSuccess: (data) => {
       queryClient.setQueryData<WebsiteCustomizationResponse>(
         ["customization"],
-        (old) => (old ? { ...old, subCategories: updatedSubCategories } : old),
+        (old) => (old ? { ...old, subCategories: data.subCategories } : old),
       );
       setNewSubCategory("");
     },
@@ -122,22 +132,19 @@ const Customization = () => {
   });
 
   const handleAddCategory = () => {
-    if (!newCategory.trim()) return;
-    addCategoryMutation.mutate([...categories, newCategory]);
+    const category = newCategory.trim();
+    if (!category) return;
+    addCategoryMutation.mutate(category);
   };
 
   const handleAddSubCategory = () => {
-    if (!newSubCategory.trim() || !selectedCategory) return;
+    const subCategory = newSubCategory.trim();
+    if (!subCategory || !selectedCategory) return;
 
-    const updatedSubCategories = {
-      ...subCategories,
-      [selectedCategory]: [
-        ...(subCategories[selectedCategory] || []),
-        newSubCategory,
-      ],
-    };
-
-    addSubCategoryMutation.mutate(updatedSubCategories);
+    addSubCategoryMutation.mutate({
+      category: selectedCategory,
+      subCategory,
+    });
   };
 
   if (isLoading) {

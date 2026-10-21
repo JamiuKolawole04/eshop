@@ -5,3 +5,11 @@ export type SellerDeviceUsageResponseType = {
     value: number;
   }>;
 };
+
+export type AdminDeviceUsageResponseType = {
+  success: boolean;
+  deviceUsage: Array<{
+    name: string;
+    value: number;
+  }>;
+};

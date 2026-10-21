@@ -5,3 +5,5 @@ export type SellerGeoStatsResponseType = {
     users: number;
   }>;
 };
+
+export type AdminGeoStatsResponseType = SellerGeoStatsResponseType;

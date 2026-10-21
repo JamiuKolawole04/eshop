@@ -3,6 +3,7 @@ import express, { Router } from "express";
 import {
   createPaymentIntent,
   createPaymentSession,
+  getAdminRevenue,
   getAllOrdersForAdmin,
   getOrderDetails,
   getSellerOrders,
@@ -60,6 +61,12 @@ router.get(
   isAuthenticated("admin"),
   isAdmin,
   getAllOrdersForAdmin,
+);
+router.get(
+  "/admin/revenue",
+  isAuthenticated("admin"),
+  isAdmin,
+  getAdminRevenue,
 );
 
 router.put("/verify-coupon", verifyCouponCode);

@@ -759,3 +759,41 @@ export const getAllOrdersForAdmin = async (
     next(error);
   }
 };
+
+export const getAdminRevenue = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    const orders = await prisma.orders.findMany({
+      where: { createdAt: { gte: start } },
+      select: { total: true, createdAt: true },
+    });
+
+    const monthly = new Map<string, number>();
+
+    for (const order of orders) {
+      const key = `${order.createdAt.getFullYear()}-${order.createdAt.getMonth()}`;
+      monthly.set(key, (monthly.get(key) ?? 0) + order.total);
+    }
+
+    const revenueData = Array.from({ length: 6 }, (_, i) => {
+      const date = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+      const amount = monthly.get(key) ?? 0;
+
+      return {
+        month: MONTH_NAMES[date.getMonth()],
+        amount: Math.round(amount * 100) / 100,
+      };
+    });
+
+    return res.status(200).json({ success: true, revenueData });
+  } catch (error) {
+    return next(error);
+  }
+};

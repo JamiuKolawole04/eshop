@@ -6,6 +6,8 @@ import {
   addNewAdmin,
   addSubCategoryToCustomization,
   getAdmin,
+  getAdminDeviceUsage,
+  getAdminGeo,
   getAllAdmins,
   getAllCustomizations,
   getAllEvents,
@@ -36,6 +38,14 @@ router.get(
   isAdmin,
   getAllNotifications,
 );
+router.get(
+  "/device-usage",
+  isAuthenticated("admin"),
+  isAdmin,
+  getAdminDeviceUsage,
+);
+
+router.get("/geo", isAuthenticated("admin"), isAdmin, getAdminGeo);
 router.post(
   "/add-category",
   isAuthenticated("admin"),

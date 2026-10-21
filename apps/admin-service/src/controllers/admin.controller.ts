@@ -450,3 +450,89 @@ export const getAllNotifications = async (
     next(error);
   }
 };
+
+const DEVICE_LABELS: Record<string, string> = {
+  desktop: "Computer",
+  mobile: "Phone",
+  tablet: "Tablet",
+};
+
+export const getAdminDeviceUsage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const analytics = await prisma.shopAnalytics.findMany({
+      select: { deviceCategories: true },
+    });
+
+    const counts = new Map<string, number>();
+
+    for (const entry of analytics) {
+      const categories = (entry.deviceCategories ?? {}) as Record<
+        string,
+        number
+      >;
+
+      for (const [device, value] of Object.entries(categories)) {
+        const name = DEVICE_LABELS[device.toLowerCase()] ?? device;
+        counts.set(name, (counts.get(name) ?? 0) + value);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      deviceUsage: [...counts.entries()].map(([name, value]) => ({
+        name,
+        value,
+      })),
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getAdminGeo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const [sellers, users] = await Promise.all([
+      prisma.sellers.findMany({ select: { country: true } }),
+      prisma.userAnalytics.findMany({ select: { country: true } }),
+    ]);
+
+    const stats = new Map<string, { users: number; sellers: number }>();
+
+    const entry = (name: string) => {
+      const current = stats.get(name) ?? { users: 0, sellers: 0 };
+      stats.set(name, current);
+      return current;
+    };
+
+    for (const seller of sellers) {
+      if (seller.country && seller.country !== "Unknown") {
+        entry(seller.country).sellers += 1;
+      }
+    }
+
+    for (const user of users) {
+      if (user.country && user.country !== "Unknown") {
+        entry(user.country).users += 1;
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: [...stats.entries()].map(([name, counts]) => ({
+        name,
+        users: counts.users,
+        sellers: counts.sellers,
+      })),
+    });
+  } catch (error) {
+    return next(error);
+  }
+};

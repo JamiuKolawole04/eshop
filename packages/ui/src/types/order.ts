@@ -109,3 +109,11 @@ export interface AdminOrdersResponseType {
   success: boolean;
   orders: Array<OrderWithShop>;
 }
+
+export interface AdminRevenueData {
+  success: boolean;
+  revenueData: {
+    month: string;
+    amount: number;
+  }[];
+}

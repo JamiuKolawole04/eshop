@@ -10,7 +10,10 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 import {
+  AdminDeviceUsageResponseType,
+  AdminGeoStatsResponseType,
   AdminOrdersResponseType,
+  AdminRevenueData,
   ButtonLoader,
   DeviceStat,
   GeographicalMap,
@@ -27,11 +30,28 @@ const fetchOrders = async () => {
   return response.data.orders;
 };
 
-const deviceData = [
-  { name: "Phone", value: 55 },
-  { name: "Tablet", value: 20 },
-  { name: "Computer", value: 25 },
-];
+const fetchAdminRevenue = async () => {
+  const response = await axiosInstance.get<AdminRevenueData>(
+    `/api/orders/admin/revenue`,
+  );
+
+  return response.data.revenueData;
+};
+
+const fetchAdminDeviceUsage = async () => {
+  const response = await axiosInstance.get<AdminDeviceUsageResponseType>(
+    `/api/admin/device-usage`,
+  );
+
+  return response.data.deviceUsage;
+};
+
+const fetchAdminGeo = async () => {
+  const response =
+    await axiosInstance.get<AdminGeoStatsResponseType>(`/api/admin/geo`);
+
+  return response.data.data;
+};
 
 const OrdersTable = () => {
   const { data: orders = [], isLoading } = useQuery<OrderWithShop[]>({
@@ -142,6 +162,24 @@ const OrdersTable = () => {
 
 // Dashboard Layout
 const DashboardPage = () => {
+  const { data: revenueData = [], isLoading: isRevenueLoading } = useQuery({
+    queryKey: ["admin-revenue"],
+    queryFn: fetchAdminRevenue,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: deviceData = [], isLoading: isDeviceLoading } = useQuery({
+    queryKey: ["admin-device-usage"],
+    queryFn: fetchAdminDeviceUsage,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: geoData = [], isLoading: isGeoLoading } = useQuery({
+    queryKey: ["admin-geo"],
+    queryFn: fetchAdminGeo,
+    staleTime: 1000 * 60 * 5,
+  });
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 font-poppins">
       {/* Top Charts */}
@@ -155,7 +193,13 @@ const DashboardPage = () => {
                 Last 6 months performance
               </span>
             </h2>
-            <SalesChart />
+            {isRevenueLoading ? (
+              <div className="flex items-center justify-center">
+                <ButtonLoader className="text-white mt-5" />
+              </div>
+            ) : (
+              <SalesChart revenueData={revenueData} />
+            )}
           </div>
         </div>
 
@@ -167,9 +211,15 @@ const DashboardPage = () => {
               How users access your platform
             </span>
           </h2>
-          <div className="mt-6 sm:mt-10 lg:mt-14">
-            <DeviceStat deviceData={deviceData} />
-          </div>
+          {isDeviceLoading ? (
+            <div className="flex items-center justify-center">
+              <ButtonLoader className="text-white mt-5" />
+            </div>
+          ) : (
+            <div className="mt-6 sm:mt-10 lg:mt-14">
+              <DeviceStat deviceData={deviceData} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -183,7 +233,13 @@ const DashboardPage = () => {
               Visual breakdown of global user &amp; seller activity.
             </span>
           </h2>
-          <GeographicalMap />
+          {isGeoLoading ? (
+            <div className="flex items-center justify-center h-[35vh]">
+              <ButtonLoader className="text-white mt-5" />
+            </div>
+          ) : (
+            <GeographicalMap data={geoData} />
+          )}
         </div>
 
         {/* Orders Table */}
