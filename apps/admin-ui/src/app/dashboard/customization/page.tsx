@@ -44,7 +44,7 @@ const Customization = () => {
 
   const addCategoryMutation = useMutation({
     mutationFn: async (updatedCategories: string[]) => {
-      const res = await axiosInstance.put("/api/admin/add-category", {
+      const res = await axiosInstance.post("/api/admin/add-category", {
         categories: updatedCategories,
       });
       return res.data;
@@ -63,7 +63,7 @@ const Customization = () => {
 
   const addSubCategoryMutation = useMutation({
     mutationFn: async (updatedSubCategories: Record<string, string[]>) => {
-      const res = await axiosInstance.put("/api/admin/add-subcategory", {
+      const res = await axiosInstance.post("/api/admin/add-sub-category", {
         subCategories: updatedSubCategories,
       });
       return res.data;

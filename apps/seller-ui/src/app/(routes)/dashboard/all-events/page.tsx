@@ -40,11 +40,11 @@ const fetchEvents = async () => {
 };
 
 const deleteEvent = async (eventId: string) => {
-  await axiosInstance.delete(`api/events/${eventId}`);
+  await axiosInstance.delete(`api/products/events/${eventId}`);
 };
 
 const restoreEvent = async (eventId: string) => {
-  await axiosInstance.patch(`api/events/${eventId}/restore`);
+  await axiosInstance.patch(`api/products/events/${eventId}/restore`);
 };
 
 const Page = () => {

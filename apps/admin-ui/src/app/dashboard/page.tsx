@@ -1,21 +1,31 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
   ColumnDef,
 } from "@tanstack/react-table";
+import { useQuery } from "@tanstack/react-query";
 
-type Order = {
-  id: string;
-  customer: string;
-  amount: string;
-  status: string;
+import {
+  AdminOrdersResponseType,
+  ButtonLoader,
+  DeviceStat,
+  GeographicalMap,
+  OrderWithShop,
+  SalesChart,
+} from "@packages/ui";
+import axiosInstance from "@/utils/axiosInstance";
+
+const fetchOrders = async () => {
+  const response = await axiosInstance.get<AdminOrdersResponseType>(
+    `/api/orders/admin/all`,
+  );
+
+  return response.data.orders;
 };
-
-import { DeviceStat, GeographicalMap, SalesChart } from "@packages/ui";
 
 const deviceData = [
   { name: "Phone", value: 55 },
@@ -23,46 +33,50 @@ const deviceData = [
   { name: "Computer", value: 25 },
 ];
 
-// Orders data
-const orders = [
-  { id: "ORD-001", customer: "John Doe", amount: "$250", status: "Paid" },
-  { id: "ORD-002", customer: "Jane Smith", amount: "$180", status: "Pending" },
-  { id: "ORD-003", customer: "Alice Johnson", amount: "$340", status: "Paid" },
-  { id: "ORD-004", customer: "Bob Lee", amount: "$90", status: "Failed" },
-  { id: "ORD-005", customer: "Bob Lee", amount: "$90", status: "Failed" },
-  { id: "ORD-006", customer: "Bob Lee", amount: "$90", status: "Failed" },
-];
-
-const columns: ColumnDef<Order>[] = [
-  {
-    accessorKey: "id",
-    header: "Order ID",
-  },
-  {
-    accessorKey: "customer",
-    header: "Customer",
-  },
-  {
-    accessorKey: "amount",
-    header: "Amount",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ getValue }) => {
-      const value = getValue<Order["status"]>();
-      const color =
-        value === "Paid"
-          ? "text-green-400"
-          : value === "Pending"
-            ? "text-yellow-400"
-            : "text-red-400";
-      return <span className={`font-medium ${color}`}>{value}</span>;
-    },
-  },
-];
-
 const OrdersTable = () => {
+  const { data: orders = [], isLoading } = useQuery<OrderWithShop[]>({
+    queryKey: ["admin-orders"],
+    queryFn: fetchOrders,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const columns = useMemo<ColumnDef<OrderWithShop>[]>(
+    () => [
+      {
+        accessorKey: "id",
+        header: "Order ID",
+        cell: ({ row }) => (
+          <span className="text-white text-sm truncate">
+            #{row.original.id.slice(-6).toUpperCase()}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "user.name",
+        header: "Customer",
+      },
+      {
+        accessorKey: "total",
+        header: "Amount",
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ getValue }) => {
+          const value = getValue<OrderWithShop["status"]>();
+          const color =
+            value === "Paid"
+              ? "text-green-400"
+              : value === "Pending"
+                ? "text-yellow-400"
+                : "text-red-400";
+          return <span className={`font-medium ${color}`}>{value}</span>;
+        },
+      },
+    ],
+    [],
+  );
+
   const table = useReactTable({
     data: orders,
     columns,
@@ -77,41 +91,51 @@ const OrdersTable = () => {
           A quick snapshot of your latest transactions.
         </span>
       </h2>
-      <div className="!rounded-xl shadow-xl overflow-x-auto border border-slate-700">
-        <table className="min-w-full text-xs sm:text-sm text-white">
-          <thead className="bg-slate-900 text-slate-300">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="p-2 sm:p-3 text-left whitespace-nowrap"
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody className="bg-transparent">
-            {table.getRowModel().rows.map((row) => (
-              <tr
-                key={row.id}
-                className="border-t border-slate-600 hover:bg-slate-800 transition"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="p-2 sm:p-3 whitespace-nowrap">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center">
+          <ButtonLoader className="text-white mt-5" />
+        </div>
+      ) : (
+        <div className="!rounded-xl shadow-xl overflow-x-auto border border-slate-700">
+          <table className="min-w-full text-xs sm:text-sm text-white">
+            <thead className="bg-slate-900 text-slate-300">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="p-2 sm:p-3 text-left whitespace-nowrap"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody className="bg-transparent">
+              {table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-t border-slate-600 hover:bg-slate-800 transition"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="p-2 sm:p-3 whitespace-nowrap">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

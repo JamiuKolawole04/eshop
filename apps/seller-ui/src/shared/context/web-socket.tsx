@@ -14,7 +14,7 @@ export const WebSocketProvider = ({
   children: React.ReactNode;
   seller: { id: string };
 }) => {
-  const [wsReady, setWsReady] = useState(false);
+  const [, setWsReady] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 

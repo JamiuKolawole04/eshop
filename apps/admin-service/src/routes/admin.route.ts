@@ -49,4 +49,6 @@ router.post(
   addSubCategoryToCustomization,
 );
 
+// ban users
+
 export default router;
