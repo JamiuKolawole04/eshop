@@ -15,6 +15,8 @@ import {
   getAllProductsForAdmin,
   getAllSellers,
   getAllUsers,
+  uploadSiteBanner,
+  uploadSiteLogo,
 } from "../controllers/admin.controller";
 
 const router: Router = express.Router();
@@ -60,5 +62,11 @@ router.post(
 );
 
 // ban users
-
+router.post("/upload-logo", isAuthenticated("admin"), isAdmin, uploadSiteLogo);
+router.post(
+  "/upload-banner",
+  isAuthenticated("admin"),
+  isAdmin,
+  uploadSiteBanner,
+);
 export default router;

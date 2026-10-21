@@ -6,6 +6,9 @@ import {
   NotFoundError,
   ValidationError,
 } from "@packages/error-handler";
+import { DEVICE_LABELS } from "@packages/types";
+import { sendLog } from "@packages/logs";
+import { imageKit } from "@packages/imagekit";
 
 export const getAdmin = async (
   req: Request,
@@ -15,11 +18,11 @@ export const getAdmin = async (
   try {
     const user = req.user;
 
-    // await sendLog({
-    //   type: "success",
-    //   message: `Admin data retrieved ${user?.email}`,
-    //   source: "auth-service",
-    // });
+    await sendLog({
+      type: "success",
+      message: `Admin data retrieved ${user?.email}`,
+      source: "auth-service",
+    });
 
     res.status(200).json({
       success: true,
@@ -451,12 +454,6 @@ export const getAllNotifications = async (
   }
 };
 
-const DEVICE_LABELS: Record<string, string> = {
-  desktop: "Computer",
-  mobile: "Phone",
-  tablet: "Tablet",
-};
-
 export const getAdminDeviceUsage = async (
   req: Request,
   res: Response,
@@ -493,6 +490,18 @@ export const getAdminDeviceUsage = async (
   }
 };
 
+const REGION_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
+
+const normalizeCountry = (country: string) => {
+  if (country.length !== 2) return country;
+
+  try {
+    return REGION_NAMES.of(country.toUpperCase()) ?? country;
+  } catch {
+    return country;
+  }
+};
+
 export const getAdminGeo = async (
   req: Request,
   res: Response,
@@ -513,14 +522,22 @@ export const getAdminGeo = async (
     };
 
     for (const seller of sellers) {
-      if (seller.country && seller.country !== "Unknown") {
-        entry(seller.country).sellers += 1;
+      if (!seller.country) continue;
+
+      const country = normalizeCountry(seller.country);
+
+      if (country !== "Unknown" && country !== "Unknown Region") {
+        entry(country).sellers += 1;
       }
     }
 
     for (const user of users) {
-      if (user.country && user.country !== "Unknown") {
-        entry(user.country).users += 1;
+      if (!user.country) continue;
+
+      const country = normalizeCountry(user.country);
+
+      if (country !== "Unknown" && country !== "Unknown Region") {
+        entry(country).users += 1;
       }
     }
 
@@ -534,5 +551,87 @@ export const getAdminGeo = async (
     });
   } catch (error) {
     return next(error);
+  }
+};
+
+export const uploadSiteLogo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { fileName } = req.body;
+    if (!fileName || typeof fileName !== "string") {
+      throw new ValidationError("file is required!");
+    }
+
+    const config = await prisma.site_config.findFirst();
+    if (!config) throw new NotFoundError("Site config not found");
+
+    const response = await imageKit.files.upload({
+      file: fileName,
+      fileName: `site-logo-${Date.now()}.jpg`,
+      folder: "/eshop-products",
+    });
+
+    const updated = await prisma.site_config.update({
+      where: { id: config.id },
+      data: { logo: response.url, logoFileId: response.fileId },
+    });
+
+    if (config.logoFileId) {
+      await imageKit.files
+        .delete(config.logoFileId)
+        .catch((err) => console.log("Failed to delete old site logo:", err));
+    }
+
+    res.status(200).json({
+      success: true,
+      logo: updated.logo,
+      logoFileId: updated.logoFileId,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadSiteBanner = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { fileName } = req.body;
+    if (!fileName || typeof fileName !== "string") {
+      throw new ValidationError("file is required!");
+    }
+
+    const config = await prisma.site_config.findFirst();
+    if (!config) throw new NotFoundError("Site config not found");
+
+    const response = await imageKit.files.upload({
+      file: fileName,
+      fileName: `site-banner-${Date.now()}.jpg`,
+      folder: "/eshop-products",
+    });
+
+    const updated = await prisma.site_config.update({
+      where: { id: config.id },
+      data: { banner: response.url, bannerFileId: response.fileId },
+    });
+
+    if (config.bannerFileId) {
+      await imageKit.files
+        .delete(config.bannerFileId)
+        .catch((err) => console.log("Failed to delete old site banner:", err));
+    }
+
+    res.status(200).json({
+      success: true,
+      banner: updated.banner,
+      bannerFileId: updated.bannerFileId,
+    });
+  } catch (error) {
+    next(error);
   }
 };

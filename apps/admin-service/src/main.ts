@@ -11,7 +11,7 @@ const port = process.env.PORT ? Number(process.env.PORT) : 6005;
 
 app.disable("x-powered-by");
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
 app.get("/health", (req, res) => {

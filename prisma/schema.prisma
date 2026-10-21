@@ -153,8 +153,12 @@ model Site_config {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   categories    String[]
   subCategories Json
+
   logo          String?
+  logoFileId    String?
+
   banner        String?
+  bannerFileId  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

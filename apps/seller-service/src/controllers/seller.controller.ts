@@ -7,6 +7,7 @@ import {
 } from "@packages/error-handler";
 import { NotificationChannel, prisma } from "@packages/prisma";
 import { imageKit } from "@packages/imagekit";
+import { DEVICE_LABELS } from "@packages/types";
 import {
   cleanString,
   countWords,
@@ -18,12 +19,6 @@ import { SOCIAL_HOSTS, SocialType } from "../types/shop.type";
 const MAX_NAME_LENGTH = 60;
 const MAX_BIO_WORDS = 100;
 const MAX_SOCIAL_LINKS = 5;
-
-const DEVICE_LABELS: Record<string, string> = {
-  desktop: "Computer",
-  mobile: "Phone",
-  tablet: "Tablet",
-};
 
 export const updateShopProfile = async (
   req: Request,

@@ -17,6 +17,14 @@ const fetchCustomization = async () => {
   return res.data;
 };
 
+const convertFileToBase64 = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+
 const Customization = () => {
   const queryClient = useQueryClient();
 
@@ -92,10 +100,11 @@ const Customization = () => {
 
   const uploadLogoMutation = useMutation({
     mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append("file", file);
+      const fileName = await convertFileToBase64(file);
 
-      const res = await axiosInstance.post("/admin/api/upload-logo", formData);
+      const res = await axiosInstance.post("/api/admin/upload-logo", {
+        fileName,
+      });
       return res.data;
     },
     onSuccess: (data) => {
@@ -111,13 +120,11 @@ const Customization = () => {
 
   const uploadBannerMutation = useMutation({
     mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append("file", file);
+      const fileName = await convertFileToBase64(file);
 
-      const res = await axiosInstance.post(
-        "/admin/api/upload-banner",
-        formData,
-      );
+      const res = await axiosInstance.post("/api/admin/upload-banner", {
+        fileName,
+      });
       return res.data;
     },
     onSuccess: (data) => {
