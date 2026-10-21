@@ -532,12 +532,8 @@ export const getAdminGeo = async (
     }
 
     for (const user of users) {
-      if (!user.country) continue;
-
-      const country = normalizeCountry(user.country);
-
-      if (country !== "Unknown" && country !== "Unknown Region") {
-        entry(country).users += 1;
+      if (user.country && user.country !== "Unknown") {
+        entry(user.country).users += 1;
       }
     }
 
@@ -554,6 +550,40 @@ export const getAdminGeo = async (
   }
 };
 
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
+
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+const validateImagePayload = (fileName: string) => {
+  const match = /^data:(image\/[a-z+.-]+);base64,(.+)$/i.exec(fileName);
+
+  if (!match) {
+    throw new ValidationError("File must be a base64 image data URI");
+  }
+
+  const mimeType = match[1].toLowerCase();
+  const base64 = match[2];
+
+  if (!ALLOWED_IMAGE_TYPES.includes(mimeType)) {
+    throw new ValidationError("Only PNG, JPEG and WebP images are allowed");
+  }
+
+  const padding = base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0;
+  const sizeInBytes = (base64.length * 3) / 4 - padding;
+
+  if (sizeInBytes > MAX_IMAGE_BYTES) {
+    throw new ValidationError("Image must be 5MB or smaller");
+  }
+
+  return mimeType;
+};
+
 export const uploadSiteLogo = async (
   req: Request,
   res: Response,
@@ -565,12 +595,14 @@ export const uploadSiteLogo = async (
       throw new ValidationError("file is required!");
     }
 
+    const mimeType = validateImagePayload(fileName);
+
     const config = await prisma.site_config.findFirst();
     if (!config) throw new NotFoundError("Site config not found");
 
     const response = await imageKit.files.upload({
       file: fileName,
-      fileName: `site-logo-${Date.now()}.jpg`,
+      fileName: `site-logo-${Date.now()}.${IMAGE_EXTENSIONS[mimeType] ?? "jpg"}`,
       folder: "/eshop-products",
     });
 
@@ -606,12 +638,14 @@ export const uploadSiteBanner = async (
       throw new ValidationError("file is required!");
     }
 
+    const mimeType = validateImagePayload(fileName);
+
     const config = await prisma.site_config.findFirst();
     if (!config) throw new NotFoundError("Site config not found");
 
     const response = await imageKit.files.upload({
       file: fileName,
-      fileName: `site-banner-${Date.now()}.jpg`,
+      fileName: `site-banner-${Date.now()}.${IMAGE_EXTENSIONS[mimeType] ?? "jpg"}`,
       folder: "/eshop-products",
     });
 
