@@ -127,10 +127,18 @@ export const getUser = async (
   next: NextFunction,
 ) => {
   try {
-    const user = req.user;
+    const account = req.user;
+
+    if (!account) {
+      throw new AuthError("Unauthorized!");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...user } = account;
+
     await sendLog({
       type: "success",
-      message: `User data retrieved ${user?.email}`,
+      message: `User data retrieved ${user.email}`,
       source: "user-service",
     });
     res.status(200).json({

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { prisma } from "@packages/prisma";
 import {
+  AuthError,
   ConflictError,
   ForbiddenError,
   NotFoundError,
@@ -17,11 +18,18 @@ export const getAdmin = async (
   next: NextFunction,
 ) => {
   try {
-    const user = req.user;
+    const account = req.user;
+
+    if (!account) {
+      throw new AuthError("Unauthorized!");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...user } = account;
 
     await sendLog({
       type: "success",
-      message: `Admin data retrieved ${user?.email}`,
+      message: `Admin data retrieved ${user.email}`,
       source: "auth-service",
     });
 
