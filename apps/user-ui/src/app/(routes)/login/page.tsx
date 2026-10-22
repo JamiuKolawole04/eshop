@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import axios, { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
 
-import { GoogleSignInButton } from "@/shared/components/googleButton";
 import { ButtonLoader } from "@packages/ui";
 import { useAuthStore } from "@/store/auth";
 
@@ -85,14 +84,6 @@ const Page = () => {
               Sign up
             </Link>
           </p>
-
-          <GoogleSignInButton />
-
-          <div className="flex items-center my-5 text-gray-400 text-sm font-Poppins">
-            <div className="flex-1 border-t border-gray-300"></div>
-            <span className="px-3">or sign in with Email</span>
-            <div className="flex-1 border-t border-gray-300"></div>
-          </div>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <label htmlFor="email" className="block text-gray-700 mb-1">

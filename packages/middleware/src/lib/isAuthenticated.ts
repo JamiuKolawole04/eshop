@@ -59,6 +59,15 @@ export const isAuthenticated = (expectedRole: AuthRole) => {
         });
       }
 
+      if (
+        decoded.role === "user" &&
+        (account as { banned?: boolean | null }).banned
+      ) {
+        return res.status(403).json({
+          message: "Account is banned.",
+        });
+      }
+
       req.role = decoded.role;
       return next();
     } catch {
@@ -118,6 +127,15 @@ export const isAuthenticatedAny = async (
     if (!account) {
       return res.status(401).json({
         message: "Account not found",
+      });
+    }
+
+    if (
+      decoded.role === "user" &&
+      (account as { banned?: boolean | null }).banned
+    ) {
+      return res.status(403).json({
+        message: "Account is banned.",
       });
     }
 

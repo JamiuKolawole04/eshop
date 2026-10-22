@@ -24,6 +24,7 @@ import { Prisma, prisma, Sellers, Shops, Users } from "@packages/prisma";
 import {
   AuthError,
   ConflictError,
+  ForbiddenError,
   NotFoundError,
   ValidationError,
 } from "@packages/error-handler";
@@ -149,6 +150,10 @@ export const login = async (
       throw new AuthError("Invalid credentials.");
     }
 
+    if (user.banned) {
+      throw new ForbiddenError("Your account has been banned.");
+    }
+
     const accessToken = jwt.sign(
       {
         id: user.id,
@@ -257,6 +262,15 @@ export const refreshToken = async (
 
     if (!account) {
       throw new AuthError("Forbidden! User/Seller not found.");
+    }
+
+    if (
+      decoded.role === "user" &&
+      (account as { banned?: boolean | null }).banned
+    ) {
+      await clearCurrentRefreshToken(decoded.role, decoded.id);
+      clearAuthCookies(res, decoded.role);
+      throw new ForbiddenError("Forbidden! This account has been banned.");
     }
 
     const newAccessToken = jwt.sign(

@@ -65,7 +65,10 @@ export const SideBarWrapper = () => {
     >
       <Sidebar.Header>
         <Box className="font-poppins">
-          <Link href={"/"} className="flex justify-center text-center gap-2">
+          <Link
+            href={"/dashboard"}
+            className="flex justify-center text-center gap-2"
+          >
             <DashbaordLogo className="w-6 h-6" />
             <Box>
               <h3 className="text-base font-medium text-[#ecedee]">

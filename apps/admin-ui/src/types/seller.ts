@@ -4,6 +4,7 @@ export type Seller = {
   email: string;
   createdAt: string;
   shop: {
+    id: string;
     name: string;
     avatar: string;
     address: string;

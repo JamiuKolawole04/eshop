@@ -15,6 +15,7 @@ import {
   getAllProductsForAdmin,
   getAllSellers,
   getAllUsers,
+  toggleUserBan,
   uploadSiteBanner,
   uploadSiteLogo,
 } from "../controllers/admin.controller";
@@ -61,7 +62,12 @@ router.post(
   addSubCategoryToCustomization,
 );
 
-// ban users
+router.put(
+  "/ban-user/:userId",
+  isAuthenticated("admin"),
+  isAdmin,
+  toggleUserBan,
+);
 router.post("/upload-logo", isAuthenticated("admin"), isAdmin, uploadSiteLogo);
 router.post(
   "/upload-banner",

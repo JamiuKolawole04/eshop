@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { prisma } from "@packages/prisma";
 import {
   ConflictError,
+  ForbiddenError,
   NotFoundError,
   ValidationError,
 } from "@packages/error-handler";
@@ -269,6 +270,7 @@ export const getAllUsers = async (
           name: true,
           email: true,
           role: true,
+          banned: true,
           createdAt: true,
         },
       }),
@@ -313,6 +315,7 @@ export const getAllSellers = async (
           createdAt: true,
           shop: {
             select: {
+              id: true,
               name: true,
               avatar: true,
               address: true,
@@ -667,5 +670,44 @@ export const uploadSiteBanner = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const toggleUserBan = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      throw new ValidationError("User id is required");
+    }
+
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    if (user.role === "admin") {
+      throw new ForbiddenError("Admin accounts cannot be banned");
+    }
+
+    const updated = await prisma.users.update({
+      where: { id: userId },
+      data: { banned: !user.banned },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: updated.banned
+        ? "User banned successfully"
+        : "User unbanned successfully",
+      banned: updated.banned,
+    });
+  } catch (error) {
+    return next(error);
   }
 };

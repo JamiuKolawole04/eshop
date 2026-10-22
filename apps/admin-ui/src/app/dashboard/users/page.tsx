@@ -109,6 +109,11 @@ const UsersPage = () => {
         header: "Actions",
         cell: ({ row }) => {
           const user: User = row.original;
+
+          if (user.role === "admin") {
+            return <span className="px-2 text-gray-500">—</span>;
+          }
+
           return (
             <button
               onClick={() => {

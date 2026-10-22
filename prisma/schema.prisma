@@ -51,6 +51,7 @@ model Users {
   name      String
   email     String   @unique
   role      String   @default("user")
+  banned    Boolean? @default(false)
   password  String?
   following String[]
   avatar    Images?

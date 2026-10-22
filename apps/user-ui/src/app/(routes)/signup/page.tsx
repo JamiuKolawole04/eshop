@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 
-import { GoogleSignInButton } from "@/shared/components/googleButton";
 import { ButtonLoader } from "@packages/ui";
 
 type FormData = {
@@ -136,14 +135,12 @@ const Page = () => {
               Login
             </Link>
           </p>
-
-          <GoogleSignInButton />
-
+          {/*
           <div className="flex items-center my-5 text-gray-400 text-sm font-Poppins">
             <div className="flex-1 border-t border-gray-300"></div>
             <span className="px-3">or sign in with Email</span>
             <div className="flex-1 border-t border-gray-300"></div>
-          </div>
+          </div>*/}
 
           {!showOtp ? (
             <form onSubmit={handleSubmit(onSubmit)}>

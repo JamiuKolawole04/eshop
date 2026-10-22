@@ -278,12 +278,12 @@ const Signup = () => {
                   >
                     {isPasswordVisible ? <Eye /> : <EyeOff />}
                   </button>
-                  {errors.password && (
-                    <p className="text-red-500 text-sm">
-                      {String(errors.password.message)}
-                    </p>
-                  )}
                 </div>
+                {errors.password && (
+                  <p className="text-red-500 text-sm">
+                    {String(errors.password.message)}
+                  </p>
+                )}
 
                 <button
                   type="submit"

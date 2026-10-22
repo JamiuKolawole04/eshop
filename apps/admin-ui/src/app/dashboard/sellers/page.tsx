@@ -90,7 +90,7 @@ const SellersPage = () => {
           const shopName = row.original.shop?.name;
           return shopName ? (
             <a
-              href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/shop/${row.original.id}`}
+              href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/shop/${row.original.shop?.id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:underline"

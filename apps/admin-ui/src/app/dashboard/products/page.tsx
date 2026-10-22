@@ -70,6 +70,7 @@ const Products = () => {
           return (
             <Link
               href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/product/${row.original.slug}`}
+              target="_blank"
               className="text-blue-400 hover:underline"
               title={row.original.title}
             >
