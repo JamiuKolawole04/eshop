@@ -152,7 +152,7 @@ const Page = () => {
               <Eye size={18} />
             </Link>
             <Link
-              href={`/product/edit/${row.original.id}`}
+              href={`/dashboard/product/edit/${row.original.id}`}
               className="text-yellow-400 hover:text-yellow-300 transition"
             >
               <Pencil size={18} />

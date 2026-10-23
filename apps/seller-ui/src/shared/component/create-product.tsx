@@ -5,7 +5,7 @@
 import { ChevronRight, Wand, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -18,6 +18,7 @@ import {
   RichTextEditor,
   SizeSelector,
   AllDiscountCodeResponseType,
+  ProductType,
 } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 import { ImagePlaceholder } from "@/shared/component/image-placeholder";
@@ -26,9 +27,84 @@ import { enhancements } from "@/utils/ai-enhancements";
 interface UploadedImage {
   fileId: string;
   fileUrl: string;
+  isExisting?: boolean;
 }
 
-const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
+type ProductFormProps = {
+  isEvent?: boolean;
+  product?: ProductType | null;
+  mode?: "create" | "edit";
+};
+
+const toDateInputValue = (value?: string | null) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+};
+
+const mapProductImages = (
+  product?: ProductType | null,
+): (UploadedImage | null)[] => {
+  if (!product) return [null];
+
+  const mapped: (UploadedImage | null)[] = (product.images || []).map(
+    (image) => ({
+      fileId: image.file_id,
+      fileUrl: image.url,
+      isExisting: true,
+    }),
+  );
+
+  if (mapped.length === 0) return [null];
+
+  if (mapped.length < 8) {
+    mapped.push(null);
+  }
+
+  return mapped;
+};
+
+const ProductForm = ({
+  isEvent = false,
+  product = null,
+  mode = "create",
+}: ProductFormProps) => {
+  const isEdit = mode === "edit" && Boolean(product);
+  const initialImages = useMemo(() => mapProductImages(product), [product]);
+  const defaultValues = useMemo(
+    () => ({
+      title: product?.title ?? "",
+      short_description: product?.short_description ?? "",
+      detailed_description: product?.detailed_description ?? "",
+      warranty: product?.warranty ?? "",
+      slug: product?.slug ?? "",
+      tags: Array.isArray(product?.tags) ? product.tags.join(", ") : "",
+      brand: product?.brand ?? "",
+      cash_on_delivery: product?.cashOnDelivery ?? "yes",
+      video_url: product?.video_url ?? "",
+      category: product?.category ?? "",
+      subCategory: product?.subCategory ?? "",
+      regular_price: product?.regular_price ?? "",
+      sale_price: product?.sale_price ?? "",
+      stock: product?.stock ?? "",
+      colors: product?.colors ?? [],
+      sizes: product?.sizes ?? [],
+      discountCodes: product?.discount_codes ?? [],
+      customProperties: Array.isArray(product?.custom_properties)
+        ? product.custom_properties
+        : [],
+      custom_specifications: Array.isArray(product?.custom_specifications)
+        ? product.custom_specifications
+        : [],
+      starting_date: toDateInputValue(product?.starting_date),
+      ending_date: toDateInputValue(product?.ending_date),
+      images: initialImages,
+    }),
+    [product, initialImages],
+  );
+
   const {
     register,
     control,
@@ -36,17 +112,32 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
     setValue,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<any>({ defaultValues });
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [openImageModal, setOpenImageModal] = useState<boolean>(false);
   const [activeEffect, setActiveEffect] = useState<string | null>(null);
   const [pictureUploadingLoader, setPictureUploadingLoader] =
     useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<string>("");
-  const [images, setImages] = useState<(UploadedImage | null)[]>([null]);
+  const [images, setImages] =
+    useState<(UploadedImage | null)[]>(initialImages);
+  const [removedImageFileIds, setRemovedImageFileIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
+
+  const deleteUploadedImage = async (fileId: string) => {
+    await axiosInstance.delete(`/api/products/product-image`, {
+      data: { fileId },
+    });
+  };
+
+  const stageImageRemoval = (fileId: string) => {
+    setRemovedImageFileIds((current) =>
+      current.includes(fileId) ? current : [...current, fileId],
+    );
+  };
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["categories"],
@@ -109,6 +200,20 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
         fileUrl: response.data?.fileUrl,
       };
 
+      const previousImage = images[index];
+
+      if (previousImage && typeof previousImage === "object") {
+        if (isEdit && previousImage.isExisting) {
+          stageImageRemoval(previousImage.fileId);
+        } else {
+          try {
+            await deleteUploadedImage(previousImage.fileId);
+          } catch (err) {
+            console.log(err);
+          }
+        }
+      }
+
       const updatedImages = [...images];
       updatedImages[index] = uploadedImage;
 
@@ -127,17 +232,21 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
 
   const handleRemoveImage = async (index: number) => {
     try {
-      const updatedImages = [...images];
-      const imageToDelete = updatedImages[index];
+      const imageToDelete = images[index];
 
       if (imageToDelete && typeof imageToDelete === "object") {
-        await axiosInstance.delete(`/api/products/product-image`, {
-          data: {
-            fileId: imageToDelete.fileId,
-          },
-        });
+        if (isEdit && imageToDelete.isExisting) {
+          stageImageRemoval(imageToDelete.fileId);
+        } else {
+          try {
+            await deleteUploadedImage(imageToDelete.fileId);
+          } catch (err) {
+            console.log(err);
+          }
+        }
       }
 
+      const updatedImages = [...images];
       updatedImages.splice(index, 1);
 
       if (!updatedImages.includes(null) && updatedImages.length < 8) {
@@ -168,20 +277,58 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
   };
 
   const onSubmit = async (data: any) => {
+    const validImages = Array.isArray(data.images)
+      ? data.images.filter(
+          (image: UploadedImage | null) => image?.fileId && image?.fileUrl,
+        )
+      : [];
+
+    if (validImages.length === 0) {
+      toast.error("Please upload at least one product image");
+      return;
+    }
+
     try {
       setLoading(true);
-      await axiosInstance.post(`/api/products`, {
+
+      const payload = {
         ...data,
+        images: validImages,
         starting_date: isEvent ? data.starting_date : undefined,
         ending_date: isEvent ? data.ending_date : undefined,
-      });
-      router.push("/dashboard/all-products");
+      };
+
+      if (isEdit && product) {
+        await axiosInstance.put(`/api/products/${product.id}`, payload);
+
+        if (removedImageFileIds.length > 0) {
+          await Promise.allSettled(
+            removedImageFileIds.map((fileId) => deleteUploadedImage(fileId)),
+          );
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["shop-products"] });
+        queryClient.invalidateQueries({ queryKey: ["shop-events"] });
+
+        toast.success(isEvent ? "Event updated" : "Product updated");
+        router.push(isEvent ? "/dashboard/all-events" : "/dashboard/all-products");
+      } else {
+        await axiosInstance.post(`/api/products`, payload);
+        router.push("/dashboard/all-products");
+      }
     } catch (error: any) {
-      toast.error(error?.data?.message);
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Something went wrong",
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  const pageTitle = isEvent ? "Event" : "Product";
+  const actionTitle = isEdit ? `Edit ${pageTitle}` : `Create ${pageTitle}`;
 
   return (
     <form
@@ -189,14 +336,14 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <h2 className="text-xl sm:text-2xl py-2 font-semibold font-Poppins">
-        {isEvent ? "Create Event" : "Create Product"}
+        {actionTitle}
       </h2>
 
       <div className="flex items-center">
         <span className="text-[#80Deea] cursor-pointer">Dasboard</span>
 
         <ChevronRight size={20} className="opacity-[.8]" />
-        <span>{isEvent ? "Create Event" : "Create Product"}</span>
+        <span>{actionTitle}</span>
       </div>
 
       <div className="py-4 w-full flex flex-col gap-6 md:flex-row">
@@ -210,6 +357,7 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
               images={images}
               setSelectedImage={setSelectedImage}
               index={0}
+              defaultImage={images[0]?.fileUrl ?? null}
               onImageChange={handleImageChange}
               onRemove={handleRemoveImage}
             />
@@ -226,6 +374,7 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
                 images={images}
                 setSelectedImage={setSelectedImage}
                 index={index + 1}
+                defaultImage={images[index + 1]?.fileUrl ?? null}
                 onImageChange={handleImageChange}
                 onRemove={handleRemoveImage}
               />
@@ -360,7 +509,16 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
               </div>
 
               <div className="mt-2">
-                <CustomProperties control={control} errors={errors} />
+                <CustomProperties
+                  control={control}
+                  errors={errors}
+                  defaultProperties={
+                    (defaultValues.customProperties as {
+                      label: string;
+                      values: string[];
+                    }[]) || []
+                  }
+                />
               </div>
 
               <div className="mt-2">
@@ -371,7 +529,6 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
                   {...register("cash_on_delivery", {
                     required: "Cash on Delivery is required",
                   })}
-                  defaultValue="yes"
                   className="w-full border outline-none border-gray-700 bg-transparent p-2 rounded-md text-white"
                 >
                   <option value="yes" className="bg-black">
@@ -758,16 +915,20 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
           disabled={loading}
         >
           {loading
-            ? isEvent
-              ? "Creating Event..."
-              : "Creating..."
-            : isEvent
-              ? "Create Event"
-              : "Create"}
+            ? isEdit
+              ? "Saving..."
+              : isEvent
+                ? "Creating Event..."
+                : "Creating..."
+            : isEdit
+              ? `Update ${pageTitle}`
+              : isEvent
+                ? "Create Event"
+                : "Create"}
         </button>
       </div>
     </form>
   );
 };
 
-export default CreateProduct;
+export default ProductForm;

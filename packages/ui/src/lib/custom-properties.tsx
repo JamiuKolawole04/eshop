@@ -5,10 +5,19 @@ import { Plus, X } from "lucide-react";
 
 import { Input } from "./input";
 
-const CustomProperties = ({ control, errors }: any) => {
+const CustomProperties = ({
+  control,
+  errors,
+  defaultProperties = [],
+}: any) => {
   const [properties, setProperties] = useState<
     { label: string; values: string[] }[]
-  >([]);
+  >(() =>
+    defaultProperties.map((property: { label: string; values: string[] }) => ({
+      ...property,
+      values: [...(property.values || [])],
+    })),
+  );
   const [newLabel, setNewLabel] = React.useState("");
   const [newValue, setNewValue] = React.useState("");
 

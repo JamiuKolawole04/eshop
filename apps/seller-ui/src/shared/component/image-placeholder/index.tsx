@@ -2,7 +2,7 @@
 
 import { Pencil, WandSparkles, X } from "lucide-react";
 import Image from "next/image";
-import { ChangeEvent, Fragment, useState } from "react";
+import { ChangeEvent, Fragment, useEffect, useState } from "react";
 
 type Props = {
   size: string;
@@ -30,6 +30,10 @@ export const ImagePlaceholder = ({
   pictureUploadingLoader,
 }: Props) => {
   const [imagePreview, setImagePreview] = useState<string | null>(defaultImage);
+
+  useEffect(() => {
+    setImagePreview(defaultImage ?? null);
+  }, [defaultImage]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

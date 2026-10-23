@@ -20,6 +20,7 @@ import {
   restoreProduct,
   searchProducts,
   topShops,
+  updateProduct,
   uploadProductImage,
 } from "../controllers/product.controller";
 
@@ -27,6 +28,13 @@ const router: Router = express.Router();
 
 router.post("/", isAuthenticated("seller"), isSeller, createProduct);
 router.get("/", getAllProducts);
+
+router.put(
+  "/:productId",
+  isAuthenticated("seller"),
+  isSeller,
+  updateProduct,
+);
 
 router.get(
   "/shop-products",

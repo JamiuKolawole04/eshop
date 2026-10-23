@@ -1,5 +1,5 @@
-import CreateProduct from "@/shared/component/create-product";
+import ProductForm from "@/shared/component/create-product";
 
-const CreateProductPage = () => <CreateProduct isEvent={false} />;
+const CreateProductPage = () => <ProductForm isEvent={false} />;
 
 export default CreateProductPage;

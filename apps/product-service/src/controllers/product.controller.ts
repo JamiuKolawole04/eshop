@@ -205,6 +205,8 @@ export const createProduct = async (
       subCategory,
       customProperties = {},
       images = [],
+      starting_date,
+      ending_date,
     } = req.body;
 
     if (
@@ -256,6 +258,8 @@ export const createProduct = async (
         regular_price: parseFloat(regular_price),
         custom_properties: customProperties || {},
         custom_specifications: custom_specifications || {},
+        starting_date: starting_date ? new Date(starting_date) : null,
+        ending_date: ending_date ? new Date(ending_date) : null,
         images: {
           create: images
             .filter((img: any) => img && img.fileId && img.fileUrl)
@@ -274,6 +278,141 @@ export const createProduct = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const updateProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { productId } = req.params;
+
+    const {
+      title,
+      short_description,
+      detailed_description,
+      warranty,
+      custom_specifications,
+      slug,
+      tags,
+      cash_on_delivery,
+      brand,
+      video_url,
+      category,
+      colors = [],
+      sizes = [],
+      discountCodes,
+      stock,
+      sale_price,
+      regular_price,
+      subCategory,
+      customProperties = {},
+      images = [],
+      starting_date,
+      ending_date,
+    } = req.body;
+
+    const existingProduct = await prisma.products.findUnique({
+      where: { id: productId },
+      select: { id: true, shopId: true },
+    });
+
+    if (!existingProduct) {
+      throw new ValidationError("Product not found");
+    }
+
+    if (existingProduct.shopId !== req.seller?.shop?.id) {
+      throw new ValidationError("Unauthorized action");
+    }
+
+    if (
+      !title ||
+      !short_description ||
+      !detailed_description ||
+      !warranty ||
+      !slug ||
+      !tags ||
+      !cash_on_delivery ||
+      !category ||
+      !subCategory ||
+      !sale_price ||
+      !regular_price ||
+      !stock
+    ) {
+      throw new ValidationError("Missing required fields");
+    }
+
+    const slugChecking = await prisma.products.findUnique({
+      where: { slug },
+    });
+
+    if (slugChecking && slugChecking.id !== productId) {
+      throw new ValidationError(
+        "Slug already exists! Please use a different slug.",
+      );
+    }
+
+    const validImages = Array.isArray(images)
+      ? images.filter((img: any) => img && img.fileId && img.fileUrl)
+      : [];
+
+    const updateData: Prisma.ProductsUpdateInput = {
+      title,
+      short_description,
+      detailed_description,
+      warranty,
+      cashOnDelivery: cash_on_delivery,
+      slug,
+      tags: Array.isArray(tags) ? tags : tags.split(","),
+      brand,
+      video_url,
+      category,
+      subCategory,
+      colors: colors || [],
+      discount_codes: (discountCodes || []).map((codeId: string) => codeId),
+      sizes: sizes || [],
+      stock: parseInt(stock),
+      sale_price: parseFloat(sale_price),
+      regular_price: parseFloat(regular_price),
+      custom_properties: customProperties || {},
+      custom_specifications: custom_specifications || {},
+      starting_date:
+        starting_date !== undefined
+          ? starting_date
+            ? new Date(starting_date)
+            : null
+          : undefined,
+      ending_date:
+        ending_date !== undefined
+          ? ending_date
+            ? new Date(ending_date)
+            : null
+          : undefined,
+      images: {
+        deleteMany: {},
+        ...(validImages.length > 0 && {
+          create: validImages.map((img: any) => ({
+            file_id: img.fileId,
+            url: img.fileUrl,
+          })),
+        }),
+      },
+    };
+
+    const updatedProduct = await prisma.products.update({
+      where: { id: productId },
+      data: updateData,
+      include: { images: true },
+    });
+
+    return res.status(200).json({
+      success: true,
+      updatedProduct,
+    });
+  } catch (error) {
+    return next(error);
   }
 };
 
