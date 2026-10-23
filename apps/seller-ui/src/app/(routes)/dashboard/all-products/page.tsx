@@ -97,6 +97,7 @@ const Page = () => {
           return (
             <Link
               href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/product/${row.original.slug}`}
+              target="_blank"
               className="text-blue-400 hover:underline max-w-[220px] truncate"
               title={row.original.title}
             >
@@ -188,7 +189,9 @@ const Page = () => {
   return (
     <div className="w-full min-h-screen p-4 sm:p-6 lg:p-8 font-Poppins text-sm">
       <div className="flex justify-between items-center mb-1 flex-wrap gap-3">
-        <h2 className="text-xl sm:text-2xl text-white font-semibold">All Products</h2>
+        <h2 className="text-xl sm:text-2xl text-white font-semibold">
+          All Products
+        </h2>
         <Link
           href="/dashboard/create-product"
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
@@ -240,7 +243,10 @@ const Page = () => {
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="border-b border-gray-800">
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="p-3 text-left whitespace-nowrap">
+                    <th
+                      key={header.id}
+                      className="p-3 text-left whitespace-nowrap"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(

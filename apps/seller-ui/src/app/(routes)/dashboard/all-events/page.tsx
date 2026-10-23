@@ -24,19 +24,20 @@ import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
+import { useSeller } from "@/hooks/use-seller";
 import { DeleteConfirmationModal } from "@/shared/component/modals/delete-confirmation-modal";
 import {
   ButtonLoader,
-  GetEventOffersResponseType,
+  GetSellerEventsByUserResponseType,
   ProductType,
 } from "@packages/ui";
 
-const fetchEvents = async () => {
-  const response = await axiosInstance.get<GetEventOffersResponseType>(
-    `/api/products/events/all`,
+const fetchEvents = async (shopId: string) => {
+  const response = await axiosInstance.get<GetSellerEventsByUserResponseType>(
+    `/api/sellers/shops/${shopId}/events?page=1&limit=20`,
   );
 
-  return response.data.events;
+  return response.data.products;
 };
 
 const deleteEvent = async (eventId: string) => {
@@ -49,14 +50,17 @@ const restoreEvent = async (eventId: string) => {
 
 const Page = () => {
   const queryClient = useQueryClient();
+  const { seller } = useSeller();
+  const shopId = seller?.shop?.id as string;
 
   const [globalFilter, setGlobalFilter] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>();
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["shop-events"],
-    queryFn: fetchEvents,
+    queryKey: ["shop-events", shopId, 20],
+    queryFn: () => fetchEvents(shopId),
+    enabled: !!shopId,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -194,7 +198,9 @@ const Page = () => {
   return (
     <div className="w-full min-h-screen p-4 sm:p-6 lg:p-8 font-Poppins text-sm">
       <div className="flex justify-between items-center mb-1 flex-wrap gap-3">
-        <h2 className="text-xl sm:text-2xl text-white font-semibold">All Events</h2>
+        <h2 className="text-xl sm:text-2xl text-white font-semibold">
+          All Events
+        </h2>
         <Link
           href="/dashboard/create-event"
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
@@ -244,7 +250,10 @@ const Page = () => {
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="border-b border-gray-800">
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="p-3 text-left whitespace-nowrap">
+                    <th
+                      key={header.id}
+                      className="p-3 text-left whitespace-nowrap"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(

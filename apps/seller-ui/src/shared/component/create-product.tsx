@@ -314,7 +314,12 @@ const ProductForm = ({
         router.push(isEvent ? "/dashboard/all-events" : "/dashboard/all-products");
       } else {
         await axiosInstance.post(`/api/products`, payload);
-        router.push("/dashboard/all-products");
+        queryClient.invalidateQueries({
+          queryKey: [isEvent ? "shop-events" : "shop-products"],
+        });
+        router.push(
+          isEvent ? "/dashboard/all-events" : "/dashboard/all-products",
+        );
       }
     } catch (error: any) {
       toast.error(

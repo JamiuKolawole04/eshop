@@ -186,7 +186,7 @@ const SellerProfile = ({ shop, followersCount, sellerId }: Props) => {
   });
 
   const { data: events, isLoading: isEventsLoading } = useQuery({
-    queryKey: ["seller-events", shop?.id],
+    queryKey: ["shop-events", shop?.id, 10],
     queryFn: async () => {
       const res = await axiosInstance.get<GetSellerEventsByUserResponseType>(
         `/api/sellers/shops/${shop?.id}/events?page=1&limit=10`,
