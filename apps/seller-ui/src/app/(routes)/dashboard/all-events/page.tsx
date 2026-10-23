@@ -103,7 +103,7 @@ const Page = () => {
           return (
             <Link
               href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/product/${row.original.slug}`}
-              className="text-blue-400 hover:underline"
+              className="text-blue-400 hover:underline max-w-[220px] truncate"
               title={row.original.title}
             >
               {truncatedTitle}
@@ -192,9 +192,9 @@ const Page = () => {
   };
 
   return (
-    <div className="w-full min-h-screen p-8 font-Poppins text-sm">
-      <div className="flex justify-between items-center mb-1">
-        <h2 className="text-2xl text-white font-semibold">All Events</h2>
+    <div className="w-full min-h-screen p-4 sm:p-6 lg:p-8 font-Poppins text-sm">
+      <div className="flex justify-between items-center mb-1 flex-wrap gap-3">
+        <h2 className="text-xl sm:text-2xl text-white font-semibold">All Events</h2>
         <Link
           href="/dashboard/create-event"
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
@@ -225,7 +225,7 @@ const Page = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
+      <div className="overflow-x-auto bg-gray-900 rounded-lg p-3 sm:p-4">
         {isLoading ? (
           <div className="flex items-center justify-center">
             <ButtonLoader className="text-white mt-5" />
@@ -239,12 +239,12 @@ const Page = () => {
             </p>
           </div>
         ) : (
-          <table className="w-full text-white">
+          <table className="w-full min-w-[800px] text-white">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="border-b border-gray-800">
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="p-3 text-left">
+                    <th key={header.id} className="p-3 text-left whitespace-nowrap">
                       {header.isPlaceholder
                         ? null
                         : flexRender(

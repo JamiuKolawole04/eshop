@@ -12,6 +12,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ChevronLeft } from "lucide-react";
 
 import { useSeller } from "@/hooks/use-seller";
 import axiosInstance from "@/utils/axiosInstance";
@@ -229,9 +230,13 @@ const Inbox = () => {
   };
 
   return (
-    <div className="w-full h-screen font-Poppins">
+    <div className="w-full h-[calc(100dvh-3.5rem)] lg:h-dvh font-Poppins">
       <div className="flex h-full overflow-hidden">
-        <div className="w-[320px] border-r border-r-gray-800 bg-[#0a0a0a]">
+        <div
+          className={`w-full md:w-[320px] md:shrink-0 overflow-y-auto border-r border-r-gray-800 bg-[#0a0a0a] ${
+            selectedChat ? "hidden md:block" : "block"
+          }`}
+        >
           <div className="p-4 border-b border-b-gray-800 text-lg font-semibold text-white">
             Messages
           </div>
@@ -297,10 +302,26 @@ const Inbox = () => {
           </div>
         </div>
 
-        <div className="flex flex-col flex-1 bg-[#0a0a0a]">
+        <div
+          className={`flex flex-col flex-1 min-w-0 bg-[#0a0a0a] ${
+            selectedChat ? "flex" : "hidden md:flex"
+          }`}
+        >
           {selectedChat ? (
             <Fragment>
               <div className="p-4 border-b border-b-gray-800 bg-[#0a0a0a] flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedChat(null);
+                    router.push("/dashboard/inbox");
+                  }}
+                  aria-label="Back to conversations"
+                  className="md:hidden -ml-1 p-1 text-gray-400 hover:text-white"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+
                 <Image
                   src={String(selectedChat?.user?.avatar?.url)}
                   alt={selectedChat?.user?.name}
@@ -322,7 +343,7 @@ const Inbox = () => {
 
               <div
                 ref={messageContainerRef}
-                className="flex-1 overflow-y-auto px-6 py-6 space-y-4 text-sm bg-[#0a0a0a]"
+                className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 text-sm bg-[#0a0a0a]"
               >
                 {hasNextPage && (
                   <div className="flex justify-center mb-2">

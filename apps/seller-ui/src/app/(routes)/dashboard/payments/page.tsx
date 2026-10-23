@@ -121,8 +121,8 @@ const SellerPayments = () => {
   });
 
   return (
-    <div className="w-full min-h-screen p-8 font-Poppins">
-      <h2 className="text-2xl text-white font-semibold mb-2">Payments</h2>
+    <div className="w-full min-h-screen p-4 sm:p-6 lg:p-8 font-Poppins">
+      <h2 className="text-xl sm:text-2xl text-white font-semibold mb-2">Payments</h2>
       <BreadCrumbs title="Payments" />
 
       <div className="my-4 flex items-center bg-gray-900 p-2 rounded-md flex-1">
@@ -136,18 +136,18 @@ const SellerPayments = () => {
         />
       </div>
 
-      <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
+      <div className="overflow-x-auto bg-gray-900 rounded-lg p-3 sm:p-4">
         {isLoading ? (
           <div className="flex items-center justify-center">
             <ButtonLoader className="text-white mt-5" />
           </div>
         ) : (
-          <table className="w-full text-white text-sm">
+          <table className="w-full min-w-[700px] text-white text-sm">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="border-b border-gray-800">
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="p-3 text-left">
+                    <th key={header.id} className="p-3 text-left whitespace-nowrap">
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),

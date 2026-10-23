@@ -26,8 +26,10 @@ const Notifications = () => {
   };
 
   return (
-    <div className="w-full min-h-screen p-8">
-      <h2 className="text-2xl text-white font-semibold mb-2">Notifications</h2>
+    <div className="w-full min-h-screen p-4 sm:p-6 lg:p-8">
+      <h2 className="text-xl sm:text-2xl text-white font-semibold mb-2">
+        Notifications
+      </h2>
       <BreadCrumbs title="Notifications" />
 
       {!isLoading && data?.notifications?.length === 0 && (
@@ -37,7 +39,7 @@ const Notifications = () => {
       )}
 
       {!isLoading && (data?.notifications?.length ?? 0) > 0 && (
-        <div className="md:w-[80%] my-6 rounded-lg divide-y divide-gray-800 bg-black/40 backdrop-blur-lg shadow-sm">
+        <div className="w-full md:w-[80%] my-6 rounded-lg divide-y divide-gray-800 bg-black/40 backdrop-blur-lg shadow-sm">
           {data?.notifications?.map((d) => (
             <Link
               key={d.id}
@@ -50,9 +52,13 @@ const Notifications = () => {
               onClick={() => markAsNotificationAsRead(d.id)}
             >
               <div className="flex items-start gap-3">
-                <div className="flex flex-col">
-                  <span className="text-white font-medium">{d.title}</span>
-                  <span className="text-gray-300 text-sm">{d.message}</span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-white font-medium break-words">
+                    {d.title}
+                  </span>
+                  <span className="text-gray-300 text-sm break-words">
+                    {d.message}
+                  </span>
                   <span className="text-gray-500 text-xs mt-1">
                     {new Date(d.createdAt).toLocaleString("en-UK", {
                       dateStyle: "medium",

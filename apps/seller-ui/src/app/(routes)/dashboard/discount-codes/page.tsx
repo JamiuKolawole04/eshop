@@ -87,9 +87,9 @@ const Page = () => {
     createDiscountCodeMutation.mutate(data);
   };
   return (
-    <div className="w-full min-h-screen p-8 font-Poppins">
-      <div className="flex justify-between items-center mb-1">
-        <h2 className="text-2xl text-white font-semibold">Discount Codes</h2>
+    <div className="w-full min-h-screen p-4 sm:p-6 lg:p-8 font-Poppins">
+      <div className="flex justify-between items-center mb-1 flex-wrap gap-3">
+        <h2 className="text-xl sm:text-2xl text-white font-semibold">Discount Codes</h2>
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
           onClick={() => setShowModal(true)}
@@ -117,13 +117,14 @@ const Page = () => {
             <ButtonLoader className="text-white mt-5" />
           </div>
         ) : (
-          <table className="w-full text-white">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-white">
             <thead>
               <tr className="border-b border-gray-800 text-sm">
-                <th className="p-3 text-left">Title</th>
-                <th className="p-3 text-left">Type</th>
-                <th className="p-3 text-left">Value</th>
-                <th className="p-3 text-left">Code</th>
+                <th className="p-3 text-left whitespace-nowrap">Title</th>
+                <th className="p-3 text-left whitespace-nowrap">Type</th>
+                <th className="p-3 text-left whitespace-nowrap">Value</th>
+                <th className="p-3 text-left whitespace-nowrap">Code</th>
               </tr>
             </thead>
 
@@ -157,6 +158,7 @@ const Page = () => {
               ))}
             </tbody>
           </table>
+          </div>
         )}
 
         {!isLoading && discountCodes?.length === 0 && (
@@ -167,8 +169,8 @@ const Page = () => {
       </div>
 
       {showModal && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-gray-800 p-6 rounded-lg w-[450px] shadow-lg">
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-[450px] max-h-[90dvh] overflow-y-auto shadow-lg">
             <div className="flex justify-between items-center border-b border-gray-700 pb-3">
               <h3 className="text-xl text-white">Create Discount Code</h3>
 

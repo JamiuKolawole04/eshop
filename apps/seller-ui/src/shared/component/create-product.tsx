@@ -185,10 +185,10 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
 
   return (
     <form
-      className="w-full mx-auto p-8 shadow-md rounded-lg text-white font-Poppins"
+      className="w-full mx-auto p-4 sm:p-6 lg:p-8 shadow-md rounded-lg text-white font-Poppins"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <h2 className="text-2xl py-2 font-semibold font-Poppins">
+      <h2 className="text-xl sm:text-2xl py-2 font-semibold font-Poppins">
         {isEvent ? "Create Event" : "Create Product"}
       </h2>
 
@@ -199,8 +199,8 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
         <span>{isEvent ? "Create Event" : "Create Product"}</span>
       </div>
 
-      <div className="py-4 w-full flex gap-6">
-        <div className="md:w-[35%]">
+      <div className="py-4 w-full flex flex-col gap-6 md:flex-row">
+        <div className="w-full md:w-[35%]">
           {images?.length > 0 && (
             <ImagePlaceholder
               setOpenImageModal={setOpenImageModal}
@@ -233,9 +233,9 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
           </div>
         </div>
 
-        <div className="md:w-[65%]">
-          <div className="w-full flex gap-6">
-            <div className="w-2/4">
+        <div className="w-full md:w-[65%]">
+          <div className="w-full flex flex-col gap-6 md:flex-row">
+            <div className="w-full md:w-2/4">
               <Input
                 label="Product Title *"
                 placeholder="Enter product title"
@@ -389,7 +389,7 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
               </div>
             </div>
 
-            <div className="w-2/4">
+            <div className="w-full md:w-2/4">
               <label className="block font-semibold text-gray-300 mb-1 text-sm">
                 Category *
               </label>
@@ -610,7 +610,7 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
               {/* ---- The only real difference: event date fields ---- */}
               {isEvent && (
                 <div className="mt-2 flex gap-3">
-                  <div className="w-1/2">
+                  <div className="w-1/2 min-w-0">
                     <Input
                       type="date"
                       label="Start Date *"
@@ -625,7 +625,7 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
                     )}
                   </div>
 
-                  <div className="w-1/2">
+                  <div className="w-1/2 min-w-0">
                     <Input
                       type="date"
                       label="End Date *"
@@ -702,8 +702,8 @@ const CreateProduct = ({ isEvent = false }: { isEvent?: boolean }) => {
       </div>
 
       {openImageModal && (
-        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-60 z-50">
-          <div className="bg-gray-800 p-6 rounded-lg w-[450px] text-white">
+        <div className="fixed inset-0 p-4 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-[450px] max-h-[90dvh] overflow-y-auto text-white">
             <div className="flex justify-between items-center pb-3 mb-4">
               <h2 className="text-lg font-semibold">Enhance product Image</h2>
               <X

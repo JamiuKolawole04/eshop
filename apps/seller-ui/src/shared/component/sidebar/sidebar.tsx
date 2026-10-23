@@ -55,12 +55,12 @@ export const SidebarWrapper = () => {
   return (
     <Box
       css={{
-        height: "100vh",
+        height: "100dvh",
         zIndex: 202,
         position: "sticky",
         padding: "8px",
         top: "0",
-        overflowY: "scroll",
+        overflowY: "auto",
         scrollbarWidth: "none",
       }}
       className="sidebar-wrapper font-Poppins"

@@ -56,7 +56,7 @@ export const ChatInput = ({ message, setMessage, onSendMessage }: Props) => {
         </button>
 
         {showEmoji && (
-          <div className="absolute bottom-12 left-0 mb-2 z-50">
+          <div className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 sm:absolute sm:bottom-12 sm:left-0 sm:translate-x-0">
             <EmojiPicker onEmojiClick={handleEmojiClick} />
           </div>
         )}

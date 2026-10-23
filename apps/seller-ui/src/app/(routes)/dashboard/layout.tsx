@@ -1,5 +1,5 @@
 import { RequireAuth } from "@/shared/component/requireAuth";
-import { SidebarWrapper } from "@/shared/component/sidebar/sidebar";
+import { DashboardShell } from "@/shared/component/sidebar/dashboard-shell";
 
 type Props = {
   children: React.ReactNode;
@@ -8,17 +8,7 @@ type Props = {
 const Layout = ({ children }: Props) => {
   return (
     <RequireAuth>
-      <div className="flex h-full bg-black min-h-screen">
-        <aside className="w-[280px] min-w-[250px] max-w-[300px] border-r border-r-slate-800">
-          <div className="sticky top-0">
-            <SidebarWrapper />
-          </div>
-        </aside>
-
-        <main className="flex-1">
-          <div className="overflow-auto">{children}</div>
-        </main>
-      </div>
+      <DashboardShell>{children}</DashboardShell>
     </RequireAuth>
   );
 };

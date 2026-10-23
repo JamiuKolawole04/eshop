@@ -13,6 +13,6 @@ cron.schedule("0 * * * *", async () => {
       },
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 });

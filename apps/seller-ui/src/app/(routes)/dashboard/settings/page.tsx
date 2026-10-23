@@ -382,13 +382,13 @@ const SettingsPage = () => {
       </nav>
 
       {/* Tabs */}
-      <div className="mt-6 flex overflow border-b border-slate-700">
+      <div className="mt-6 flex overflow-x-auto border-b border-slate-700">
         {TABS.map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={`shrink-0 whitespace-nowrap -mb-px border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`shrink-0 whitespace-nowrap -mb-px border-b-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === tab
                 ? "border-blue-500 text-white"
                 : "border-transparent text-slate-400 hover:text-slate-200"

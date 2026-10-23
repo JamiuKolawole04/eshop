@@ -185,7 +185,7 @@ const DashboardPage = () => {
       {/* Top Charts */}
       <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Revenue Chart */}
-        <div className="w-full lg:w-[65%]">
+        <div className="w-full min-w-0 lg:w-[65%]">
           <div className="rounded-2xl shadow-xl">
             <h2 className="text-white text-lg sm:text-xl font-semibold">
               Revenue
@@ -205,7 +205,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Device Usage */}
-        <div className="w-full lg:w-[35%] rounded-2xl shadow-xl">
+        <div className="w-full min-w-0 lg:w-[35%] rounded-2xl shadow-xl">
           <h2 className="text-white text-lg sm:text-xl font-semibold mb-2">
             Device Usage
             <span className="block text-sm text-slate-400 font-normal">
@@ -227,7 +227,7 @@ const DashboardPage = () => {
       {/* Geo Map + Orders */}
       <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-8 mt-8">
         {/* Map */}
-        <div className="w-full lg:w-[60%]">
+        <div className="w-full min-w-0 lg:w-[60%]">
           <h2 className="text-white text-lg sm:text-xl font-semibold mt-6 lg:mt-6">
             Where your visitors come from
             <span className="block text-sm text-slate-400 font-normal">
@@ -244,7 +244,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Orders Table */}
-        <div className="w-full lg:w-[40%]">
+        <div className="w-full min-w-0 lg:w-[40%]">
           <OrdersTable />
         </div>
       </div>
