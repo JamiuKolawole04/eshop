@@ -41,11 +41,11 @@ const fetchEvents = async (shopId: string) => {
 };
 
 const deleteEvent = async (eventId: string) => {
-  await axiosInstance.delete(`api/products/events/${eventId}`);
+  await axiosInstance.delete(`/api/products/events/${eventId}`);
 };
 
 const restoreEvent = async (eventId: string) => {
-  await axiosInstance.patch(`api/products/events/${eventId}/restore`);
+  await axiosInstance.patch(`/api/products/events/${eventId}/restore`);
 };
 
 const Page = () => {

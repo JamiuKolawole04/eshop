@@ -92,8 +92,18 @@ router.delete(
 router.get("/events/offers", getFilteredEvents);
 router.get("/events/all", getAllEvents);
 
-// router.delete("/events/eventId", deleteEvents);
-// router.get("/events/eventId/restore", deleteEvents);
+router.delete(
+  "/events/:productId",
+  isAuthenticated("seller"),
+  isSeller,
+  deleteProduct,
+);
+router.patch(
+  "/events/:productId/restore",
+  isAuthenticated("seller"),
+  isSeller,
+  restoreProduct,
+);
 
 router.get("/shops/filtered", getFilteredShops);
 router.get("/shops/top", topShops);
