@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 
 import { ErrorMiddleware } from "@packages/error-handler";
 import sellerRoutes from "./routes/seller.route";
+import "./jobs/shop-cron-job";
 
 const host = process.env.HOST ?? "localhost";
 const port = process.env.PORT ? Number(process.env.PORT) : 6007;

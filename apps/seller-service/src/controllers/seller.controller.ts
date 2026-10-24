@@ -9,6 +9,10 @@ import { NotificationChannel, prisma } from "@packages/prisma";
 import { imageKit } from "@packages/imagekit";
 import { DEVICE_LABELS } from "@packages/types";
 import {
+  DEFAULT_SHOP_AVATAR_FILE_ID,
+  DEFAULT_SHOP_COVER_BANNER_FILE_ID,
+} from "../constants/shop.constants";
+import {
   cleanString,
   countWords,
   hostMatches,
@@ -407,8 +411,10 @@ export const uploadShopAvatar = async (
       folder: "/eshop-products",
     });
 
-    const DEFAULT_AVATAR_FILE_ID = "6a8078ae5c7cd75eb81f31dc";
-    if (shop.avatarFileId && shop.avatarFileId !== DEFAULT_AVATAR_FILE_ID) {
+    if (
+      shop.avatarFileId &&
+      shop.avatarFileId !== DEFAULT_SHOP_AVATAR_FILE_ID
+    ) {
       try {
         await imageKit.files.delete(shop.avatarFileId);
       } catch (err) {
@@ -462,10 +468,9 @@ export const uploadShopCoverBanner = async (
       folder: "/eshop-products",
     });
 
-    const DEFAULT_BANNER_FILE_ID = "6a8f875d5c7cd75eb81ddeaa";
     if (
       shop.coverBannerFileId &&
-      shop.coverBannerFileId !== DEFAULT_BANNER_FILE_ID
+      shop.coverBannerFileId !== DEFAULT_SHOP_COVER_BANNER_FILE_ID
     ) {
       try {
         await imageKit.files.delete(shop.coverBannerFileId);
