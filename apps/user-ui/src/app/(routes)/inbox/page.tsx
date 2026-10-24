@@ -2,7 +2,14 @@
 
 "use client";
 
-import { Fragment, SubmitEvent, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  SubmitEvent,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -35,7 +42,7 @@ const fetchConversations = async () => {
   return response.data.conversations;
 };
 
-const Inbox = () => {
+const InboxContent = () => {
   const query = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -398,5 +405,11 @@ const Inbox = () => {
     </div>
   );
 };
+
+const Inbox = () => (
+  <Suspense fallback={null}>
+    <InboxContent />
+  </Suspense>
+);
 
 export default Inbox;

@@ -10,6 +10,22 @@ import {
 } from "@packages/error-handler";
 import { imageKit } from "@packages/imagekit";
 
+const MAX_SEARCH_LENGTH = 80;
+const SEARCH_RESULT_LIMIT = 10;
+
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const visibleProductFilter = {
+  OR: [{ isDeleted: false }, { isDeleted: null }],
+};
+
+const activeProductFilter = { status: "Active" as const };
+
+const nonEventFilter = {
+  OR: [{ starting_date: null }, { starting_date: { isSet: false } }],
+};
+
 export const getCategories = async (
   req: Request,
   res: Response,
@@ -616,6 +632,7 @@ export const getFilteredProducts = async (
 ) => {
   try {
     const {
+      q,
       priceRange = [0, 10000],
       categories = [],
       colors = [],
@@ -632,13 +649,32 @@ export const getFilteredProducts = async (
     const parsedLimit = Number(limit);
     const skip = (parsedPage - 1) * parsedLimit;
 
+    const rawQuery = typeof q === "string" ? q.trim() : "";
+
+    if (rawQuery.length > MAX_SEARCH_LENGTH) {
+      return res.status(400).json({
+        message: `Search query must be ${MAX_SEARCH_LENGTH} characters or fewer.`,
+      });
+    }
+
     const filters: Record<string, any> = {
       sale_price: {
         gte: parsedPriceRange[0],
         lte: parsedPriceRange[1],
       },
-      OR: [{ starting_date: null }, { starting_date: { isSet: false } }],
+      AND: [visibleProductFilter, activeProductFilter, nonEventFilter],
     };
+
+    if (rawQuery) {
+      const pattern = escapeRegex(rawQuery);
+
+      filters.AND.push({
+        OR: [
+          { title: { contains: pattern, mode: "insensitive" } },
+          { short_description: { contains: pattern, mode: "insensitive" } },
+        ],
+      });
+    }
 
     if (categories && (categories as string[]).length > 0) {
       filters.category = {
@@ -664,6 +700,7 @@ export const getFilteredProducts = async (
         where: filters,
         skip,
         take: parsedLimit,
+        orderBy: { createdAt: "desc" },
         include: {
           images: true,
           shop: true,
@@ -683,7 +720,7 @@ export const getFilteredProducts = async (
       },
     });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -883,39 +920,83 @@ export const searchProducts = async (
   next: NextFunction,
 ) => {
   try {
-    const query = req.query.q as string;
+    const rawQuery = typeof req.query.q === "string" ? req.query.q.trim() : "";
 
-    if (!query || query.trim().length === 0) {
+    if (!rawQuery) {
       return res.status(400).json({ message: "Search query is required." });
     }
 
-    const products = await prisma.products.findMany({
-      where: {
-        OR: [
-          {
-            title: {
-              contains: query,
-              mode: "insensitive",
-            },
-          },
-          {
-            short_description: {
-              contains: query,
-              mode: "insensitive",
-            },
-          },
-        ],
+    if (rawQuery.length > MAX_SEARCH_LENGTH) {
+      return res.status(400).json({
+        message: `Search query must be ${MAX_SEARCH_LENGTH} characters or fewer.`,
+      });
+    }
+
+    const pattern = escapeRegex(rawQuery);
+    const normalizedQuery = rawQuery.toLowerCase();
+
+    const searchSelect = {
+      id: true,
+      title: true,
+      slug: true,
+      short_description: true,
+      sale_price: true,
+      regular_price: true,
+      createdAt: true,
+      images: {
+        take: 1,
+        orderBy: { createdAt: "asc" as const },
+        select: { url: true },
       },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-      },
-      take: 10,
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    } satisfies Prisma.ProductsSelect;
+
+    const baseWhere = {
+      AND: [visibleProductFilter, activeProductFilter, nonEventFilter],
+    };
+
+    const [titleMatches, otherMatches] = await Promise.all([
+      prisma.products.findMany({
+        where: {
+          ...baseWhere,
+          title: { startsWith: pattern, mode: "insensitive" },
+        },
+        orderBy: { createdAt: "desc" },
+        take: SEARCH_RESULT_LIMIT,
+        select: searchSelect,
+      }),
+      prisma.products.findMany({
+        where: {
+          ...baseWhere,
+          OR: [
+            { title: { contains: pattern, mode: "insensitive" } },
+            { short_description: { contains: pattern, mode: "insensitive" } },
+          ],
+        },
+        orderBy: { createdAt: "desc" },
+        take: SEARCH_RESULT_LIMIT,
+        select: searchSelect,
+      }),
+    ]);
+
+    const rank = (product: (typeof titleMatches)[number]) => {
+      const title = product.title.toLowerCase();
+
+      if (title === normalizedQuery) return 0;
+      if (title.startsWith(normalizedQuery)) return 1;
+      if (title.includes(normalizedQuery)) return 2;
+      return 3;
+    };
+
+    const products = [...titleMatches, ...otherMatches]
+      .filter(
+        (product, index, all) =>
+          all.findIndex(({ id }) => id === product.id) === index,
+      )
+      .sort(
+        (a, b) =>
+          rank(a) - rank(b) || b.createdAt.getTime() - a.createdAt.getTime(),
+      )
+      .slice(0, SEARCH_RESULT_LIMIT);
 
     return res.status(200).json({ products });
   } catch (error) {

@@ -70,6 +70,21 @@ export type GetFilteredProductsResponseType = {
 export type GetFilteredEventOffersResponseType =
   GetFilteredProductsResponseType;
 
+export type SearchProductType = {
+  id: string;
+  title: string;
+  slug: string;
+  short_description: string;
+  sale_price: number;
+  regular_price: number;
+  createdAt: string;
+  images: Array<Pick<FileType, "url">>;
+};
+
+export type SearchProductsResponseType = {
+  products: SearchProductType[];
+};
+
 export type GetEventOffersResponseType = {
   events: ProductWithRelationsType[];
   top10BySales: ProductWithRelationsType[];

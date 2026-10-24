@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { CheckCircle, Truck } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
 import { useStore } from "@/store";
 
-const PaymentSuccessPage = () => {
+const PaymentSuccessContent = () => {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
   const router = useRouter();
@@ -53,5 +53,11 @@ const PaymentSuccessPage = () => {
     </div>
   );
 };
+
+const PaymentSuccessPage = () => (
+  <Suspense fallback={null}>
+    <PaymentSuccessContent />
+  </Suspense>
+);
 
 export default PaymentSuccessPage;

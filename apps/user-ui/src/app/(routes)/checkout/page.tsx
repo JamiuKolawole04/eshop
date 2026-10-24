@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { XCircle } from "lucide-react";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
@@ -12,6 +12,12 @@ import { CheckoutForm } from "@/shared/components/checkOutForm";
 
 const stripePromise = loadStripe(
   String(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY),
+);
+
+const CheckoutLoading = () => (
+  <div className="flex justify-center items-center min-h-[70vh]">
+    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+  </div>
 );
 
 const Page = () => {
@@ -82,11 +88,7 @@ const Page = () => {
   const appearance: Appearance = { theme: "stripe" };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[70vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-      </div>
-    );
+    return <CheckoutLoading />;
   }
 
   if (error) {
@@ -128,4 +130,10 @@ const Page = () => {
   );
 };
 
-export default Page;
+const CheckoutPage = () => (
+  <Suspense fallback={<CheckoutLoading />}>
+    <Page />
+  </Suspense>
+);
+
+export default CheckoutPage;

@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Search } from "lucide-react";
 import Image from "next/image";
 
 import HeaderBottom from "./headerBottom";
 import { HeaderActions } from "./headerActions";
+import { SearchBox } from "@/shared/components/search/searchBox";
 import useLayout from "@/hooks/use-layout";
 
 const Header = () => {
@@ -28,20 +28,7 @@ const Header = () => {
           />
         </Link>
 
-        <div className="order-last md:order-none w-full md:w-auto md:flex-1 md:max-w-[600px] relative">
-          <input
-            type="text"
-            placeholder="Search for products..."
-            className="w-full px-3 md:px-4 pr-14 font-Poppins font-medium text-base border-2 md:border-[2.5px] border-[#3489ff] outline-none h-[44px] md:h-[55px]"
-          />
-          <button
-            type="button"
-            aria-label="Search"
-            className="w-[48px] md:w-[60px] h-[44px] md:h-[55px] cursor-pointer flex items-center justify-center bg-[#3489ff] absolute top-0 right-0"
-          >
-            <Search color="#fff" className="w-5 h-5 md:w-6 md:h-6" />
-          </button>
-        </div>
+        <SearchBox />
 
         <HeaderActions />
       </div>

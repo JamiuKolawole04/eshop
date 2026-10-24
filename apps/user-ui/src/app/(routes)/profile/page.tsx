@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   BadgeCheck,
   Bell,
@@ -72,7 +72,7 @@ const navItemTone = (active?: boolean, danger?: boolean) =>
       ? "text-red-500 hover:bg-red-50"
       : "text-gray-700 hover:bg-gray-100";
 
-const Page = () => {
+const ProfileContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -159,9 +159,6 @@ const Page = () => {
 
         <div className="mt-10 flex flex-col md:flex-row gap-6">
           <div className="bg-white p-4 rounded-md shadow-sm border border-gray-100 w-full md:w-1/5">
-            {/* Mobile: every option visible at once as a 3-column grid of tiles
-                (icon above label). No horizontal scrolling, nothing hidden.
-                Logout sits apart below so it is not tapped by accident. */}
             <div className="md:hidden">
               <nav
                 aria-label="Account sections"
@@ -384,6 +381,12 @@ const Page = () => {
     </div>
   );
 };
+
+const Page = () => (
+  <Suspense fallback={null}>
+    <ProfileContent />
+  </Suspense>
+);
 
 export default Page;
 

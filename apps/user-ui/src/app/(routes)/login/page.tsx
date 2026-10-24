@@ -3,7 +3,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import axios, { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
@@ -16,7 +16,7 @@ type FormData = {
   password: string;
 };
 
-const Page = () => {
+const LoginContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect");
@@ -178,5 +178,11 @@ const Page = () => {
     </div>
   );
 };
+
+const Page = () => (
+  <Suspense fallback={null}>
+    <LoginContent />
+  </Suspense>
+);
 
 export default Page;

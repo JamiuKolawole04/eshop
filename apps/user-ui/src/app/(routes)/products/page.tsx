@@ -1,10 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Range } from "react-range";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { X } from "lucide-react";
 
 import axiosInstance from "@/utils/axiosInstance";
 import {
@@ -25,7 +26,8 @@ async function fetchProductCategories() {
 }
 
 const MIN = 0;
-const MAX = 1199;
+const MAX = 10000;
+const STEP = 10;
 
 // Product grid: 1 col (phones) -> 2 (>=480px) -> 2 (lg, sidebar takes space) -> 3 (xl) -> 4 (2xl)
 const GRID_CLASSES =
@@ -33,19 +35,71 @@ const GRID_CLASSES =
 
 const SECTION_TITLE = "text-xl font-medium border-b border-b-slate-300 pb-1";
 
-const Page = () => {
+const CLEAR_SEARCH_CLASSES =
+  "inline-flex items-center gap-1.5 text-sm text-[#55585b] bg-white border border-gray-200 px-3 py-1.5 shadow-sm hover:border-blue-600 hover:text-blue-600 transition !rounded";
+
+const ClearSearchButton = ({
+  onClick,
+  className = "",
+}: {
+  onClick: () => void;
+  className?: string;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`${CLEAR_SEARCH_CLASSES} ${className}`}
+  >
+    <X className="w-4 h-4" aria-hidden="true" />
+    Clear search
+  </button>
+);
+
+const PageSkeleton = () => (
+  <div className="w-full bg-[#f5f5f5] pb-10 font-Poppins">
+    <div className="w-[92%] sm:w-[90%] lg:w-[85%] xl:w-[80%] m-auto">
+      <div className="pt-6 pb-6 md:pt-10 md:pb-[50px] space-y-3">
+        <div className="h-9 md:h-12 w-52 md:w-72 bg-gray-300 animate-pulse rounded" />
+        <div className="h-4 w-40 bg-gray-200 animate-pulse rounded" />
+      </div>
+
+      <div className="w-full flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-8">
+        <div className="hidden lg:block w-[270px] shrink-0 h-[460px] bg-white shadow-md !rounded animate-pulse" />
+
+        <div className="flex-1 min-w-0 lg:px-3">
+          <div className={GRID_CLASSES}>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div
+                key={index + 1}
+                className="h-[250px] bg-gray-300 animate-pulse rounded-xl"
+              ></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const ProductsContent = () => {
   const router = useRouter();
-  const [isProductLoading, setIsProductLoading] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1199]);
+  const searchParams = useSearchParams();
+
+  const q = (searchParams.get("q") ?? "").trim();
+
+  const [isProductLoading, setIsProductLoading] = useState(true);
+  const [priceRange, setPriceRange] = useState([MIN, MAX]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [page, setPage] = useState<number>(1);
   const [products, setProducts] = useState<ProductWithRelationsType[]>([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [tempPriceRange, setTempPriceRange] = useState([0, 1199]);
-  // UI only: opens/closes the filter panel on screens smaller than lg
+  const [tempPriceRange, setTempPriceRange] = useState([MIN, MAX]);
+  const [error, setError] = useState<string | null>(null);
+
   const [showFilters, setShowFilters] = useState(false);
+  const lastQRef = useRef(q);
 
   const updateURL = () => {
     const params = new URLSearchParams();
@@ -64,11 +118,17 @@ const Page = () => {
     }
 
     params.set("page", page.toString());
-    router.replace(`products?${decodeURIComponent(params.toString())}`);
+
+    const query = decodeURIComponent(params.toString());
+
+    router.replace(
+      q ? `products?${query}&q=${encodeURIComponent(q)}` : `products?${query}`,
+    );
   };
 
   const fetchFilteredProducts = async () => {
     setIsProductLoading(true);
+    setError(null);
 
     try {
       const query = new URLSearchParams();
@@ -86,6 +146,10 @@ const Page = () => {
         query.set("sizes", selectedSizes.join(","));
       }
 
+      if (q) {
+        query.set("q", q);
+      }
+
       query.set("page", page.toString());
       query.set("limit", "12");
 
@@ -97,15 +161,31 @@ const Page = () => {
       setTotalPages(response.data.pagination.totalPages);
     } catch (err) {
       console.log(new Error("Error fetching filtered products"), err);
+      setError("Couldn't load products right now. Please try again.");
     } finally {
       setIsProductLoading(false);
     }
   };
 
   useEffect(() => {
+    const termChanged = lastQRef.current !== q;
+    lastQRef.current = q;
+
+    if (termChanged && page !== 1) {
+      setPage(1);
+      return;
+    }
+
     updateURL();
     fetchFilteredProducts();
-  }, [priceRange, selectedCategories, selectedColors, selectedSizes, page]);
+  }, [priceRange, selectedCategories, selectedColors, selectedSizes, page, q]);
+
+  const clearSearch = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("q");
+    const search = decodeURIComponent(params.toString());
+    router.replace(search ? `products?${search}` : "products");
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ["categories"],
@@ -138,16 +218,35 @@ const Page = () => {
       <div className="w-[92%] sm:w-[90%] lg:w-[85%] xl:w-[80%] m-auto">
         {/* Page heading + breadcrumb */}
         <div className="pt-6 pb-6 md:pt-10 md:pb-[50px]">
-          <h1 className="font-medium text-3xl sm:text-4xl md:text-[40px] leading-tight mb-3">
-            All Product
-          </h1>
+          <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 mb-3">
+            <div>
+              <h1 className="font-medium text-3xl sm:text-4xl md:text-[40px] leading-tight">
+                {q ? "Search results" : "All Product"}
+              </h1>
+
+              {q && (
+                <p className="text-[#55585b] text-base sm:text-lg mt-1 break-words">
+                  “{q}”
+                </p>
+              )}
+            </div>
+
+            {q && (
+              <ClearSearchButton
+                onClick={clearSearch}
+                className="mt-1 shrink-0"
+              />
+            )}
+          </div>
 
           <Link href="/" className="text-[#55585b] hover:underline">
             Home
           </Link>
 
           <span className="inline-block p-[1.5px] mx-1 bg-[#a8acb0] rounded-full"></span>
-          <span className="text-[#55585b]">All products</span>
+          <span className="text-[#55585b]">
+            {q ? "Search" : "All products"}
+          </span>
         </div>
 
         {/* lg:items-start is required so the sticky sidebar doesn't stretch to full height */}
@@ -174,7 +273,7 @@ const Page = () => {
               <h3 className="text-xl font-medium">Price Filter</h3>
               <div className="mx-2">
                 <Range
-                  step={1}
+                  step={STEP}
                   min={MIN}
                   max={MAX}
                   values={tempPriceRange}
@@ -310,6 +409,8 @@ const Page = () => {
                   ></div>
                 ))}
               </div>
+            ) : error ? (
+              <p className="font-Roboto text-red-600">{error}</p>
             ) : (
               <div>
                 {products.length > 0 ? (
@@ -317,6 +418,11 @@ const Page = () => {
                     {products?.map((product) => (
                       <ProductCard key={product.id} product={product} />
                     ))}
+                  </div>
+                ) : q ? (
+                  <div>
+                    <p className="font-Roboto">No products found for “{q}”</p>
+                    <ClearSearchButton onClick={clearSearch} className="mt-3" />
                   </div>
                 ) : (
                   <p className="font-Roboto">No products found</p>
@@ -343,5 +449,11 @@ const Page = () => {
     </div>
   );
 };
+
+const Page = () => (
+  <Suspense fallback={<PageSkeleton />}>
+    <ProductsContent />
+  </Suspense>
+);
 
 export default Page;
