@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   Bell,
   BellRing,
+  CheckCircle2,
   ChevronDown,
   ChevronRight,
   Save,
@@ -19,6 +20,7 @@ import {
 import axiosInstance from "@/utils/axiosInstance";
 import {
   ButtonLoader,
+  CreatePayoutAccountResponseType,
   FetchSellerDetailsResponseType,
   NotificationChannel,
 } from "@packages/ui";
@@ -267,6 +269,9 @@ const SettingsPage = () => {
   // Form state
   const [threshold, setThreshold] = useState("10");
   const [channel, setChannel] = useState<NotificationChannel>("email");
+  const [bankName, setBankName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [payoutJustConnected, setPayoutJustConnected] = useState(false);
 
   const { data, isPending, isError, refetch } = useQuery({
     queryKey,
@@ -354,6 +359,21 @@ const SettingsPage = () => {
     onError: (err) => toast.error(getErrorMessage(err)),
   });
 
+  const payoutMutation = useMutation({
+    mutationFn: async (values: { bankName: string; accountNumber: string }) => {
+      const res = await axiosInstance.post<CreatePayoutAccountResponseType>(
+        `/api/sellers/shops/payout-account`,
+        values,
+      );
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message ?? "Payout account connected.");
+      setPayoutJustConnected(true);
+    },
+    onError: (err) => toast.error(getErrorMessage(err)),
+  });
+
   const handleSaveThreshold = () => {
     const value = Number(threshold);
     if (!Number.isInteger(value) || value < 0) {
@@ -363,6 +383,23 @@ const SettingsPage = () => {
     lowStockMutation.mutate(value);
   };
 
+  const handleConnectPayout = () => {
+    if (!bankName.trim()) {
+      toast.error("Enter your bank name.");
+      return;
+    }
+    if (!/^\d{6,20}$/.test(accountNumber.trim())) {
+      toast.error("Enter a valid account number (6-20 digits).");
+      return;
+    }
+    payoutMutation.mutate({
+      bankName: bankName.trim(),
+      accountNumber: accountNumber.trim(),
+    });
+  };
+
+  const payoutConnected =
+    payoutJustConnected || !!seller?.paystackSubaccountCode;
   const isScheduledForDeletion = !!shop?.isDeleted;
   const daysLeft = getDaysLeft(shop?.deletedAt);
 
@@ -512,8 +549,73 @@ const SettingsPage = () => {
       )}
 
       {activeTab === "Withdraw Method" && (
-        <div className={`${CARD} mt-6 max-w-2xl p-4 text-sm text-slate-400`}>
-          Withdraw method settings coming soon.
+        <div className={`${CARD} mt-6 max-w-2xl px-5`}>
+          {payoutConnected ? (
+            <div className="flex items-center gap-2 py-6 text-sm text-green-400">
+              <CheckCircle2 size={18} />
+              Your Paystack payout account is connected. Your share of sales
+              settles directly into your bank account.
+            </div>
+          ) : (
+            <>
+              <p className="pt-5 text-sm text-slate-300">
+                Connect your bank account to receive your share of sales. Your
+                details are sent to Paystack to create a payout subaccount.
+              </p>
+              <div className="space-y-4 py-5">
+                <div>
+                  <label
+                    htmlFor="bank-name"
+                    className="block text-xs font-medium text-slate-300"
+                  >
+                    Bank name
+                  </label>
+                  <input
+                    id="bank-name"
+                    type="text"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    placeholder="e.g. GCB Bank"
+                    className="mt-1.5 w-full rounded-md border border-slate-600 bg-slate-900/60 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="account-number"
+                    className="block text-xs font-medium text-slate-300"
+                  >
+                    Account number
+                  </label>
+                  <input
+                    id="account-number"
+                    type="text"
+                    inputMode="numeric"
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber(e.target.value)}
+                    placeholder="e.g. 1234567890"
+                    className="mt-1.5 w-full rounded-md border border-slate-600 bg-slate-900/60 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="pb-5">
+                <button
+                  type="button"
+                  onClick={handleConnectPayout}
+                  disabled={payoutMutation.isPending}
+                  className="flex items-center gap-2 rounded-md bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {payoutMutation.isPending ? (
+                    <ButtonLoader size={16} />
+                  ) : (
+                    <Save size={16} />
+                  )}
+                  {payoutMutation.isPending
+                    ? "Connecting..."
+                    : "Connect Payout Account"}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
 

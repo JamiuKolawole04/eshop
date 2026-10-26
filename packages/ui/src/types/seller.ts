@@ -6,6 +6,12 @@ export type FetchSellerDetailsResponseType = {
   followersCount: number;
 };
 
+export type CreatePayoutAccountResponseType = {
+  success: boolean;
+  message?: string;
+  paystackSubaccountCode?: string;
+};
+
 export type SellerRevenueData = {
   success: true;
   revenueData: {

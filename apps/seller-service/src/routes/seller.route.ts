@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 
 import {
+  createPayoutAccount,
   deleteShop,
   followShop,
   getDeviceUsage,
@@ -62,6 +63,13 @@ router.patch(
   isAuthenticated("seller"),
   isSeller,
   updateShopProfile,
+);
+
+router.post(
+  "/shops/payout-account",
+  isAuthenticated("seller"),
+  isSeller,
+  createPayoutAccount,
 );
 
 router.post("/follow-shop", isAuthenticated("user"), isUser, followShop);
