@@ -139,6 +139,7 @@ model Sellers {
   country      String
   password     String?
   stripeId     String?
+  paystackSubaccountCode String?
   shop         Shops?
 
   shopId String? @db.ObjectId

@@ -77,13 +77,19 @@ export const createPaymentSession = async (
 
     const uniqueShopsId = [...new Set(cart.map((item) => item.shopId))];
 
+    const shopShares = cart.reduce<Record<string, number>>((acc, item) => {
+      acc[item.shopId] =
+        (acc[item.shopId] ?? 0) + item.quantity * item.sale_price;
+      return acc;
+    }, {});
+
     const shops = await prisma.shops.findMany({
       where: { id: { in: uniqueShopsId } },
       select: {
         id: true,
         sellerId: true,
         seller: {
-          select: { stripeId: true },
+          select: { stripeId: true, paystackSubaccountCode: true },
         },
       },
     });
@@ -92,6 +98,8 @@ export const createPaymentSession = async (
       shopId: shop.id,
       sellerId: shop.sellerId,
       stripeAccountId: shop?.seller?.stripeId,
+      paystackSubaccountCode: shop?.seller?.paystackSubaccountCode ?? null,
+      amount: shopShares[shop.id] ?? 0,
     }));
 
     const totalAmount = cart.reduce((total, item) => {
