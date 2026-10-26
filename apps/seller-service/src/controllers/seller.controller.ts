@@ -125,13 +125,31 @@ export const getSellerProducts = async (
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
+    const shop = await prisma.shops.findFirst({
+      where: {
+        id: shopId,
+        OR: [{ isDeleted: false }, { isDeleted: null }],
+      },
+      select: { id: true },
+    });
+
+    if (!shop) {
+      throw new NotFoundError("Shop not found");
+    }
+
     const baseFilter = {
       shopId,
-      OR: [
-        { starting_date: null },
-        { starting_date: { isSet: false } },
-        { ending_date: null },
-        { ending_date: { isSet: false } },
+      AND: [
+        {
+          OR: [
+            { starting_date: null },
+            { starting_date: { isSet: false } },
+            { ending_date: null },
+            { ending_date: { isSet: false } },
+          ],
+        },
+        { OR: [{ isDeleted: false }, { isDeleted: null }] },
+        { status: "Active" as const },
       ],
     };
 
@@ -178,6 +196,18 @@ export const getSellerEvents = async (
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
 
+    const shop = await prisma.shops.findFirst({
+      where: {
+        id: shopId,
+        OR: [{ isDeleted: false }, { isDeleted: null }],
+      },
+      select: { id: true },
+    });
+
+    if (!shop) {
+      throw new NotFoundError("Shop not found");
+    }
+
     const baseFilter = {
       shopId,
       AND: [
@@ -185,6 +215,8 @@ export const getSellerEvents = async (
         { starting_date: { isSet: true } },
         { ending_date: { not: null } },
         { ending_date: { isSet: true } },
+        { OR: [{ isDeleted: false }, { isDeleted: null }] },
+        { status: "Active" as const },
       ],
     };
 
