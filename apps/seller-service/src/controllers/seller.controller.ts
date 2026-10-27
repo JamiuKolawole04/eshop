@@ -1,4 +1,3 @@
-import axios from "axios";
 import { NextFunction, Request, Response } from "express";
 
 import {
@@ -8,6 +7,7 @@ import {
 } from "@packages/error-handler";
 import { NotificationChannel, prisma } from "@packages/prisma";
 import { imageKit } from "@packages/imagekit";
+import { paystack } from "@packages/payment";
 import { DEVICE_LABELS } from "@packages/types";
 import {
   DEFAULT_SHOP_AVATAR_FILE_ID,
@@ -610,15 +610,7 @@ export const createPayoutAccount = async (
       throw new ValidationError("A valid account number is required");
     }
 
-    const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
-    if (!paystackSecret) {
-      throw new ValidationError(
-        "Payment processor is not configured. Please contact support.",
-      );
-    }
-
     const sellerId = req.seller?.id as string;
-
     const seller = await prisma.sellers.findFirst({
       where: { id: sellerId },
       select: { paystackSubaccountCode: true },
@@ -630,35 +622,11 @@ export const createPayoutAccount = async (
 
     const shop = await getSellerShop(sellerId);
 
-    let paystackResponse;
-    try {
-      paystackResponse = await axios.post(
-        "https://api.paystack.co/subaccount",
-        {
-          business_name: shop.name,
-          settlement_bank: bankName.trim(),
-          account_number: accountNumber.trim(),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${paystackSecret}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-    } catch (err) {
-      const paystackMessage = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string } | undefined)?.message
-        : undefined;
-      throw new ValidationError(
-        paystackMessage ?? "Payout setup failed. Please try again later.",
-      );
-    }
-
-    const subaccountCode = paystackResponse.data?.data?.subaccount_code;
-    if (!subaccountCode) {
-      throw new ValidationError("Payout setup failed. Please try again later.");
-    }
+    const { subaccountCode } = await paystack.connectSubAccount({
+      businessName: shop.name,
+      settlementBank: bankName.trim(),
+      accountNumber: accountNumber.trim(),
+    });
 
     await prisma.sellers.update({
       where: { id: sellerId },

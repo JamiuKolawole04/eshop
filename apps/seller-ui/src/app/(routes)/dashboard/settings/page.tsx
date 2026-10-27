@@ -553,14 +553,14 @@ const SettingsPage = () => {
           {payoutConnected ? (
             <div className="flex items-center gap-2 py-6 text-sm text-green-400">
               <CheckCircle2 size={18} />
-              Your Paystack payout account is connected. Your share of sales
-              settles directly into your bank account.
+              Your payout account is connected. Your share of sales settles
+              directly into your bank account.
             </div>
           ) : (
             <>
               <p className="pt-5 text-sm text-slate-300">
                 Connect your bank account to receive your share of sales. Your
-                details are sent to Paystack to create a payout subaccount.
+                details are securely used to set up your payout account.
               </p>
               <div className="space-y-4 py-5">
                 <div>

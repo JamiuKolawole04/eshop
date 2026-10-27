@@ -16,6 +16,9 @@
       "path": "../../packages/types/tsconfig.lib.json"
     },
     {
+      "path": "../../packages/payment/tsconfig.lib.json"
+    },
+    {
       "path": "../../packages/imagekit/tsconfig.lib.json"
     },
     {
