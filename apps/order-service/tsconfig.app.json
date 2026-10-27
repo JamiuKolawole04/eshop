@@ -16,6 +16,9 @@
       "path": "../../packages/logs/tsconfig.lib.json"
     },
     {
+      "path": "../../packages/payment/tsconfig.lib.json"
+    },
+    {
       "path": "../../packages/error-handler/tsconfig.lib.json"
     },
     {

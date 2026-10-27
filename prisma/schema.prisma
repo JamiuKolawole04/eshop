@@ -279,6 +279,9 @@ model Orders {
   shopId String @db.ObjectId
   shop   Shops  @relation(fields: [shopId], references: [id])
 
+
+  sessionId String?
+
   total             Float
   shippingAddressId String
   couponCode        String?

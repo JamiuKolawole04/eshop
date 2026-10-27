@@ -6,7 +6,7 @@ import bodyParser from "body-parser";
 
 import { ErrorMiddleware } from "@packages/error-handler";
 import orderRoutes from "./routes/order.route";
-import { createOrder } from "./controllers/order.controller";
+import { createOrder, paystackWebhook } from "./controllers/order.controller";
 import "./bullmq/email.worker";
 
 const host = process.env.HOST ?? "localhost";
@@ -24,6 +24,16 @@ app.post(
   },
 
   createOrder,
+);
+
+app.post(
+  "/api/paystack-webhook",
+  bodyParser.raw({ type: "application/json" }),
+  (req, res, next) => {
+    (req as any).rawBody = req.body;
+    next();
+  },
+  paystackWebhook,
 );
 
 app.use(express.json());

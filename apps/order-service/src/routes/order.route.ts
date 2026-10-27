@@ -3,6 +3,7 @@ import express, { Router } from "express";
 import {
   createPaymentIntent,
   createPaymentSession,
+  createPaystackPayment,
   getAdminRevenue,
   getAllOrdersForAdmin,
   getOrderDetails,
@@ -34,6 +35,12 @@ router.post(
   isAuthenticated("user"),
   isUser,
   createPaymentSession,
+);
+router.post(
+  "/paystack-payment",
+  isAuthenticated("user"),
+  isUser,
+  createPaystackPayment,
 );
 router.get(
   "/verify-payment-session",
