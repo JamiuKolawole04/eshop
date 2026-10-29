@@ -1,10 +1,5 @@
-import {
-  PaymentElement,
-  useElements,
-  useStripe,
-} from "@stripe/react-stripe-js";
-import { Fragment, SubmitEvent, useState } from "react";
-import { CheckCircle, XCircle } from "lucide-react";
+import { Fragment, useState } from "react";
+import { XCircle } from "lucide-react";
 import axios from "axios";
 
 import { ButtonLoader } from "@packages/ui";
@@ -20,8 +15,7 @@ type Coupon = {
   discountAmount: number;
 } | null;
 
-type Props = {
-  clientSecret?: string;
+type PaystackProps = {
   cartItems: CartItem[];
   coupon: Coupon;
   sessionId: string;
@@ -70,93 +64,11 @@ const OrderSummary = ({
   </div>
 );
 
-export const CheckoutForm = ({ cartItems, coupon, sessionId }: Props) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<"success" | "failed" | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    if (!stripe || !elements) {
-      setIsLoading(false);
-      return;
-    }
-
-    const result = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/payment-success?sessionId=${sessionId}`,
-      },
-    });
-
-    if (result.error) {
-      setStatus("failed");
-      setErrorMessage(result.error.message || "Something went wrong");
-    } else {
-      setStatus("success");
-    }
-
-    setIsLoading(false);
-  };
-
-  return (
-    <div className="flex justify-center items-center min-h-[80vh] px-4 my-10">
-      <form
-        className="bg-white w-full max-w-lg p-8 rounded-md shadow space-y-6"
-        onSubmit={handleSubmit}
-      >
-        <h2 className="text-3xl font-bold text-center mb-2">
-          Secure Payment Checkout
-        </h2>
-
-        <OrderSummary cartItems={cartItems} coupon={coupon} />
-
-        <PaymentElement />
-
-        <button
-          type="submit"
-          disabled={!stripe || isLoading}
-          className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {isLoading && <ButtonLoader className="w-5 h-5" />}
-          {isLoading ? "Processing..." : "Pay Now"}
-        </button>
-
-        {errorMessage && (
-          <div className="flex items-center gap-2 text-red-600 text-sm justify-center">
-            <XCircle className="w-5 h-5" />
-            {errorMessage}
-          </div>
-        )}
-
-        {status === "success" && (
-          <div className="flex items-center gap-2 text-green-600 text-sm justify-center">
-            <CheckCircle className="w-5 h-5" />
-            Payment successful!
-          </div>
-        )}
-
-        {status === "failed" && (
-          <div className="flex items-center gap-2 text-red-600 text-sm justify-center">
-            <XCircle className="w-5 h-5" />
-            Payment failed. Please try again.
-          </div>
-        )}
-      </form>
-    </div>
-  );
-};
-
 export const PaystackCheckout = ({
   cartItems,
   coupon,
   sessionId,
-}: Omit<Props, "clientSecret">) => {
+}: PaystackProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
