@@ -299,45 +299,95 @@ const ProfileContent = () => {
             ) : activeTab === "Change Password" ? (
               <ChangePassword />
             ) : activeTab === "Notifications" ? (
-              <div className="space-y-4 text-sm text-gray-700">
+              <div className="space-y-4">
+                {isNotificationsLoading && (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-20 animate-pulse rounded-xl bg-gray-100"
+                      />
+                    ))}
+                  </div>
+                )}
+
                 {!isNotificationsLoading &&
                   data?.notifications?.length === 0 && (
-                    <p className="">No Notifications available yet!</p>
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 py-16 text-center">
+                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                        <Bell size={22} />
+                      </div>
+                      <p className="font-medium text-gray-800">
+                        No notifications yet
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        We'll let you know when something happens.
+                      </p>
+                    </div>
                   )}
 
                 {!isNotificationsLoading &&
                   (data?.notifications?.length ?? 0) > 0 && (
-                    <div className="md:w-[80%] my-6 rounded-lg divide-y divide-gray-800 bg-black/40 backdrop-blur-lg shadow-sm">
-                      {data?.notifications?.map((d) => (
-                        <Link
-                          key={d.id}
-                          href={d.redirectLink}
-                          className={`block px-5 py-4 transition ${
-                            d.status !== "unread"
-                              ? "hover:bg-gray-800/40"
-                              : "bg-gray-800/50 hover:bg-gray-800/70"
-                          }`}
-                          onClick={() => markAsNotificationAsRead(d.id)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="flex flex-col">
-                              <span className="text-white font-medium">
-                                {d.title}
-                              </span>
-                              <span className="text-gray-300 text-sm">
-                                {d.message}
-                              </span>
-                              <span className="text-gray-500 text-xs mt-1">
-                                {new Date(d.createdAt).toLocaleString("en-UK", {
-                                  dateStyle: "medium",
-                                  timeStyle: "short",
-                                })}
-                              </span>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                    <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white">
+                      {data?.notifications?.map((d) => {
+                        const isUnread = d.status === "unread";
+
+                        return (
+                          <li key={d.id}>
+                            <Link
+                              href={d.redirectLink}
+                              onClick={() => markAsNotificationAsRead(d.id)}
+                              className={`flex items-start gap-4 px-5 py-4 transition-colors ${
+                                isUnread
+                                  ? "bg-blue-50/60 hover:bg-blue-50"
+                                  : "bg-white hover:bg-gray-50"
+                              }`}
+                            >
+                              <div
+                                className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                                  isUnread
+                                    ? "bg-blue-100 text-blue-600"
+                                    : "bg-gray-100 text-gray-500"
+                                }`}
+                              >
+                                <Bell size={18} />
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-start justify-between gap-3">
+                                  <p
+                                    className={`text-sm ${
+                                      isUnread
+                                        ? "font-semibold text-gray-900"
+                                        : "font-medium text-gray-700"
+                                    }`}
+                                  >
+                                    {d.title}
+                                  </p>
+                                  {isUnread && (
+                                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-600" />
+                                  )}
+                                </div>
+
+                                <p className="mt-0.5 text-sm text-gray-600 line-clamp-2">
+                                  {d.message}
+                                </p>
+
+                                <p className="mt-1.5 text-xs text-gray-400">
+                                  {new Date(d.createdAt).toLocaleString(
+                                    "en-GB",
+                                    {
+                                      dateStyle: "medium",
+                                      timeStyle: "short",
+                                    },
+                                  )}
+                                </p>
+                              </div>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   )}
               </div>
             ) : (
