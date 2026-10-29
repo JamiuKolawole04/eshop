@@ -69,11 +69,17 @@ export class PaystackClient {
   async connectSubAccount(
     input: PaystackSubaccountInput,
   ): Promise<PaystackSubaccountResult> {
-    const data = await this.post<{ subaccount_code: string }>("/subaccount", {
+    const payload = {
       business_name: input.businessName,
       settlement_bank: input.settlementBank,
       account_number: input.accountNumber,
-    });
+      percentage_charge: 10,
+    };
+
+    const data = await this.post<{ subaccount_code: string }>(
+      "/subaccount",
+      payload,
+    );
 
     if (!data.subaccount_code) {
       throw new ValidationError("Payout setup failed. Please try again later.");

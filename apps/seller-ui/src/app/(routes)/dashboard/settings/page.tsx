@@ -368,6 +368,7 @@ const SettingsPage = () => {
       return res.data;
     },
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["seller-profile"] });
       toast.success(data.message ?? "Payout account connected.");
       setPayoutJustConnected(true);
     },
