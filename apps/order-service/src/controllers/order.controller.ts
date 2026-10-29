@@ -430,6 +430,13 @@ const createOrdersForSession = async (
   let createdNewOrder = false;
 
   for (const shopId in shopGrouped) {
+    const existing = await prisma.orders.findFirst({
+      where: { sessionId, shopId },
+      select: { id: true },
+    });
+
+    if (existing) continue;
+
     const orderItems = shopGrouped[shopId];
 
     let orderTotal = orderItems.reduce(

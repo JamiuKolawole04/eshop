@@ -91,17 +91,19 @@ export class PaystackClient {
   async initialize(
     input: PaystackInitializeInput,
   ): Promise<PaystackInitializeResult> {
-    const data = await this.post<{
-      authorization_url: string;
-      access_code: string;
-      reference: string;
-    }>("/transaction/initialize", {
+    const payload = {
       email: input.email,
       amount: input.amountInSubunits,
       callback_url: input.callbackUrl,
       metadata: input.metadata,
       ...(input.split ? { split: input.split } : {}),
-    });
+    };
+
+    const data = await this.post<{
+      authorization_url: string;
+      access_code: string;
+      reference: string;
+    }>("/transaction/initialize", payload);
 
     if (!data.authorization_url) {
       throw new ValidationError(

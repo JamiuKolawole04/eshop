@@ -36,3 +36,28 @@ export type PaystackEnvelope<T> = {
   message: string;
   data: T;
 };
+
+export type PaystackConnectSubAccount = {
+  status: boolean;
+  message: "Subaccount created";
+  data: {
+    business_name: string;
+    account_number: string;
+    percentage_charge: number;
+    settlement_bank: string;
+    currency: "GMD" | "NGN" | "USD";
+    bank: number;
+    integration: number;
+    domain: "test" | "live";
+    product: string;
+    managed_by_integration: number;
+    subaccount_code: string;
+    is_verified: boolean;
+    settlement_schedule: string;
+    active: boolean;
+    migrate: boolean;
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
