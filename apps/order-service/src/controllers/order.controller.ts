@@ -333,69 +333,81 @@ export const paystackWebhook = async (
 
     const event = JSON.parse(rawBody.toString("utf8"));
 
-    if (event?.event !== "charge.success") {
-      return res.status(200).json({ received: true, ignored: event?.event });
-    }
+    if (event?.event === "charge.success") {
+      const data = event.data ?? {};
 
-    const data = event.data ?? {};
+      if (!data.metadata?.sessionId || !data.metadata?.userId) {
+        console.warn(
+          "Paystack charge.success without session metadata:",
+          data.reference,
+        );
+        return res.status(200).json({ received: true, ignored: "no-metadata" });
+      }
 
-    if (!data.metadata?.sessionId || !data.metadata?.userId) {
-      console.warn(
-        "Paystack charge.success without session metadata:",
-        data.reference,
+      const sessionId: string = data.metadata.sessionId;
+      const sessionData = await redis.get(`payment-session:${sessionId}`);
+
+      if (!sessionData) {
+        console.warn(
+          "Session expired or missing for paid charge:",
+          sessionId,
+          data.reference,
+        );
+        return res.status(200).json({ received: true });
+      }
+
+      const session = JSON.parse(sessionData);
+
+      if (session.userId !== data.metadata.userId) {
+        console.error(
+          "Paystack charge owner mismatch for session:",
+          sessionId,
+          data.reference,
+        );
+        return res.status(200).json({ received: true });
+      }
+
+      const expectedSubunits = Math.round(
+        (Number(session.totalAmount ?? 0) -
+          (Number(session.coupon?.discountAmount ?? 0) || 0)) *
+          100,
       );
-      return res.status(200).json({ received: true, ignored: "no-metadata" });
-    }
 
-    const sessionId: string = data.metadata.sessionId;
-    const sessionData = await redis.get(`payment-session:${sessionId}`);
+      if (expectedSubunits > 0 && Number(data.amount) !== expectedSubunits) {
+        console.error(
+          "Paystack charge amount mismatch — manual review:",
+          sessionId,
+          data.reference,
+          {
+            expectedSubunits,
+            charged: data.amount,
+            currency: data.currency,
+          },
+        );
+        return res
+          .status(200)
+          .json({ received: true, note: "amount-mismatch" });
+      }
 
-    if (!sessionData) {
-      console.warn(
-        "Session expired or missing for paid charge:",
+      const outcome = await createOrdersForSession(
         sessionId,
-        data.reference,
+        data.metadata.userId,
       );
-      return res.status(200).json({ received: true });
+
+      return res.status(200).json({ received: true, outcome });
     }
 
-    const session = JSON.parse(sessionData);
-
-    if (session.userId !== data.metadata.userId) {
-      console.error(
-        "Paystack charge owner mismatch for session:",
-        sessionId,
-        data.reference,
+    if (event?.event === "refund.created") {
+      console.log(
+        `Paystack webhook processing refund: ${event.data.reference}`,
       );
-      return res.status(200).json({ received: true });
+      return res
+        .status(200)
+        .json({ received: true, outcome: "refund-received" });
     }
 
-    const expectedSubunits = Math.round(
-      (Number(session.totalAmount ?? 0) -
-        (Number(session.coupon?.discountAmount ?? 0) || 0)) *
-        100,
-    );
-
-    if (expectedSubunits > 0 && Number(data.amount) !== expectedSubunits) {
-      console.error(
-        "Paystack charge amount mismatch — manual review:",
-        sessionId,
-        data.reference,
-        {
-          expectedSubunits,
-          charged: data.amount,
-          currency: data.currency,
-        },
-      );
-      return res.status(200).json({ received: true, note: "amount-mismatch" });
-    }
-
-    const outcome = await createOrdersForSession(
-      sessionId,
-      data.metadata.userId,
-    );
-
-    return res.status(200).json({ received: true, outcome });
+    console.log(`Paystack webhook ignored: ${event?.event}`);
+    return res.status(200).json({ received: true, ignored: event?.event });
   } catch (error) {
     console.error("Paystack webhook error:", error);
     return next(error);
