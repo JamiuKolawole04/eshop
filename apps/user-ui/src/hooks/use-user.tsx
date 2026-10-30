@@ -35,7 +35,7 @@ export const useUser = () => {
   });
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && user) {
       setIsLoggedIn(true);
     }
   }, [isSuccess, user]);

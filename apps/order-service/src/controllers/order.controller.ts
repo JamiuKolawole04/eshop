@@ -334,6 +334,9 @@ export const paystackWebhook = async (
     const event = JSON.parse(rawBody.toString("utf8"));
 
     if (event?.event === "charge.success") {
+      console.log(
+        `Paystack webhook processing charge: ${event.data.reference}`,
+      );
       const data = event.data ?? {};
 
       if (!data.metadata?.sessionId || !data.metadata?.userId) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 import {
   BadgeCheck,
   Bell,
@@ -80,8 +80,13 @@ const ProfileContent = () => {
   const { isLoading, user } = useUser();
   const { setIsLoggedIn } = useAuthStore();
 
-  const queryTab = searchParams.get("active") || "Profile";
-  const [activeTab, setActiveTab] = useState(queryTab);
+  const activeTab = searchParams.get("active") || "Profile";
+
+  const setActiveTab = (tab: string) => {
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set("active", tab);
+    router.replace(`/profile?${newParams.toString()}`);
+  };
 
   const { data: orders = [] } = useQuery({
     queryKey: ["user-orders"],
@@ -99,6 +104,7 @@ const ProfileContent = () => {
   ).length;
 
   const logOutHandler = async () => {
+    document.cookie = "has_session=; Max-Age=0; path=/";
     queryClient.removeQueries({ queryKey: ["user-profile"] });
     setIsLoggedIn(false);
 
@@ -108,14 +114,6 @@ const ProfileContent = () => {
       console.error("Logout request failed:", err);
     });
   };
-
-  useEffect(() => {
-    if (activeTab !== queryTab) {
-      const newParams = new URLSearchParams(searchParams);
-      newParams.set("active", activeTab);
-      router.replace(`profile?${newParams.toString()}`);
-    }
-  }, [activeTab]);
 
   const { data, isLoading: isNotificationsLoading } = useQuery({
     queryKey: ["notifications"],

@@ -4,16 +4,27 @@ import Link from "next/link";
 import { ArrowUp, MapPin, Mail, X } from "lucide-react";
 import { FaFacebook, FaLinkedin } from "react-icons/fa";
 
-const myAccountLinks = [
-  { label: "Track Orders", href: "/track-orders" },
-  { label: "Shipping", href: "/shipping" },
+import { useAuthStore } from "@/store/auth";
+
+type FooterLink = { label: string; href: string; protected?: boolean };
+
+const myAccountLinks: FooterLink[] = [
+  { label: "Track Orders", href: "/profile?active=My+Orders", protected: true },
+  {
+    label: "Shipping",
+    href: "/profile?active=Shipping+Address",
+    protected: true,
+  },
   { label: "Wishlist", href: "/wishlist" },
-  { label: "My Account", href: "/profile" },
-  { label: "Order History", href: "/orders" },
-  { label: "Returns", href: "/returns" },
+  { label: "My Account", href: "/profile", protected: true },
+  {
+    label: "Order History",
+    href: "/profile?active=My+Orders",
+    protected: true,
+  },
 ];
 
-const informationLinks = [
+const informationLinks: FooterLink[] = [
   { label: "Our Story", href: "/about" },
   { label: "Careers", href: "/careers" },
   { label: "Privacy Policy", href: "/privacy-policy" },
@@ -31,31 +42,41 @@ const socials = [
 const LinkColumn = ({
   title,
   links,
+  isLoggedIn,
 }: {
   title: string;
-  links: { label: string; href: string }[];
+  links: FooterLink[];
+  isLoggedIn: boolean;
 }) => (
   <div>
     <h3 className="mb-3 text-base font-semibold text-gray-900 sm:mb-4">
       {title}
     </h3>
     <ul className="space-y-2">
-      {links.map((link) => (
-        <li key={link.label}>
-          <Link
-            href={link.href}
-            className="inline-block py-0.5 text-sm text-gray-600 transition-colors hover:text-gray-900"
-          >
-            {link.label}
-          </Link>
-        </li>
-      ))}
+      {links.map((link) => {
+        const href =
+          link.protected && !isLoggedIn
+            ? `/login?redirect=${encodeURIComponent(link.href)}`
+            : link.href;
+
+        return (
+          <li key={link.label}>
+            <Link
+              href={href}
+              className="inline-block py-0.5 text-sm text-gray-600 transition-colors hover:text-gray-900"
+            >
+              {link.label}
+            </Link>
+          </li>
+        );
+      })}
     </ul>
   </div>
 );
-
 export const Footer = () => {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const { isLoggedIn } = useAuthStore();
 
   return (
     <footer className="relative border-t border-gray-200 bg-white font-Poppins">
@@ -81,8 +102,16 @@ export const Footer = () => {
           </div>
         </div>
 
-        <LinkColumn title="My Account" links={myAccountLinks} />
-        <LinkColumn title="Information" links={informationLinks} />
+        <LinkColumn
+          title="My Account"
+          links={myAccountLinks}
+          isLoggedIn={isLoggedIn}
+        />
+        <LinkColumn
+          title="Information"
+          links={informationLinks}
+          isLoggedIn={isLoggedIn}
+        />
 
         {/* Contact */}
         <div className="col-span-2 lg:col-span-1">
