@@ -14,7 +14,12 @@ import Link from "next/link";
 
 import { BreadCrumbs } from "@/shared/component/breadcrumbs";
 import axiosInstance from "@/utils/axiosInstance";
-import { ButtonLoader, Order, SellerOrdersResponseType } from "@packages/ui";
+import {
+  ButtonLoader,
+  formatCurrency,
+  Order,
+  SellerOrdersResponseType,
+} from "@packages/ui";
 
 const fetchOrders = async () => {
   const response =
@@ -58,7 +63,7 @@ const SellerPayments = () => {
           const sellerShare = row.original.total * 0.9;
           return (
             <span className="text-green-400 font-medium">
-              ${sellerShare.toFixed(2)}
+              {formatCurrency(sellerShare)}
             </span>
           );
         },
@@ -68,7 +73,7 @@ const SellerPayments = () => {
         cell: ({ row }) => {
           const adminFee = row.original.total * 0.1;
           return (
-            <span className="text-yellow-400">${adminFee.toFixed(2)}</span>
+            <span className="text-yellow-400">{formatCurrency(adminFee)}</span>
           );
         },
       },

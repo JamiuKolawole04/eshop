@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import {
   CreateConversationResponseType,
+  formatCurrency,
   ProductWithRelationsType,
   Ratings,
 } from "@packages/ui";
@@ -196,12 +197,12 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
 
             <div className="mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
               <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                ${data?.sale_price}
+                {formatCurrency(data?.sale_price)}
               </h3>
 
               {data?.regular_price && (
                 <h3 className="text-base sm:text-lg text-red-600 line-through">
-                  ${data.regular_price}
+                  {formatCurrency(data.regular_price)}
                 </h3>
               )}
             </div>

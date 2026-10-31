@@ -12,8 +12,10 @@ import axiosInstance from "@/utils/axiosInstance";
 import {
   Input,
   AllDiscountCodeResponseType,
+  CURRENCY_SYMBOL,
   DiscountCode,
   ButtonLoader,
+  formatCurrency,
 } from "@packages/ui";
 import { DeleteDiscountCodeModal } from "@/shared/component/modals/delete-discount-modal";
 
@@ -138,12 +140,14 @@ const Page = () => {
                   <td className="p-3">
                     {discount?.discountType === "percentage"
                       ? "Percentage (%)"
-                      : "Fiat {$}"}
+                      : "Fiat"}
                   </td>
                   <td className="p-3">
                     {discount?.discountType === "percentage"
                       ? `${discount?.discountValue}%`
-                      : `$${discount?.discountValue}`}
+                      : formatCurrency(discount?.discountValue, {
+                          decimals: false,
+                        })}
                   </td>
                   <td className="p-3">{discount?.discountCode}</td>
                   <td className="p-3">
@@ -205,7 +209,9 @@ const Page = () => {
                       className="w-full border outline-none border-gray-700 bg-transparent text-white"
                     >
                       <option value="percentage">Percentage (%)</option>
-                      <option value="flat">Fiat Amount ($)</option>
+                      <option value="flat">
+                        Fiat Amount ({CURRENCY_SYMBOL})
+                      </option>
                     </select>
                   )}
                 />

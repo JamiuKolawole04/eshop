@@ -2,7 +2,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Eye, Heart, ShoppingBag } from "lucide-react";
 
-import { ProductWithRelationsType, Ratings } from "@packages/ui";
+import {
+  formatCurrency,
+  ProductWithRelationsType,
+  Ratings,
+} from "@packages/ui";
 import { ProductDetailsCard } from "./productDetailsCard";
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
@@ -97,10 +101,10 @@ export const ProductCard = ({ product, isEvent }: Props) => {
       <div className="mt-3 flex flex-wrap justify-between items-center gap-x-2 gap-y-1 px-2">
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <span className="text-base sm:text-lg font-bold text-gray-900">
-            ${product?.sale_price}
+            {formatCurrency(product?.sale_price)}
           </span>
           <span className="text-xs sm:text-sm line-through text-gray-400">
-            ${product?.regular_price}
+            {formatCurrency(product?.regular_price)}
           </span>
         </div>
 

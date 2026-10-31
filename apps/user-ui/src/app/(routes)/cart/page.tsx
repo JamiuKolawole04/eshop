@@ -15,6 +15,7 @@ import { useDeviceTracking } from "@/hooks/use-device-tracking";
 import {
   ButtonLoader,
   CreatePaymentSessionResponseType,
+  formatCurrency,
   GetUserAddressResponseType,
   VerifyCouponCodeResponseType,
 } from "@packages/ui";
@@ -255,22 +256,21 @@ const Page = () => {
                       {item?.id === discountedProductId ? (
                         <div className="flex flex-col items-end md:items-center">
                           <span className="line-through text-gray-500 text-sm">
-                            ${item.sale_price.toFixed(2)}
+                            {formatCurrency(item.sale_price)}
                           </span>
 
                           <span className="text-green-600 font-semibold">
-                            $
-                            {(
+                            {formatCurrency(
                               (item.sale_price * (100 - discountPercentage)) /
-                              100
-                            ).toFixed(2)}
+                                100,
+                            )}
                           </span>
                           <span className="text-xs text-green-700 bg-white">
                             Discount Applied
                           </span>
                         </div>
                       ) : (
-                        <span className="">${item.sale_price.toFixed(2)}</span>
+                        <span className="">{formatCurrency(item.sale_price)}</span>
                       )}
                     </td>
 
@@ -329,7 +329,7 @@ const Page = () => {
                 <div className="flex justify-between items-center text-[#010f1c] text-base font-medium pb-2">
                   <span className="">Discount ({discountPercentage}%)</span>
                   <span className="text-green-600">
-                    - ${discountAmount.toFixed(2)}
+                    - {formatCurrency(discountAmount)}
                   </span>
                 </div>
               )}
@@ -337,7 +337,7 @@ const Page = () => {
               <div className="flex justify-between items-center text-[#010f1c] text-lg md:text-xl font-[550] pb-3">
                 <span className="">Subtotal</span>
                 <span className="">
-                  ${(subTotal - discountAmount).toFixed(2)}
+                  {formatCurrency(subTotal - discountAmount)}
                 </span>
               </div>
 
@@ -433,7 +433,7 @@ const Page = () => {
                 <div className="flex items-center justify-between text-[#010f1c] text-lg md:text-xl font-[550] pb-3">
                   <span className="">Total</span>
                   <span className="">
-                    ${(subTotal - discountAmount).toFixed(2)}
+                    {formatCurrency(subTotal - discountAmount)}
                   </span>
                 </div>
 

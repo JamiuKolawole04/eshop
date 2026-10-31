@@ -1,6 +1,7 @@
 "use client";
 
 import useLayout from "@/hooks/use-layout";
+import { formatCurrency } from "@packages/ui";
 import { MoveRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ export const Hero = () => {
       <div className="md:w-[80%] w-[90%] m-auto flex flex-col md:flex-row gap-8 md:gap-0 h-full items-center">
         <div className="w-full md:w-1/2 text-center md:text-left">
           <p className="font-Roboto font-normal text-white pb-2 text-base sm:text-xl">
-            Starting from $40
+            Starting from {formatCurrency(40, { decimals: false })}
           </p>
 
           <h1 className="text-white text-4xl sm:text-5xl lg:text-6xl font-extrabold font-Roboto">

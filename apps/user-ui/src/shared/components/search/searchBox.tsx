@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 
-import { SearchProductType } from "@packages/ui";
+import { formatCurrency, SearchProductType } from "@packages/ui";
 import useProductSearch from "@/hooks/use-product-search";
 
 const MIN_TERM_LENGTH = 2;
@@ -367,10 +367,10 @@ export const SearchBox = () => {
                         </p>
                         <p className="shrink-0 whitespace-nowrap font-Poppins text-sm leading-none">
                           <span className="font-bold text-slate-900">
-                            ${product.sale_price}
+                            {formatCurrency(product.sale_price)}
                           </span>
                           <span className="ml-1.5 text-xs text-slate-400 line-through">
-                            ${product.regular_price}
+                            {formatCurrency(product.regular_price)}
                           </span>
                         </p>
                       </div>

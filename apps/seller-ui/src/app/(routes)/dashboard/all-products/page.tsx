@@ -25,7 +25,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
 import { DeleteConfirmationModal } from "@/shared/component/modals/delete-confirmation-modal";
-import { ButtonLoader, ProductType } from "@packages/ui";
+import { ButtonLoader, formatCurrency, ProductType } from "@packages/ui";
 
 const fetchProducts = async () => {
   const response = await axiosInstance.get(`/api/products/shop-products`);
@@ -109,7 +109,9 @@ const Page = () => {
       {
         accessorKey: "price",
         header: "Price",
-        cell: ({ row }: any) => <span>${row.original.sale_price}</span>,
+        cell: ({ row }: any) => (
+          <span>{formatCurrency(row.original.sale_price)}</span>
+        ),
       },
       {
         accessorKey: "stock",

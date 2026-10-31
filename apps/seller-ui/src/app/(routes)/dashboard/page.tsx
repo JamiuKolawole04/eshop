@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   ButtonLoader,
   DeviceStat,
+  formatCurrency,
   GeographicalMap,
   Order,
   SalesChart,
@@ -78,7 +79,7 @@ const OrdersTable = () => {
       {
         accessorKey: "total",
         header: "Amount",
-        cell: ({ row }) => <span>${row.original.total}</span>,
+        cell: ({ row }) => <span>{formatCurrency(row.original.total)}</span>,
       },
       {
         accessorKey: "status",

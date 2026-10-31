@@ -12,7 +12,12 @@ import {
 import { Search, Eye } from "lucide-react";
 import Link from "next/link";
 
-import { ButtonLoader, Order, SellerOrdersResponseType } from "@packages/ui";
+import {
+  ButtonLoader,
+  formatCurrency,
+  Order,
+  SellerOrdersResponseType,
+} from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 import { BreadCrumbs } from "@/shared/component/breadcrumbs";
 
@@ -55,7 +60,7 @@ const OrdersTable = () => {
       {
         accessorKey: "total",
         header: "Total",
-        cell: ({ row }) => <span>${row.original.total}</span>,
+        cell: ({ row }) => <span>{formatCurrency(row.original.total)}</span>,
       },
       {
         accessorKey: "status",

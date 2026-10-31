@@ -8,6 +8,7 @@ import {
   OrderDetailsResponseType,
   ButtonLoader,
   DeliveryStatus,
+  formatCurrency,
 } from "@packages/ui";
 
 import axiosInstance from "@/utils/axiosInstance";
@@ -159,7 +160,7 @@ const Page = () => {
             <div className="flex justify-between">
               <dt className="text-gray-500">Total paid</dt>
               <dd className="text-gray-900 font-semibold">
-                ${order.total.toFixed(2)}
+                {formatCurrency(order.total)}
               </dd>
             </div>
 
@@ -167,11 +168,13 @@ const Page = () => {
               <div className="flex justify-between">
                 <dt className="text-gray-500">Discount applied</dt>
                 <dd className="text-green-600">
-                  -${order.discountAmount.toFixed(2)}{" "}
+                  -{formatCurrency(order.discountAmount)}{" "}
                   {order.couponCode &&
                     (order.couponCode.discountType === "percentage"
                       ? `(${order.couponCode.discountValue}% off)`
-                      : `($${order.couponCode.discountValue} off)`)}
+                      : `(${formatCurrency(order.couponCode.discountValue, {
+                          decimals: false,
+                        })} off)`)}
                 </dd>
               </div>
             )}
@@ -258,7 +261,7 @@ const Page = () => {
               </div>
 
               <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                ${item.price.toFixed(2)}
+                {formatCurrency(item.price)}
               </p>
             </div>
           ))}
@@ -267,7 +270,7 @@ const Page = () => {
         <div className="flex justify-between pt-4 mt-4 border-t border-gray-200">
           <span className="text-sm font-medium text-gray-500">Total</span>
           <span className="text-base font-bold text-gray-900">
-            ${order.total.toFixed(2)}
+            {formatCurrency(order.total)}
           </span>
         </div>
       </div>

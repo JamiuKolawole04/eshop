@@ -28,6 +28,7 @@ import { useSeller } from "@/hooks/use-seller";
 import { DeleteConfirmationModal } from "@/shared/component/modals/delete-confirmation-modal";
 import {
   ButtonLoader,
+  formatCurrency,
   GetSellerEventsByUserResponseType,
   ProductType,
 } from "@packages/ui";
@@ -118,7 +119,9 @@ const Page = () => {
       {
         accessorKey: "price",
         header: "Price",
-        cell: ({ row }: any) => <span>${row.original.sale_price}</span>,
+        cell: ({ row }: any) => (
+          <span>{formatCurrency(row.original.sale_price)}</span>
+        ),
       },
       {
         accessorKey: "stock",

@@ -9,6 +9,7 @@ import { X } from "lucide-react";
 
 import axiosInstance from "@/utils/axiosInstance";
 import {
+  formatCurrency,
   GetFilteredProductsResponseType,
   ProductCategoriesTypes,
   ProductWithRelationsType,
@@ -314,7 +315,8 @@ const ProductsContent = () => {
               </div>
               <div className="flex flex-wrap justify-between items-center gap-2 mt-2">
                 <div className="text-sm text-gray-600">
-                  ${tempPriceRange[0]} - ${tempPriceRange[1]}
+                  {formatCurrency(tempPriceRange[0], { decimals: false })} -{" "}
+                  {formatCurrency(tempPriceRange[1], { decimals: false })}
                 </div>
 
                 <button

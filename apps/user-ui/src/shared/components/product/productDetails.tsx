@@ -18,6 +18,7 @@ import DOMPurify from "isomorphic-dompurify";
 
 import {
   CreateConversationResponseType,
+  formatCurrency,
   GetFilteredProductsResponseType,
   ProductWithRelationsType,
 } from "@packages/ui";
@@ -253,12 +254,12 @@ export const ProductDetails = ({ product }: Props) => {
 
           <div className="mt-3">
             <span className="text-3xl font-bold text-orange-500">
-              ${product?.sale_price}
+              {formatCurrency(product?.sale_price)}
             </span>
 
             <div className="flex gap-2 pb-2 text-lg border-b border-b-slate-200">
               <span className="text-gray-400 line-through">
-                ${product?.regular_price}
+                {formatCurrency(product?.regular_price)}
               </span>
 
               <span className="text-gray-500">-{discountPercentage}%</span>

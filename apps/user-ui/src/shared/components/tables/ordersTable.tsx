@@ -13,7 +13,11 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { OrderWithItems, UserOrdersResponseType } from "@packages/ui";
+import {
+  formatCurrency,
+  OrderWithItems,
+  UserOrdersResponseType,
+} from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 
 const fetchUserOrders = async () => {
@@ -42,8 +46,8 @@ export const OrdersTable = () => {
     },
     {
       accessorKey: "total",
-      header: "Total ($)",
-      cell: (info: any) => `$${info.getValue()?.toFixed(2)}`,
+      header: "Total",
+      cell: (info: any) => formatCurrency(info.getValue()),
     },
     {
       accessorKey: "createdAt",

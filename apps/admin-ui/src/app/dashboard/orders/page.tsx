@@ -15,6 +15,7 @@ import Link from "next/link";
 import {
   AdminOrdersResponseType,
   ButtonLoader,
+  formatCurrency,
   OrderWithShop,
 } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
@@ -70,7 +71,7 @@ const OrdersTable = () => {
         accessorKey: "total",
         header: "Total",
         cell: ({ row }) => (
-          <span className="text-white">${row.original.total.toFixed(2)}</span>
+          <span className="text-white">{formatCurrency(row.original.total)}</span>
         ),
       },
       {

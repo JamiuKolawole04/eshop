@@ -14,7 +14,7 @@ import Link from "next/link";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import axiosInstance from "@/utils/axiosInstance";
-import { ButtonLoader } from "@packages/ui";
+import { ButtonLoader, formatCurrency } from "@packages/ui";
 import { Pagination } from "@/shared/components/pagination";
 import { ProductForAdmin, ProductsForAdminResponseType } from "@/types/product";
 
@@ -82,7 +82,7 @@ const Products = () => {
       {
         accessorKey: "price",
         header: "Price",
-        cell: ({ row }) => <span>${row.original.sale_price}</span>,
+        cell: ({ row }) => <span>{formatCurrency(row.original.sale_price)}</span>,
       },
       {
         accessorKey: "stock",

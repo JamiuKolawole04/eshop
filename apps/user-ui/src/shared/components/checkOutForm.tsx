@@ -2,7 +2,7 @@ import { Fragment, useState } from "react";
 import { XCircle } from "lucide-react";
 import axios from "axios";
 
-import { ButtonLoader } from "@packages/ui";
+import { ButtonLoader, formatCurrency } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 
 type CartItem = {
@@ -34,7 +34,7 @@ const OrderSummary = ({
         <span>
           {item.quantity} x {item.title}
         </span>
-        <span>${(item.quantity * item.sale_price).toFixed(2)}</span>
+        <span>{formatCurrency(item.quantity * item.sale_price)}</span>
       </div>
     ))}
 
@@ -43,7 +43,7 @@ const OrderSummary = ({
         <Fragment>
           <span>Discount</span>
           <span className="text-green-600">
-            ${coupon?.discountAmount?.toFixed(2)}
+            {formatCurrency(coupon?.discountAmount)}
           </span>
         </Fragment>
       )}
@@ -52,13 +52,12 @@ const OrderSummary = ({
     <div className="flex justify-between font-semibold mt-2">
       <span>Total</span>
       <span>
-        $
-        {(
+        {formatCurrency(
           cartItems.reduce(
             (sum, item) => sum + item.sale_price * item.quantity,
             0,
-          ) - (coupon?.discountAmount ?? 0)
-        ).toFixed(2)}
+          ) - (coupon?.discountAmount ?? 0),
+        )}
       </span>
     </div>
   </div>
@@ -94,7 +93,7 @@ export const PaystackCheckout = ({
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[80vh] px-4 my-10">
+    <div className="flex justify-center items-center min-h-[80vh] px-4 my-10 font-Poppins">
       <div className="bg-white w-full max-w-lg p-8 rounded-md shadow space-y-6">
         <h2 className="text-3xl font-bold text-center mb-2">
           Secure Payment Checkout

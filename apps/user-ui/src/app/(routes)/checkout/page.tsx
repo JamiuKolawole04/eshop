@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { XCircle } from "lucide-react";
 
 import axiosInstance from "@/utils/axiosInstance";
@@ -40,8 +40,12 @@ const Page = () => {
           `/api/orders/verify-payment-session?sessionId=${sessionId}`,
         );
 
-        const { totalAmount, sellers, cart, coupon: sessionCoupon } =
-          verifyRes.data.session;
+        const {
+          totalAmount,
+          sellers,
+          cart,
+          coupon: sessionCoupon,
+        } = verifyRes.data.session;
 
         if (
           !sellers ||
@@ -71,7 +75,7 @@ const Page = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh] px-4">
+      <div className="flex justify-center items-center min-h-[60vh] px-4 font-Poppins">
         <div className="w-full text-center">
           <div className="flex justify-center mb-4">
             <XCircle className="text-red-500 w-10 h-10" />
@@ -104,9 +108,9 @@ const Page = () => {
 };
 
 const CheckoutPage = () => (
-  <>
+  <Suspense fallback={<CheckoutLoading />}>
     <Page />
-  </>
+  </Suspense>
 );
 
 export default CheckoutPage;

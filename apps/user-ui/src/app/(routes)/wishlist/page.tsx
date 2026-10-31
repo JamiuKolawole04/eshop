@@ -7,6 +7,7 @@ import { useUser } from "@/hooks/use-user";
 import { useLocationTracking } from "@/hooks/use-location-tracking";
 import { useDeviceTracking } from "@/hooks/use-device-tracking";
 import Image from "next/image";
+import { formatCurrency } from "@packages/ui";
 
 const Page = () => {
   const { user } = useUser();
@@ -98,7 +99,7 @@ const Page = () => {
                       <span className="md:hidden text-sm text-gray-500">
                         Price
                       </span>
-                      <span>${item?.sale_price.toFixed(2)}</span>
+                      <span>{formatCurrency(item?.sale_price)}</span>
                     </td>
 
                     {/* Quantity */}

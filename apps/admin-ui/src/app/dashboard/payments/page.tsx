@@ -16,6 +16,7 @@ import axiosInstance from "@/utils/axiosInstance";
 import {
   AdminOrdersResponseType,
   ButtonLoader,
+  formatCurrency,
   OrderWithShop,
 } from "@packages/ui";
 import { BreadCrumbs } from "@/shared/components/breadcrumbs";
@@ -71,7 +72,7 @@ const Payments = () => {
         cell: ({ row }) => {
           const adminFee = row.original.total * 0.1;
           return (
-            <span className="text-yellow-400">${adminFee.toFixed(2)}</span>
+            <span className="text-yellow-400">{formatCurrency(adminFee)}</span>
           );
         },
       },
@@ -81,7 +82,7 @@ const Payments = () => {
           const sellerShare = row.original.total * 0.9;
           return (
             <span className="text-green-400 font-medium">
-              ${sellerShare.toFixed(2)}
+              {formatCurrency(sellerShare)}
             </span>
           );
         },
