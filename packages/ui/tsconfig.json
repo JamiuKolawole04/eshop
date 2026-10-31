@@ -8,6 +8,6 @@
   ],
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "none"
   }
 }

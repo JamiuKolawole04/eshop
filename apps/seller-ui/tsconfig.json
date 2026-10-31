@@ -22,7 +22,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "none"
   },
   "include": [
     "src/**/*.ts",
@@ -50,3 +50,4 @@
     }
   ]
 }
+
