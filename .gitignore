@@ -52,6 +52,7 @@ packages/prisma/src/lib/generated/
 # Next.js
 .next
 out
+next-env.d.ts
 
 # Agents
 opencode.json
