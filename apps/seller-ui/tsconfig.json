@@ -13,15 +13,16 @@
     "incremental": true,
     "plugins": [
       {
-        "name": "next",
-      },
+        "name": "next"
+      }
     ],
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*"]
     },
     "outDir": "dist",
     "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src/**/*.ts",
@@ -31,7 +32,7 @@
     "../../apps/seller-ui/.next/types/**/*.ts",
     "../../dist/apps/seller-ui/.next/types/**/*.ts",
     "next-env.d.ts",
-    "next-env.d.ts",
+    "next-env.d.ts"
   ],
   "exclude": [
     "out-tsc",
@@ -41,11 +42,11 @@
     "jest.config.cts",
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
-    ".next",
+    ".next"
   ],
   "references": [
     {
       "path": "../../packages/ui"
     }
-  ],
+  ]
 }
