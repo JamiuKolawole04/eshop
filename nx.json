@@ -115,5 +115,6 @@
   },
   "affected": {
     "legacy": true
-  }
+  },
+  "analytics": false
 }
