@@ -8,11 +8,12 @@
     "emitDeclarationOnly": true,
     "forceConsistentCasingInFileNames": true,
     "types": ["node"],
+    "ignoreDeprecations": "none"
   },
   "include": ["src/**/*.ts"],
   "references": [
     {
       "path": "../prisma/tsconfig.lib.json"
     }
-  ],
+  ]
 }

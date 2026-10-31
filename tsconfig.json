@@ -87,5 +87,8 @@
     {
       "path": "./packages/payment"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "ignoreDeprecations": "none"
+  }
 }

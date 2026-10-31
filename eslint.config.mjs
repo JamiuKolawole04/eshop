@@ -6,7 +6,10 @@ export default [
     ...nx.configs["flat/javascript"],
     {
         ignores: [
-            "**/dist"
+            "**/dist",
+            "**/.next",
+            "**/coverage",
+            "**/.nx"
         ]
     },
     {

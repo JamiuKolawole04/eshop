@@ -1,12 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 import { shopCategories } from "@packages/ui";
+import { useState } from "react";
 
 type Props = {
   sellerId: string;
-  setActiveStep: (step: number) => void;
+  setActiveStep?: (step: number) => void;
 };
 
 type FormValues = {
@@ -18,7 +20,10 @@ type FormValues = {
   category: string;
 };
 
-export const CreateShop = ({ sellerId, setActiveStep }: Props) => {
+export const CreateShop = ({ sellerId }: Props) => {
+  const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -30,13 +35,23 @@ export const CreateShop = ({ sellerId, setActiveStep }: Props) => {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_SERVER_URI}/api/shop`,
         data,
+        { withCredentials: true },
       );
 
       return response.data;
     },
 
     onSuccess: () => {
-      setActiveStep(3);
+      setServerError(null);
+      router.push("/");
+    },
+
+    onError: (error: AxiosError) => {
+      const errorMessage =
+        (error.response?.data as { message?: string })?.message ||
+        "Shop creation error. Please try again later";
+
+      setServerError(errorMessage);
     },
   });
 
@@ -167,6 +182,10 @@ export const CreateShop = ({ sellerId, setActiveStep }: Props) => {
         >
           {shopCreateMutation.isPending ? "Creating ..." : "Create"}
         </button>
+
+        {serverError && (
+          <p className="text-red-500 text-sm mt-2">{serverError}</p>
+        )}
       </form>
     </div>
   );
