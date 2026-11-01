@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -253,10 +254,12 @@ const DeleteShopModal = ({
   );
 };
 
-const SettingsPage = () => {
+const SettingsContent = () => {
   const queryClient = useQueryClient();
 
   const { seller } = useSeller();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
 
   const sellerId: string | undefined = undefined;
 
@@ -290,6 +293,12 @@ const SettingsPage = () => {
       setChannel(shop.orderNotificationChannel);
     }
   }, [shop?.lowStockThreshold, shop?.orderNotificationChannel]);
+
+  useEffect(() => {
+    if (tabParam === "withdraw") {
+      setActiveTab("Withdraw Method");
+    }
+  }, [tabParam]);
 
   const toggleSection = (key: SectionKey) =>
     setOpenSection((current) => (current === key ? null : key));
@@ -634,4 +643,10 @@ const SettingsPage = () => {
   );
 };
 
-export default SettingsPage;
+const Page = () => (
+  <Suspense fallback={null}>
+    <SettingsContent />
+  </Suspense>
+);
+
+export default Page;

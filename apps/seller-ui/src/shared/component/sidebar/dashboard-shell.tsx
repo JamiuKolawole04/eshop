@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { useSeller } from "@/hooks/use-seller";
+import { PayoutBanner } from "@/shared/component/payout-banner";
 import { ShopAvatar } from "./shop-avatar";
 import { SidebarWrapper } from "./sidebar";
 
@@ -126,6 +127,7 @@ export const DashboardShell = ({ children }: Props) => {
         </aside>
 
         <main className="min-w-0 flex-1">
+          <PayoutBanner />
           <div className="w-full overflow-auto">{children}</div>
         </main>
       </div>

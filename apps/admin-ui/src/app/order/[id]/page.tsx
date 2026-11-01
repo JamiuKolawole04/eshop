@@ -79,11 +79,6 @@ const Page = () => {
             Placed on {new Date(order.createdAt).toLocaleDateString()}
           </p>
         </div>
-
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 border border-green-500/30 px-3 py-1 text-xs font-medium text-green-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-          {order.status}
-        </span>
       </div>
 
       {/* Status Selector */}
@@ -97,7 +92,7 @@ const Page = () => {
       <DeliveryProgress status={order.deliveryStatus} />
 
       {/* Summary + Shipping */}
-      <div className="grid sm:grid-cols-2 gap-4 mb-6">
+      <div className="grid sm:grid-cols-2 gap-4 mb-6 mt-6">
         <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4 sm:p-5">
           <h2 className="text-sm font-semibold text-gray-200 mb-3">
             Payment summary
