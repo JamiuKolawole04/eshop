@@ -22,7 +22,7 @@ type FormData = {
 };
 
 const Signup = () => {
-  const [activeStep, setActiveStep] = useState(2);
+  const [activeStep, setActiveStep] = useState(1);
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
   const [canResend, setCanResend] = useState<boolean>(true);
   const [timer, setTimer] = useState(60);

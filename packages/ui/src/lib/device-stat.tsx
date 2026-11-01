@@ -19,6 +19,36 @@ type Prop = {
 const COLORS = ["#4ade80", "#facc15", "#60a5fa"];
 
 export const DeviceStat = ({ deviceData }: Prop) => {
+  const total = deviceData.reduce((sum, item) => sum + item.value, 0);
+
+  if (total === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-6">
+        <div className="flex h-40 w-40 items-center justify-center rounded-full border-[18px] border-slate-700">
+          <div className="text-center">
+            <p className="text-2xl font-semibold text-white">0</p>
+            <p className="text-xs text-slate-400">visits</p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          {deviceData.map((entry, index) => (
+            <div key={entry.name} className="flex items-center gap-2">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{
+                  backgroundColor: COLORS[index % COLORS.length],
+                }}
+              />
+              <span className="text-sm text-slate-300">{entry.name}</span>
+              <span className="text-sm text-slate-500">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={260} minWidth={0}>
       <PieChart>

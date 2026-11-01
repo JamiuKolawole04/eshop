@@ -43,7 +43,9 @@ export const CreateShop = ({ sellerId }: Props) => {
 
     onSuccess: () => {
       setServerError(null);
-      router.push("/");
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
     },
 
     onError: (error: AxiosError) => {

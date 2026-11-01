@@ -41,6 +41,34 @@ const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY), {
   apiVersion: "2026-06-24.dahlia",
 });
 
+export const createSellerAuthCookies = async (
+  res: Response,
+  seller: Sellers,
+) => {
+  const accessToken = jwt.sign(
+    {
+      id: seller.id,
+      role: "seller",
+    },
+    String(process.env.ACCESS_TOKEN_SECRET),
+    { expiresIn: "15m" },
+  );
+
+  const refreshToken = jwt.sign(
+    {
+      id: seller.id,
+      role: "seller",
+    },
+    String(process.env.REFRESH_TOKEN_SECRET),
+    { expiresIn: "7d" },
+  );
+
+  setCookie(res, cookieNameByRole["seller"], accessToken);
+  setCookie(res, refreshCookieNameByRole["seller"], refreshToken);
+
+  await setCurrentRefreshToken("seller", seller.id, refreshToken);
+};
+
 export const userRegistration = async (
   req: Request,
   res: Response,
@@ -395,12 +423,20 @@ export const registerSeller = async (
   try {
     validateRegistrationData(req.body, "seller");
 
-    const { name, email } = req.body;
+    const { name, email, phone_number } = req.body;
     const existingSeller = await prisma.sellers.findUnique({
       where: { email },
     });
     if (existingSeller) {
       throw new ConflictError("Seller already exists.");
+    }
+
+    const sellerPhoneNumber = await prisma.sellers.findFirst({
+      where: { phone_number },
+    });
+
+    if (sellerPhoneNumber) {
+      throw new ConflictError("Seller with this phone number already exists.");
     }
 
     await checkOtpRestrictions(email);
@@ -469,6 +505,14 @@ export const createShop = async (
       throw new ValidationError("All fields are required.");
     }
 
+    const seller = await prisma.sellers.findUnique({
+      where: { id: sellerId },
+    });
+
+    if (!seller) {
+      throw new NotFoundError("Seller not found.");
+    }
+
     const shopData: Prisma.ShopsUncheckedCreateInput = {
       name,
       bio,
@@ -486,10 +530,22 @@ export const createShop = async (
       data: shopData,
     });
 
+    await createSellerAuthCookies(res, seller);
+    await sendLog({
+      type: "success",
+      message: `Seller auto-login after shop creation: ${seller.email}`,
+      source: "auth-service",
+    });
+
     res.status(201).json({
       success: true,
       message: "Shop created successfully.",
       shop,
+      user: {
+        id: seller.id,
+        email: seller.email,
+        name: seller.name,
+      },
     });
   } catch (err) {
     next(err);
@@ -575,29 +631,7 @@ export const sellerLogin = async (
       throw new AuthError("Invalid credentials.");
     }
 
-    const accessToken = jwt.sign(
-      {
-        id: seller.id,
-        role: "seller",
-      },
-      String(process.env.ACCESS_TOKEN_SECRET),
-      { expiresIn: "15m" },
-    );
-
-    const refreshToken = jwt.sign(
-      {
-        id: seller.id,
-        role: "seller",
-      },
-      String(process.env.REFRESH_TOKEN_SECRET),
-      { expiresIn: "7d" },
-    );
-
-    setCookie(res, cookieNameByRole["seller"], accessToken);
-    setCookie(res, refreshCookieNameByRole["seller"], refreshToken);
-
-    await setCurrentRefreshToken("seller", seller.id, refreshToken);
-
+    await createSellerAuthCookies(res, seller);
     await sendLog({
       type: "success",
       message: `Seller login successful: ${email}`,

@@ -775,11 +775,18 @@ export const getDeviceUsage = async (
       number
     >;
 
+    const getCount = (key: string) =>
+      Object.entries(categories).reduce(
+        (total, [device, value]) =>
+          device.toLowerCase() === key ? total + Number(value || 0) : total,
+        0,
+      );
+
     return res.status(200).json({
       success: true,
-      deviceUsage: Object.entries(categories).map(([device, value]) => ({
-        name: DEVICE_LABELS[device.toLowerCase()] ?? device,
-        value,
+      deviceUsage: Object.keys(DEVICE_LABELS).map((key) => ({
+        name: DEVICE_LABELS[key],
+        value: getCount(key),
       })),
     });
   } catch (error) {
