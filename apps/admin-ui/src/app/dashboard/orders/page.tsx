@@ -151,7 +151,24 @@ const OrdersTable = () => {
 
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
-        <table className="w-full text-white">
+        {orders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">No orders yet</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Orders will appear here once customers start buying.
+            </p>
+          </div>
+        ) : table.getRowModel().rows.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">
+              No orders match your search
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              Try a different search term.
+            </p>
+          </div>
+        ) : (
+          <table className="w-full text-white">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="border-b border-gray-800">
@@ -180,10 +197,7 @@ const OrdersTable = () => {
               </tr>
             ))}
           </tbody>
-        </table>
-
-        {!isLoading && orders?.length === 0 && (
-          <p className="text-center py-3 text-white mt-2">No Orders found!</p>
+          </table>
         )}
       </div>
     </div>

@@ -168,9 +168,21 @@ const EventsPage = () => {
 
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
-        {data?.data?.length === 0 ? (
+        {(data?.data?.length ?? 0) === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-white text-base font-medium">No events found</p>
+            <p className="text-white text-base font-medium">No events yet</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Events will appear here once they are created.
+            </p>
+          </div>
+        ) : table.getRowModel().rows.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">
+              No events match your search
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              Try a different search term.
+            </p>
           </div>
         ) : (
           <table

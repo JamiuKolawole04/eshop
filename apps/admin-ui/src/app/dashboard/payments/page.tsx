@@ -163,6 +163,22 @@ const Payments = () => {
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
         {isLoading ? (
           <p className="text-center text-white">Loading payments...</p>
+        ) : orders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">No payments yet</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Payments will appear here once orders start coming in.
+            </p>
+          </div>
+        ) : table.getRowModel().rows.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">
+              No payments match your search
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              Try a different search term.
+            </p>
+          </div>
         ) : (
           <table className="w-full text-white text-sm">
             <thead>

@@ -188,8 +188,22 @@ const UsersPage = () => {
 
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
-        {filteredUsers.length === 0 ? (
-          <p className="text-center py-6 text-gray-400">No users found.</p>
+        {data?.meta?.totalUsers === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">No users yet</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Users will appear here once they sign up.
+            </p>
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">
+              No users match your filters
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              Try a different search term or role.
+            </p>
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
