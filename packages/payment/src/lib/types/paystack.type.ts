@@ -8,6 +8,11 @@ export type PaystackSubaccountResult = {
   subaccountCode: string;
 };
 
+export type PaystackSubaccountUpdateResult = {
+  subaccount_code: string;
+  active: boolean;
+};
+
 export type PaystackSplit = {
   type: "flat";
   bearer_type: "account" | "subaccount" | "all" | "all-pro-rata" | "grid";

@@ -7,6 +7,7 @@ import {
   PaystackInitializeResult,
   PaystackSubaccountInput,
   PaystackSubaccountResult,
+  PaystackSubaccountUpdateResult,
 } from "../types/paystack.type.js";
 
 const PAYSTACK_API_BASE_URL = "https://api.paystack.co";
@@ -34,22 +35,25 @@ export class PaystackClient {
     return new ValidationError(providerMessage ?? fallbackMessage);
   }
 
-  private async post<T>(path: string, payload: unknown): Promise<T> {
+  private async request<T>(
+    method: "POST" | "PUT",
+    path: string,
+    payload: unknown,
+  ): Promise<T> {
     const secretKey = this.getSecretKey();
 
     let body: PaystackEnvelope<T>;
     try {
-      const response = await axios.post(
-        `${PAYSTACK_API_BASE_URL}${path}`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${secretKey}`,
-            "Content-Type": "application/json",
-          },
+      const response = await axios.request<PaystackEnvelope<T>>({
+        method,
+        url: `${PAYSTACK_API_BASE_URL}${path}`,
+        data: payload,
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          "Content-Type": "application/json",
         },
-      );
-      body = response.data as PaystackEnvelope<T>;
+      });
+      body = response.data;
     } catch (err) {
       throw this.toValidationError(
         err,
@@ -64,6 +68,14 @@ export class PaystackClient {
     }
 
     return body.data;
+  }
+
+  private post<T>(path: string, payload: unknown): Promise<T> {
+    return this.request<T>("POST", path, payload);
+  }
+
+  private put<T>(path: string, payload: unknown): Promise<T> {
+    return this.request<T>("PUT", path, payload);
   }
 
   async connectSubAccount(
@@ -86,6 +98,19 @@ export class PaystackClient {
     }
 
     return { subaccountCode: data.subaccount_code };
+  }
+
+  async deactivateSubAccount(subaccountCode: string): Promise<void> {
+    const code = subaccountCode.trim();
+
+    if (!code) {
+      throw new ValidationError("Payout account code is required");
+    }
+
+    await this.put<PaystackSubaccountUpdateResult>(
+      `/subaccount/${encodeURIComponent(code)}`,
+      { active: false },
+    );
   }
 
   async initialize(

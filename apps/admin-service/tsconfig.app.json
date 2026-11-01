@@ -26,6 +26,9 @@
     },
     {
       "path": "../../packages/prisma/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/payment/tsconfig.lib.json"
     }
   ],
 }
