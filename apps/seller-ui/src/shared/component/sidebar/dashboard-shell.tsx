@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
-import { DashbaordLogo } from "@/assets/svgs/dashbaord/dashboardLogo";
 import { useSeller } from "@/hooks/use-seller";
+import { ShopAvatar } from "./shop-avatar";
 import { SidebarWrapper } from "./sidebar";
 
 type Props = {
@@ -14,7 +14,7 @@ type Props = {
 
 export const DashboardShell = ({ children }: Props) => {
   const pathname = usePathname();
-  const { seller } = useSeller();
+  const { seller, isLoading: isSellerLoading } = useSeller();
 
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -101,7 +101,12 @@ export const DashboardShell = ({ children }: Props) => {
           </button>
 
           <div className="flex min-w-0 items-center gap-2">
-            <DashbaordLogo className="h-5 w-5 shrink-0" />
+            <ShopAvatar
+              src={seller?.shop?.avatar}
+              alt={shopName}
+              size={24}
+              isLoading={isSellerLoading}
+            />
 
             <p className="min-w-0 truncate font-Poppins text-sm font-medium text-[#ecedee]">
               {shopName}
