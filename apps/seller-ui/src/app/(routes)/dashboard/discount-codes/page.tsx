@@ -118,6 +118,15 @@ const Page = () => {
           <div className="flex items-center justify-center">
             <ButtonLoader className="text-white mt-5" />
           </div>
+        ) : discountCodes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">
+              No discount codes yet
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              Create a discount code to offer deals to your customers.
+            </p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-white">
@@ -163,12 +172,6 @@ const Page = () => {
             </tbody>
           </table>
           </div>
-        )}
-
-        {!isLoading && discountCodes?.length === 0 && (
-          <p className="text-gray-400 pt-4 text-center text-sm">
-            No Discount Codes Available
-          </p>
         )}
       </div>
 
