@@ -22,9 +22,12 @@ import axiosInstance from "@/utils/axiosInstance";
 import {
   ButtonLoader,
   CreatePayoutAccountResponseType,
+  FetchPayoutBanksResponseType,
   FetchSellerDetailsResponseType,
   NotificationChannel,
+  ResolvePayoutAccountResponseType,
 } from "@packages/ui";
+import BankSelect, { BankOption } from "@/shared/component/bank-select";
 import { useSeller } from "@/hooks/use-seller";
 
 type SectionKey = "low-stock" | "order-notifications";
@@ -272,9 +275,12 @@ const SettingsContent = () => {
   // Form state
   const [threshold, setThreshold] = useState("10");
   const [channel, setChannel] = useState<NotificationChannel>("email");
-  const [bankName, setBankName] = useState("");
+  const [bank, setBank] = useState<BankOption | null>(null);
   const [accountNumber, setAccountNumber] = useState("");
   const [payoutJustConnected, setPayoutJustConnected] = useState(false);
+
+  const payoutConnected =
+    payoutJustConnected || !!seller?.paystackSubaccountCode;
 
   const { data, isPending, isError, refetch } = useQuery({
     queryKey,
@@ -284,6 +290,41 @@ const SettingsContent = () => {
   });
 
   const shop = data?.shop;
+
+  const banksQuery = useQuery({
+    queryKey: ["payout-banks"],
+    queryFn: async () => {
+      const res = await axiosInstance.get<FetchPayoutBanksResponseType>(
+        `/api/sellers/shops/payout-banks`,
+      );
+      return res.data.banks;
+    },
+    enabled: activeTab === "Withdraw Method" && !payoutConnected,
+    staleTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+  });
+
+  const trimmedAccountNumber = accountNumber.trim();
+  const canResolveAccount = !!bank && /^\d{10}$/.test(trimmedAccountNumber);
+
+  const resolveQuery = useQuery({
+    queryKey: ["resolve-payout-account", bank?.code, trimmedAccountNumber],
+    queryFn: async () => {
+      const res = await axiosInstance.get<ResolvePayoutAccountResponseType>(
+        `/api/sellers/shops/payout-account/resolve`,
+        {
+          params: {
+            accountNumber: trimmedAccountNumber,
+            bankCode: bank?.code,
+          },
+        },
+      );
+      return res.data;
+    },
+    enabled: canResolveAccount && !payoutConnected,
+    retry: false,
+    staleTime: Infinity,
+  });
 
   useEffect(() => {
     if (shop?.lowStockThreshold !== undefined) {
@@ -369,7 +410,7 @@ const SettingsContent = () => {
   });
 
   const payoutMutation = useMutation({
-    mutationFn: async (values: { bankName: string; accountNumber: string }) => {
+    mutationFn: async (values: { bankCode: string; accountNumber: string }) => {
       const res = await axiosInstance.post<CreatePayoutAccountResponseType>(
         `/api/sellers/shops/payout-account`,
         values,
@@ -394,22 +435,24 @@ const SettingsContent = () => {
   };
 
   const handleConnectPayout = () => {
-    if (!bankName.trim()) {
-      toast.error("Enter your bank name.");
+    if (!bank) {
+      toast.error("Select your bank.");
       return;
     }
-    if (!/^\d{6,20}$/.test(accountNumber.trim())) {
-      toast.error("Enter a valid account number (6-20 digits).");
+    if (!/^\d{10}$/.test(accountNumber.trim())) {
+      toast.error("Enter a valid 10-digit account number.");
+      return;
+    }
+    if (!resolveQuery.data) {
+      toast.error("Verify your account number before connecting.");
       return;
     }
     payoutMutation.mutate({
-      bankName: bankName.trim(),
+      bankCode: bank.code,
       accountNumber: accountNumber.trim(),
     });
   };
 
-  const payoutConnected =
-    payoutJustConnected || !!seller?.paystackSubaccountCode;
   const isScheduledForDeletion = !!shop?.isDeleted;
   const daysLeft = getDaysLeft(shop?.deletedAt);
 
@@ -574,20 +617,28 @@ const SettingsContent = () => {
               </p>
               <div className="space-y-4 py-5">
                 <div>
-                  <label
-                    htmlFor="bank-name"
-                    className="block text-xs font-medium text-slate-300"
-                  >
-                    Bank name
-                  </label>
-                  <input
-                    id="bank-name"
-                    type="text"
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    placeholder="e.g. GCB Bank"
-                    className="mt-1.5 w-full rounded-md border border-slate-600 bg-slate-900/60 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-blue-500"
+                  <span className="block text-xs font-medium text-slate-300">
+                    Bank
+                  </span>
+                  <BankSelect
+                    banks={banksQuery.data ?? []}
+                    value={bank?.code ?? null}
+                    onChange={setBank}
+                    isLoading={banksQuery.isLoading}
+                    disabled={banksQuery.isError}
                   />
+                  {banksQuery.isError && (
+                    <p className="mt-1.5 text-xs text-red-400">
+                      {getErrorMessage(banksQuery.error)}{" "}
+                      <button
+                        type="button"
+                        onClick={() => banksQuery.refetch()}
+                        className="underline hover:text-red-300"
+                      >
+                        Retry
+                      </button>
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label
@@ -600,18 +651,39 @@ const SettingsContent = () => {
                     id="account-number"
                     type="text"
                     inputMode="numeric"
+                    maxLength={10}
                     value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    placeholder="e.g. 1234567890"
+                    onChange={(e) =>
+                      setAccountNumber(
+                        e.target.value.replace(/\D/g, "").slice(0, 10),
+                      )
+                    }
+                    placeholder="e.g. 0123456789"
                     className="mt-1.5 w-full rounded-md border border-slate-600 bg-slate-900/60 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-blue-500"
                   />
+                  {canResolveAccount && resolveQuery.isFetching && (
+                    <p className="mt-1.5 text-xs text-slate-400">
+                      Verifying account...
+                    </p>
+                  )}
+                  {canResolveAccount && resolveQuery.isError && (
+                    <p className="mt-1.5 text-xs text-red-400">
+                      {getErrorMessage(resolveQuery.error)}
+                    </p>
+                  )}
+                  {canResolveAccount && resolveQuery.data && (
+                    <p className="mt-1.5 flex items-center gap-1 text-xs text-green-400">
+                      <CheckCircle2 size={12} />
+                      {resolveQuery.data.accountName}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="pb-5">
                 <button
                   type="button"
                   onClick={handleConnectPayout}
-                  disabled={payoutMutation.isPending}
+                  disabled={payoutMutation.isPending || !resolveQuery.data}
                   className="flex items-center gap-2 rounded-md bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {payoutMutation.isPending ? (
