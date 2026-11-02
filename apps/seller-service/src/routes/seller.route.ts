@@ -6,11 +6,13 @@ import {
   followShop,
   getDeviceUsage,
   getGeoDistribution,
+  getPayoutBanks,
   getSellerDetails,
   getSellerEvents,
   getSellerProducts,
   isFollowingShop,
   markNotificationAsRead,
+  resolvePayoutAccount,
   restoreShop,
   sellerNotifications,
   unfollowShop,
@@ -70,6 +72,20 @@ router.post(
   isAuthenticated("seller"),
   isSeller,
   createPayoutAccount,
+);
+
+router.get(
+  "/shops/payout-banks",
+  isAuthenticated("seller"),
+  isSeller,
+  getPayoutBanks,
+);
+
+router.get(
+  "/shops/payout-account/resolve",
+  isAuthenticated("seller"),
+  isSeller,
+  resolvePayoutAccount,
 );
 
 router.post("/follow-shop", isAuthenticated("user"), isUser, followShop);

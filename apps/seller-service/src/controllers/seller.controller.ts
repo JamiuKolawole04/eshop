@@ -643,6 +643,65 @@ export const createPayoutAccount = async (
   }
 };
 
+export const getPayoutBanks = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const banks = await paystack.listBanks();
+
+    return res.status(200).json({
+      success: true,
+      banks: banks.map((bank) => ({
+        id: bank.id,
+        name: bank.name,
+        code: bank.code,
+        slug: bank.slug,
+        currency: bank.currency,
+        type: bank.type,
+      })),
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const resolvePayoutAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { accountNumber, bankCode } = req.query as {
+      accountNumber?: string;
+      bankCode?: string;
+    };
+
+    if (!accountNumber || !/^\d{10}$/.test(accountNumber.trim())) {
+      throw new ValidationError("A valid 10-digit account number is required");
+    }
+
+    if (!bankCode || !/^\d{3,6}$/.test(bankCode.trim())) {
+      throw new ValidationError("A valid bank code is required");
+    }
+
+    const { accountName, accountNumber: resolvedAccountNumber } =
+      await paystack.resolveAccount({
+        accountNumber: accountNumber.trim(),
+        bankCode: bankCode.trim(),
+      });
+
+    return res.status(200).json({
+      success: true,
+      accountName,
+      accountNumber: resolvedAccountNumber,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const updateLowStockThreshold = async (
   req: Request,
   res: Response,
