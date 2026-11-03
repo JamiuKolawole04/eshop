@@ -597,17 +597,17 @@ export const createPayoutAccount = async (
   next: NextFunction,
 ) => {
   try {
-    const { bankName, accountNumber } = req.body as {
-      bankName?: string;
-      accountNumber?: string;
+    const { bankCode, accountNumber } = req.body as {
+      bankCode: string;
+      accountNumber: string;
     };
 
-    if (!bankName || !bankName.trim()) {
-      throw new ValidationError("Bank name is required");
+    if (!bankCode || !/^\d{3,6}$/.test(bankCode.trim())) {
+      throw new ValidationError("A valid bank code is required");
     }
 
-    if (!accountNumber || !/^\d{6,20}$/.test(accountNumber.trim())) {
-      throw new ValidationError("A valid account number is required");
+    if (!accountNumber || !/^\d{10}$/.test(accountNumber.trim())) {
+      throw new ValidationError("A valid 10-digit account number is required");
     }
 
     const sellerId = req.seller?.id as string;
@@ -622,9 +622,14 @@ export const createPayoutAccount = async (
 
     const shop = await getSellerShop(sellerId);
 
+    const { accountName } = await paystack.resolveAccount({
+      accountNumber: accountNumber.trim(),
+      bankCode: bankCode.trim(),
+    });
+
     const { subaccountCode } = await paystack.connectSubAccount({
       businessName: shop.name,
-      settlementBank: bankName.trim(),
+      settlementBank: bankCode.trim(),
       accountNumber: accountNumber.trim(),
     });
 
@@ -637,6 +642,71 @@ export const createPayoutAccount = async (
       success: true,
       message: "Payout account connected successfully",
       paystackSubaccountCode: subaccountCode,
+      accountName,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getPayoutBanks = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const banks = await paystack.listBanks();
+
+    const activeBanks = banks
+      .filter((bank) => bank.active)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((bank) => ({
+        id: bank.id,
+        name: bank.name,
+        code: bank.code,
+        slug: bank.slug,
+        currency: bank.currency,
+        type: bank.type,
+      }));
+
+    return res.status(200).json({
+      success: true,
+      banks: activeBanks,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const resolvePayoutAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { accountNumber, bankCode } = req.query as {
+      accountNumber?: string;
+      bankCode?: string;
+    };
+
+    if (!accountNumber || !/^\d{10}$/.test(accountNumber.trim())) {
+      throw new ValidationError("A valid 10-digit account number is required");
+    }
+
+    if (!bankCode || !/^\d{3,6}$/.test(bankCode.trim())) {
+      throw new ValidationError("A valid bank code is required");
+    }
+
+    const { accountName, accountNumber: resolvedAccountNumber } =
+      await paystack.resolveAccount({
+        accountNumber: accountNumber.trim(),
+        bankCode: bankCode.trim(),
+      });
+
+    return res.status(200).json({
+      success: true,
+      accountName,
+      accountNumber: resolvedAccountNumber,
     });
   } catch (error) {
     return next(error);
@@ -775,11 +845,18 @@ export const getDeviceUsage = async (
       number
     >;
 
+    const getCount = (key: string) =>
+      Object.entries(categories).reduce(
+        (total, [device, value]) =>
+          device.toLowerCase() === key ? total + Number(value || 0) : total,
+        0,
+      );
+
     return res.status(200).json({
       success: true,
-      deviceUsage: Object.entries(categories).map(([device, value]) => ({
-        name: DEVICE_LABELS[device.toLowerCase()] ?? device,
-        value,
+      deviceUsage: Object.keys(DEVICE_LABELS).map((key) => ({
+        name: DEVICE_LABELS[key],
+        value: getCount(key),
       })),
     });
   } catch (error) {

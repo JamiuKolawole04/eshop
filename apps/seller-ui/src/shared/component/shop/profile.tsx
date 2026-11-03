@@ -407,7 +407,7 @@ const SellerProfile = ({ shop, followersCount, sellerId }: Props) => {
                 />
               ))}
               {products?.length === 0 && (
-                <p className="py-2">No products available yet!</p>
+                <p className="py-2">Products not added yet!</p>
               )}
             </div>
           )}
@@ -430,7 +430,7 @@ const SellerProfile = ({ shop, followersCount, sellerId }: Props) => {
                 />
               ))}
               {events?.length === 0 && (
-                <p className="py-2">No offers available yet!</p>
+                <p className="py-2">Offers not added yet!</p>
               )}
             </div>
           )}

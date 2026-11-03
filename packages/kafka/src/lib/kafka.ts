@@ -1,7 +1,5 @@
 import { Kafka } from "kafkajs";
 
-// "console.log(require('fs').readFileSync('ca.pem').toString('base64'))"
-
 const KAFKA_BROKER_URI = String(process.env.KAFKA_BROKER_URI);
 const caCert = Buffer.from(
   String(process.env.KAFKA_CA_CERT),

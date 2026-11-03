@@ -5,6 +5,7 @@ import {
   addCategoryToCustomization,
   addNewAdmin,
   addSubCategoryToCustomization,
+  deleteSeller,
   getAdmin,
   getAdminDeviceUsage,
   getAdminGeo,
@@ -35,6 +36,12 @@ router.post("/", isAuthenticated("admin"), isAdmin, addNewAdmin);
 router.get("/customizations", getAllCustomizations);
 router.get("/users", isAuthenticated("admin"), isAdmin, getAllUsers);
 router.get("/sellers", isAuthenticated("admin"), isAdmin, getAllSellers);
+router.delete(
+  "/sellers/:sellerId",
+  isAuthenticated("admin"),
+  isAdmin,
+  deleteSeller,
+);
 router.get(
   "/notifications",
   isAuthenticated("admin"),

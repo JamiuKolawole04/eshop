@@ -121,6 +121,17 @@ const Page = () => {
                   Failed to load admins.
                 </td>
               </tr>
+            ) : table.getRowModel().rows.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="px-4 py-12 text-center">
+                  <p className="text-white text-base font-medium">
+                    No team members yet
+                  </p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Add an admin to help manage the platform.
+                  </p>
+                </td>
+              </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
                 <tr

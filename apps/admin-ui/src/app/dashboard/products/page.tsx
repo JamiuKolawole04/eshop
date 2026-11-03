@@ -173,14 +173,20 @@ const Products = () => {
 
       {/* Table */}
       <div className="overflow-x-auto bg-gray-900 rounded-lg p-4">
-        {products?.data?.length === 0 ? (
+        {(products?.data?.length ?? 0) === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-white text-base font-medium">No products yet</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Products will appear here once sellers add them.
+            </p>
+          </div>
+        ) : table.getRowModel().rows.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-white text-base font-medium">
-              No products found
+              No products match your search
             </p>
             <p className="text-gray-400 text-sm mt-1">
-              You haven&apos;t created any products yet. Click &quot;Add
-              Product&quot; to get started.
+              Try a different search term.
             </p>
           </div>
         ) : (

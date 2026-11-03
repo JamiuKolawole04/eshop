@@ -24,7 +24,7 @@ import { useSidebar } from "@/hooks/use-sidebar";
 import { Sidebar } from "./sidebar.styles";
 import { SidebarItem } from "./sidebar.item";
 import { SidebarMenu } from "./sidebar.menu";
-import { DashbaordLogo } from "@/assets/svgs/dashbaord/dashboardLogo";
+import { ShopAvatar } from "./shop-avatar";
 import axiosInstance from "@/utils/axiosInstance";
 import { Box } from "@packages/ui";
 
@@ -34,7 +34,7 @@ export const SidebarWrapper = () => {
   const router = useRouter();
 
   const { activeSidebar, setActiveSidebar } = useSidebar();
-  const { seller } = useSeller();
+  const { seller, isLoading: isSellerLoading } = useSeller();
 
   useEffect(() => {
     setActiveSidebar(pathname);
@@ -68,7 +68,12 @@ export const SidebarWrapper = () => {
       <Sidebar.Header>
         <Box>
           <Link href={"/"} className="flex justify-center text-center gap-2">
-            <DashbaordLogo className="w-6 h-6" />
+            <ShopAvatar
+              src={seller?.shop?.avatar}
+              alt={seller?.shop?.name ?? "Shop avatar"}
+              size={32}
+              isLoading={isSellerLoading}
+            />
 
             <Box>
               <h3 className="font-medium text-[#ecedee]">

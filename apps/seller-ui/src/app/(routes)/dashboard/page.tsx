@@ -118,6 +118,13 @@ const OrdersTable = () => {
         <div className="flex items-center justify-center">
           <ButtonLoader className="text-white mt-5" />
         </div>
+      ) : orders.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 px-6 py-10 text-center">
+          <p className="text-white text-sm font-medium">No orders yet</p>
+          <p className="mt-1 max-w-xs text-xs text-slate-400">
+            Orders will appear here once customers start buying from your shop.
+          </p>
+        </div>
       ) : (
         <div className="!rounded-xl shadow-xl overflow-x-auto border border-slate-700">
           <table className="min-w-full text-xs sm:text-sm text-white">

@@ -2,11 +2,15 @@ import axios from "axios";
 
 import { ValidationError } from "@packages/error-handler";
 import {
+  PaystackConnectSubaccountResponse,
   PaystackEnvelope,
   PaystackInitializeInput,
-  PaystackInitializeResult,
+  PaystackInitializeTransactionResponse,
+  PaystackListBanksResponse,
+  PaystackResolveAccountInput,
+  PaystackResolveAccountResponse,
   PaystackSubaccountInput,
-  PaystackSubaccountResult,
+  PaystackSubaccountUpdateResponse,
 } from "../types/paystack.type.js";
 
 const PAYSTACK_API_BASE_URL = "https://api.paystack.co";
@@ -34,22 +38,25 @@ export class PaystackClient {
     return new ValidationError(providerMessage ?? fallbackMessage);
   }
 
-  private async post<T>(path: string, payload: unknown): Promise<T> {
+  private async request<T>(
+    method: "POST" | "PUT" | "GET",
+    path: string,
+    payload?: unknown,
+  ): Promise<T> {
     const secretKey = this.getSecretKey();
 
     let body: PaystackEnvelope<T>;
     try {
-      const response = await axios.post(
-        `${PAYSTACK_API_BASE_URL}${path}`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${secretKey}`,
-            "Content-Type": "application/json",
-          },
+      const response = await axios.request<PaystackEnvelope<T>>({
+        method,
+        url: `${PAYSTACK_API_BASE_URL}${path}`,
+        data: payload,
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          "Content-Type": "application/json",
         },
-      );
-      body = response.data as PaystackEnvelope<T>;
+      });
+      body = response.data;
     } catch (err) {
       throw this.toValidationError(
         err,
@@ -66,9 +73,19 @@ export class PaystackClient {
     return body.data;
   }
 
-  async connectSubAccount(
-    input: PaystackSubaccountInput,
-  ): Promise<PaystackSubaccountResult> {
+  private post<T>(path: string, payload: unknown): Promise<T> {
+    return this.request<T>("POST", path, payload);
+  }
+
+  private put<T>(path: string, payload: unknown): Promise<T> {
+    return this.request<T>("PUT", path, payload);
+  }
+
+  private get<T>(path: string): Promise<T> {
+    return this.request<T>("GET", path);
+  }
+
+  async connectSubAccount(input: PaystackSubaccountInput) {
     const payload = {
       business_name: input.businessName,
       settlement_bank: input.settlementBank,
@@ -76,7 +93,7 @@ export class PaystackClient {
       percentage_charge: 10,
     };
 
-    const data = await this.post<{ subaccount_code: string }>(
+    const data = await this.post<PaystackConnectSubaccountResponse>(
       "/subaccount",
       payload,
     );
@@ -88,9 +105,20 @@ export class PaystackClient {
     return { subaccountCode: data.subaccount_code };
   }
 
-  async initialize(
-    input: PaystackInitializeInput,
-  ): Promise<PaystackInitializeResult> {
+  async deactivateSubAccount(subaccountCode: string): Promise<void> {
+    const code = subaccountCode.trim();
+
+    if (!code) {
+      throw new ValidationError("Payout account code is required");
+    }
+
+    await this.put<PaystackSubaccountUpdateResponse>(
+      `/subaccount/${encodeURIComponent(code)}`,
+      { active: false },
+    );
+  }
+
+  async initialize(input: PaystackInitializeInput) {
     const payload = {
       email: input.email,
       amount: input.amountInSubunits,
@@ -99,11 +127,10 @@ export class PaystackClient {
       ...(input.split ? { split: input.split } : {}),
     };
 
-    const data = await this.post<{
-      authorization_url: string;
-      access_code: string;
-      reference: string;
-    }>("/transaction/initialize", payload);
+    const data = await this.post<PaystackInitializeTransactionResponse>(
+      "/transaction/initialize",
+      payload,
+    );
 
     if (!data.authorization_url) {
       throw new ValidationError(
@@ -115,6 +142,32 @@ export class PaystackClient {
       authorizationUrl: data.authorization_url,
       accessCode: data.access_code,
       reference: data.reference,
+    };
+  }
+
+  async listBanks(): Promise<PaystackListBanksResponse> {
+    return this.get<PaystackListBanksResponse>("/bank?country=nigeria");
+  }
+
+  async resolveAccount(input: PaystackResolveAccountInput) {
+    const query = new URLSearchParams({
+      account_number: input.accountNumber,
+      bank_code: input.bankCode,
+    });
+
+    const data = await this.get<PaystackResolveAccountResponse>(
+      `/bank/resolve?${query.toString()}`,
+    );
+
+    if (!data.account_name) {
+      throw new ValidationError(
+        "Could not verify this account. Please check the details and try again.",
+      );
+    }
+
+    return {
+      accountName: data.account_name,
+      accountNumber: data.account_number,
     };
   }
 }

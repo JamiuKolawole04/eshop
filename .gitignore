@@ -57,3 +57,8 @@ next-env.d.ts
 # Agents
 opencode.json
 packages/kafka/src/certs/*.pem
+
+.claude/worktrees
+.nx/polygraph
+.nx/self-healing
+.nx/migrate-runs

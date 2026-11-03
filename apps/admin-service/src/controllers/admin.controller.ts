@@ -11,6 +11,9 @@ import {
 import { DEVICE_LABELS } from "@packages/types";
 import { sendLog } from "@packages/logs";
 import { imageKit } from "@packages/imagekit";
+import { deleteSellerAccount } from "@packages/prisma";
+import { deleteImageKitFiles } from "@packages/imagekit";
+import { paystack } from "@packages/payment";
 
 export const getAdmin = async (
   req: Request,
@@ -714,6 +717,70 @@ export const toggleUserBan = async (
         ? "User banned successfully"
         : "User unbanned successfully",
       banned: updated.banned,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteSeller = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { sellerId } = req.params;
+
+    if (!sellerId) {
+      throw new ValidationError("Seller id is required");
+    }
+
+    const seller = await prisma.sellers.findUnique({
+      where: { id: sellerId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        paystackSubaccountCode: true,
+      },
+    });
+
+    if (!seller) {
+      throw new NotFoundError("Seller not found");
+    }
+
+    if (seller.paystackSubaccountCode) {
+      try {
+        await paystack.deactivateSubAccount(seller.paystackSubaccountCode);
+      } catch (error) {
+        return next(
+          new ValidationError(
+            `Failed to deactivate payout account: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          ),
+        );
+      }
+    }
+
+    const { fileIds } = await deleteSellerAccount(sellerId);
+
+    if (fileIds.length > 0) {
+      await deleteImageKitFiles(
+        fileIds,
+        `seller ${sellerId} (${seller.email})`,
+      );
+    }
+
+    await sendLog({
+      type: "warning",
+      message: `Admin deleted seller ${seller.email} (${sellerId})`,
+      source: "admin-service",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Seller deleted successfully",
     });
   } catch (error) {
     return next(error);

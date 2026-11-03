@@ -7,27 +7,21 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "plugins": [
       {
-        "name": "next"
-      }
+        "name": "next",
+      },
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
     },
     "outDir": "dist",
     "rootDir": "src",
-    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
   },
   "include": [
     "src/**/*.ts",
@@ -36,7 +30,7 @@
     "src/**/*.jsx",
     "../../apps/admin-ui/.next/types/**/*.ts",
     "../../dist/apps/admin-ui/.next/types/**/*.ts",
-    "next-env.d.ts"
+    "next-env.d.ts",
   ],
   "exclude": [
     "out-tsc",
@@ -46,11 +40,11 @@
     "jest.config.cts",
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
-    ".next"
+    ".next",
   ],
   "references": [
     {
-      "path": "../../packages/ui"
-    }
-  ]
+      "path": "../../packages/ui",
+    },
+  ],
 }
