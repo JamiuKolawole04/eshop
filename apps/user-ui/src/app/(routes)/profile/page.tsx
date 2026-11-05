@@ -2,11 +2,9 @@
 
 import { Suspense } from "react";
 import {
-  BadgeCheck,
   Bell,
   CheckCircle,
   Clock,
-  Gift,
   Inbox,
   Loader2,
   Lock,
@@ -14,9 +12,6 @@ import {
   LucideIcon,
   MapPin,
   Pencil,
-  PhoneCall,
-  Receipt,
-  Settings,
   ShoppingBag,
   Truck,
   User,
@@ -29,7 +24,6 @@ import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
 import { StatCard } from "@/shared/components/cards/statCard";
 import axiosInstance from "@/utils/axiosInstance";
-import { QuickActionCard } from "@/shared/components/cards/quickActionCard";
 import { ShippingAddress } from "@/shared/components/shippingAddress";
 import { ChangePassword } from "@/shared/components/changePassword";
 import { OrdersTable } from "@/shared/components/tables/ordersTable";
@@ -251,7 +245,7 @@ const ProfileContent = () => {
             </nav>
           </div>
 
-          <div className="bg-white p-6 rounded-md shadow-md border border-gray-100 w-full md:w-[55%]">
+          <div className="bg-white p-6 rounded-md shadow-md border border-gray-100 w-full md:flex-1">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               {activeTab}
             </h2>
@@ -391,38 +385,6 @@ const ProfileContent = () => {
             ) : (
               ""
             )}
-          </div>
-
-          <div className="w-full md:w-1/4 grid grid-cols-2 gap-4 md:block md:space-y-4 [&>*:last-child]:col-span-2">
-            <QuickActionCard
-              Icon={Gift}
-              title="Referral Program"
-              description="Invite friends and earn rewards."
-            />
-
-            <QuickActionCard
-              Icon={BadgeCheck}
-              title="Your Badges"
-              description="View your earned achievements."
-            />
-
-            <QuickActionCard
-              Icon={Settings}
-              title="Account Settings"
-              description="Manage preferences and security."
-            />
-
-            <QuickActionCard
-              Icon={Receipt}
-              title="Billing History"
-              description="Check your recent payments."
-            />
-
-            <QuickActionCard
-              Icon={PhoneCall}
-              title="Support Center"
-              description="Need help? Contact support."
-            />
           </div>
         </div>
       </div>
