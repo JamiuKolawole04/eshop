@@ -25,11 +25,8 @@ const myAccountLinks: FooterLink[] = [
 ];
 
 const informationLinks: FooterLink[] = [
-  { label: "Our Story", href: "/about" },
-  { label: "Careers", href: "/careers" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms & Conditions", href: "/terms" },
-  { label: "Latest News", href: "/news" },
   { label: "Contact Us", href: "/contact" },
 ];
 
