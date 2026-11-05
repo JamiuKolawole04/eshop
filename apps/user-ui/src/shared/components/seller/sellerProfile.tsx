@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 import axiosInstance from "@/utils/axiosInstance";
@@ -44,6 +45,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
   const [isFollowing, setIsFollowing] = useState(false);
 
   const queryClient = useQueryClient();
+  const pathname = usePathname();
 
   const { user, isAuthenticated } = useUser();
   const location = useLocationTracking();
@@ -210,7 +212,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
               </button>
             ) : (
               <Link
-                href="/login"
+                href={`/login?redirect=${encodeURIComponent(pathname)}`}
                 className="px-6 py-2 h-[40px] rounded-lg font-semibold flex items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 transition"
               >
                 <Heart size={18} />
