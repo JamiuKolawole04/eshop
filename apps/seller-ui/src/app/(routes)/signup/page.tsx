@@ -8,9 +8,8 @@ import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { SiStripe } from "react-icons/si";
 
-import { countries } from "@/utils/countries";
 import { CreateShop } from "@/shared/modules/auth/create-shop";
-import { ButtonLoader } from "@packages/ui";
+import { ButtonLoader, countries } from "@packages/ui";
 import { formatNigerianPhone } from "@/utils/phone-number";
 
 type FormData = {
@@ -250,7 +249,7 @@ const Signup = () => {
                 >
                   <option value="">Select your country</option>
                   {countries.map((country) => (
-                    <option key={country.code} value={country.code}>
+                    <option key={country.code} value={country.name}>
                       {country.name}
                     </option>
                   ))}

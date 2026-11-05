@@ -5,13 +5,13 @@ import { MapPin, Plus, Trash2, X } from "lucide-react";
 import { Fragment, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { countries } from "@/utils/countries";
 import axiosInstance from "@/utils/axiosInstance";
 import {
   CreateUserAddressResponseType,
   DeleteUserAddressResponseType,
   GetUserAddressResponseType,
   ButtonLoader,
+  countries,
 } from "@packages/ui";
 
 type FormData = {
@@ -63,7 +63,7 @@ export const ShippingAddress = () => {
       street: "",
       city: "",
       zip: "",
-      country: "Bangladesh",
+      country: "Nigeria",
       isDefault: "false",
     },
   });
@@ -233,8 +233,8 @@ export const ShippingAddress = () => {
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {countries.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
+                  <option key={country.code} value={country.name}>
+                    {country.name}
                   </option>
                 ))}
               </select>
