@@ -18,6 +18,7 @@ type FormData = {
   label: string;
   name: string;
   street: string;
+  landmark: string;
   city: string;
   zip: string;
   country: string;
@@ -61,6 +62,7 @@ export const ShippingAddress = () => {
       label: "Home",
       name: "",
       street: "",
+      landmark: "",
       city: "",
       zip: "",
       country: "Nigeria",
@@ -142,6 +144,10 @@ export const ShippingAddress = () => {
                       {address?.street}, {address?.city}, {address?.zip},{" "}
                       {address?.country}
                     </p>
+
+                    {address?.landmark && (
+                      <p className="text-gray-500">Near {address.landmark}</p>
+                    )}
                   </div>
                 </div>
 
@@ -205,6 +211,21 @@ export const ShippingAddress = () => {
                 {errors.street && (
                   <p className="text-red-500 text-xs mt-1">
                     {errors.street.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <input
+                  placeholder="Landmark (nearest bus stop, building, etc.)"
+                  {...register("landmark", {
+                    required: "Landmark is required",
+                  })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {errors.landmark && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.landmark.message}
                   </p>
                 )}
               </div>

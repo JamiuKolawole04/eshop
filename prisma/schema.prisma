@@ -316,6 +316,7 @@ model Address {
   label     AddressType
   name      String
   street    String
+  landmark  String?
   city      String
   zip       String
   country   String

@@ -4,6 +4,7 @@ export type AddressType = {
   country: string;
   label: string;
   street: string;
+  landmark?: string | null;
   city: string;
   zip: string;
   isDefault: boolean;

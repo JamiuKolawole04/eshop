@@ -212,6 +212,11 @@ const Page = () => {
                 {order.shippingAddress.street}, {order.shippingAddress.city},{" "}
                 {order.shippingAddress.zip}
               </p>
+              {order.shippingAddress.landmark && (
+                <p className="text-gray-400">
+                  Near {order.shippingAddress.landmark}
+                </p>
+              )}
               <p className="text-gray-400">{order.shippingAddress.country}</p>
             </div>
           </div>
