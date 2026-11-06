@@ -589,10 +589,14 @@ export const createtripeConnectLink = async (
       },
     });
 
+    const sellerUiUrl = (
+      process.env.SELLER_UI_URL ?? "http://localhost:3001"
+    ).replace(/\/$/, "");
+
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `http://localhost:3000/success`,
-      return_url: `http://localhost:3000/success`,
+      refresh_url: `${sellerUiUrl}/success`,
+      return_url: `${sellerUiUrl}/success`,
       type: "account_onboarding",
     });
 

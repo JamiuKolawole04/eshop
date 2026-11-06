@@ -3,6 +3,7 @@ import express, { ErrorRequestHandler, RequestHandler } from "express";
 import proxy, { ProxyOptions } from "express-http-proxy";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import httpProxy from "http-proxy";
 
 import { initializeConfig } from "./libs/initializeSiteConfig";
 import { corsMiddleware } from "./shared/middlewares/cors";
@@ -76,6 +77,7 @@ const withClientIp: ProxyOptions = {
     return proxyReqOpts;
   },
   timeout: UPSTREAM_TIMEOUT_MS,
+  limit: "100mb",
   proxyErrorHandler,
 };
 app.disable("x-powered-by");
@@ -83,8 +85,6 @@ app.disable("x-powered-by");
 app.use(corsMiddleware);
 
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
-app.use(express.json({ limit: "100mb" }));
-app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use(cookieParser());
 app.set("trust proxy", 1);
 
@@ -98,10 +98,17 @@ app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 app.use(markProxyStart);
 
+const orderWebhookProxy = proxy("http://localhost:6004", {
+  ...withClientIp,
+  proxyReqPathResolver: (req) => req.originalUrl,
+});
+
 app.use("/api/sellers", proxy("http://localhost:6007", withClientIp));
 app.use("/api/chatting", proxy("http://localhost:6006", withClientIp));
 app.use("/api/admin", proxy("http://localhost:6005", withClientIp));
 app.use("/api/orders", proxy("http://localhost:6004", withClientIp));
+app.use("/api/order", orderWebhookProxy);
+app.use("/api/paystack-webhook", orderWebhookProxy);
 app.use("/api/users", proxy("http://localhost:6003", withClientIp));
 app.use("/api/products", proxy("http://localhost:6002", withClientIp));
 app.use("/", proxy("http://localhost:6001", withClientIp));
@@ -109,6 +116,25 @@ app.use("/", proxy("http://localhost:6001", withClientIp));
 app.use(gatewayErrorHandler);
 
 const port = process.env.PORT || 8080;
+
+const wsProxy = httpProxy.createProxyServer({
+  target: "http://localhost:6006",
+  ws: true,
+  xfwd: true,
+});
+
+wsProxy.on("error", (err, _req, socket) => {
+  console.error(
+    `[gateway] websocket upstream unavailable (${
+      (err as NodeJS.ErrnoException).code ?? err.message
+    })`,
+  );
+
+  if (socket && "destroy" in socket) {
+    socket.destroy();
+  }
+});
+
 const server = app.listen(port, async () => {
   console.log(`Listening at http://localhost:${port}/api`);
 
@@ -118,4 +144,9 @@ const server = app.listen(port, async () => {
     console.log("Failed to inialize site config:", err);
   }
 });
+
+server.on("upgrade", (req, socket, head) => {
+  wsProxy.ws(req, socket, head);
+});
+
 server.on("error", console.error);

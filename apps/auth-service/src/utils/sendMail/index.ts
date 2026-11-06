@@ -41,7 +41,7 @@ export const sendMail = async (
   try {
     const html = await renderTemplate(templateName, data);
     await transporter.sendMail({
-      from: `<${process.env.SMTP_USER}>`,
+      from: process.env.SMTP_FROM || `<${process.env.SMTP_USER}>`,
       to,
       subject,
       html,

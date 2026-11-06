@@ -16,12 +16,23 @@ type IncomingMessage = {
 const producer = kafka.producer();
 const connectedUsers: Map<string, WebSocket> = new Map();
 const unseenMessagesCounts: Map<string, number> = new Map();
+let producerReady = false;
 
 export const createWebSockerServer = async (server: HttpServer) => {
   const wss = new WebSocketServer({ server });
 
-  await producer.connect();
-  console.log("Kafka producer connected");
+  producer
+    .connect()
+    .then(() => {
+      producerReady = true;
+      console.log("Kafka producer connected");
+    })
+    .catch((error) => {
+      console.error(
+        "Kafka producer unavailable, chat will continue without analytics:",
+        error,
+      );
+    });
 
   wss.on("connection", (ws: WebSocket) => {
     console.log("New web socket connection!");
@@ -120,17 +131,23 @@ export const createWebSockerServer = async (server: HttpServer) => {
           console.log(`Echoed message to sender ${senderKey}`);
         }
 
-        await producer.send({
-          topic: "chat.new_message",
-          messages: [
-            {
-              key: conversationId,
-              value: JSON.stringify(messagePayload),
-            },
-          ],
-        });
+        if (producerReady) {
+          try {
+            await producer.send({
+              topic: "chat.new_message",
+              messages: [
+                {
+                  key: conversationId,
+                  value: JSON.stringify(messagePayload),
+                },
+              ],
+            });
 
-        console.log(`Message queued to kafka: ${conversationId}`);
+            console.log(`Message queued to kafka: ${conversationId}`);
+          } catch (error) {
+            console.error("Failed to queue chat message to Kafka:", error);
+          }
+        }
       } catch (error) {
         console.log(`Error processing websocket message:`, error);
       }

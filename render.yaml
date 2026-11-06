@@ -1,0 +1,72 @@
+services:
+  - type: web
+    name: eshop-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    autoDeploy: true
+    healthCheckPath: /gateway-health
+    # One service, one public port. Prisma's generated client is gitignored,
+    # so generate it on Linux before compiling. Builds run sequentially to
+    # stay inside the free plan's memory limit.
+    buildCommand: npm ci --include=dev --legacy-peer-deps && npx prisma generate && npx nx run-many -t build -p @eshop/api-gateway @eshop/auth-service @eshop/product-service @eshop/user-service @eshop/order-service @eshop/admin-service @eshop/seller-service @eshop/chatting-service @eshop/kafka-service --parallel=1
+    startCommand: node scripts/start-all.mjs
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: NODE_ENV
+        value: production
+      - key: NX_DAEMON
+        value: "false"
+
+      # Databases
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+
+      # Auth
+      - key: ACCESS_TOKEN_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+
+      # Payments
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+
+      # Uploads
+      - key: IMAGEKIT_PRIVATE_KEY
+        sync: false
+
+      # Kafka (Aiven)
+      - key: KAFKA_BROKER_URI
+        sync: false
+      - key: KAFKA_USER_NAME
+        sync: false
+      - key: KAFKA_PASSWORD
+        sync: false
+      - key: KAFKA_CA_CERT
+        sync: false
+
+      # Email (Brevo SMTP; Render free blocks ports 25/465/587)
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "2525"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+      # Frontend origins
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SELLER_UI_URL
+        sync: false

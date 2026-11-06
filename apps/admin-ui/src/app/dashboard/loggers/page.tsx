@@ -25,9 +25,16 @@ const LoggerPage = () => {
   const [logs, setLogs] = useState<LogItem[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<LogItem[]>([]);
   const logContainerRef = useRef<HTMLDivElement | null>(null);
+  const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URI;
 
   useEffect(() => {
-    const socket = new WebSocket(String(process.env.NEXT_PUBLIC_SOCKET_URI));
+    // The logger service is not part of the free-tier deployment, so the
+    // page must render without a socket instead of throwing on mount.
+    if (!socketUrl) {
+      return;
+    }
+
+    const socket = new WebSocket(socketUrl);
 
     socket.onmessage = (event) => {
       try {
@@ -39,7 +46,7 @@ const LoggerPage = () => {
     };
 
     return () => socket.close();
-  }, []);
+  }, [socketUrl]);
 
   // Auto-scroll to bottom on log update
   useEffect(() => {
@@ -108,7 +115,11 @@ const LoggerPage = () => {
         className="bg-black font-mono border border-gray-800 rounded-md p-4 h-[600px] overflow-y-auto space-y-1"
       >
         {filteredLogs.length === 0 ? (
-          <p className="text-gray-500">Waiting for logs...</p>
+          <p className="text-gray-500">
+            {socketUrl
+              ? "Waiting for logs..."
+              : "Live logs are not configured for this deployment."}
+          </p>
         ) : (
           filteredLogs.map((log, idx) => (
             <div key={idx} className="whitespace-pre-wrap">
