@@ -262,11 +262,18 @@ const Page = () => {
               </div>
 
               <button
-                className="w-full mt-4 text-lg cursor-pointer bg-blue-500 text-white py-2 rounded-lg"
+                className="w-full mt-4 cursor-pointer bg-blue-500 text-white py-2 rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 disabled={verifyOtpMutation.isPending}
                 onClick={() => verifyOtpMutation.mutate()}
               >
-                {verifyOtpMutation.isPending ? "Verifying ..." : "Verify OTP"}
+                {verifyOtpMutation.isPending ? (
+                  <Fragment>
+                    <ButtonLoader />
+                    Verifying...
+                  </Fragment>
+                ) : (
+                  "Verify OTP"
+                )}
               </button>
 
               <p className="text-center text-sm mt-4">

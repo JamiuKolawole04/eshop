@@ -8,6 +8,8 @@ import axios, { AxiosError } from "axios";
 import { toast } from "react-hot-toast";
 import { useMutation } from "@tanstack/react-query";
 
+import { ButtonLoader } from "@packages/ui";
+
 type FormData = {
   email: string;
   password: string;
@@ -214,9 +216,16 @@ const Page = () => {
                 <button
                   type="submit"
                   disabled={requestOtpMutation.isPending}
-                  className="w-full mt-4 text-base cursor-pointer bg-black text-white py-2 rounded-lg"
+                  className="w-full mt-4 text-base cursor-pointer bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {requestOtpMutation.isPending ? "Sending OTP ..." : "Submit"}
+                  {requestOtpMutation.isPending ? (
+                    <Fragment>
+                      <ButtonLoader />
+                      Sending OTP...
+                    </Fragment>
+                  ) : (
+                    "Submit"
+                  )}
                 </button>
 
                 {serverError && (
@@ -252,22 +261,37 @@ const Page = () => {
               </div>
 
               <button
-                className="w-full mt-4 text-lg cursor-pointer bg-blue-500 text-white py-2 rounded-lg"
+                className="w-full mt-4 cursor-pointer bg-blue-500 text-white py-2 rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 disabled={verifyOtpMutation.isPending}
                 onClick={() => verifyOtpMutation.mutate()}
               >
-                {verifyOtpMutation.isPending ? "Verifying ..." : "Verify OTP"}
+                {verifyOtpMutation.isPending ? (
+                  <Fragment>
+                    <ButtonLoader />
+                    Verifying...
+                  </Fragment>
+                ) : (
+                  "Verify OTP"
+                )}
               </button>
 
               <p className="text-center text-sm mt-4">
                 {canResend ? (
                   <button
-                    className="text-blue-500 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-blue-500 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={requestOtpMutation.isPending}
                     onClick={() =>
                       requestOtpMutation.mutate({ email: userEmail })
                     }
                   >
-                    Resend OTP
+                    {requestOtpMutation.isPending ? (
+                      <Fragment>
+                        Resending...
+                        <ButtonLoader size={12} />
+                      </Fragment>
+                    ) : (
+                      "Resend OTP"
+                    )}
                   </button>
                 ) : (
                   `Resend OTP in ${timer}s`
@@ -311,9 +335,16 @@ const Page = () => {
                 <button
                   type="submit"
                   disabled={resetPasswordMutation.isPending}
-                  className="w-full mt-4 text-base cursor-pointer bg-black text-white py-2 rounded-lg"
+                  className="w-full mt-4 text-base cursor-pointer bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {resetPasswordMutation.isPending ? "Resetting ..." : "Reset"}
+                  {resetPasswordMutation.isPending ? (
+                    <Fragment>
+                      <ButtonLoader />
+                      Resetting...
+                    </Fragment>
+                  ) : (
+                    "Reset"
+                  )}
                 </button>
 
                 {serverError && (
