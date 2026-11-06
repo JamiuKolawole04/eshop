@@ -10,7 +10,8 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import {
@@ -77,6 +78,25 @@ export const OrdersTable = () => {
   if (isLoading)
     return <p className="text-sm text-gray-600">Loading orders...</p>;
 
+  if ((data?.length ?? 0) === 0)
+    return (
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 py-16 text-center">
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+          <ShoppingBag size={22} />
+        </div>
+        <p className="font-medium text-gray-800">No orders yet</p>
+        <p className="text-sm text-gray-500">
+          When you place an order, it will appear here.
+        </p>
+        <Link
+          href="/products"
+          className="mt-5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          Start shopping
+        </Link>
+      </div>
+    );
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border-collapse">
@@ -115,12 +135,6 @@ export const OrdersTable = () => {
           ))}
         </tbody>
       </table>
-
-      {data?.length === 0 && (
-        <p className="text-center h-[30vh] items-center flex justify-center">
-          No orders available yet!
-        </p>
-      )}
     </div>
   );
 };
