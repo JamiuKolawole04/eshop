@@ -43,6 +43,8 @@ export const SidebarWrapper = () => {
   const getIconColor = (route: string) =>
     activeSidebar === route ? "#0085ff" : "#969696";
 
+  const needsPayoutSetup = !isSellerLoading && !seller?.paystackSubaccountCode;
+
   const handleLogout = async () => {
     queryClient.removeQueries({ queryKey: ["seller-profile"] });
     router.push("/login");
@@ -129,6 +131,7 @@ export const SidebarWrapper = () => {
                 title="Create Product"
                 href="/dashboard/create-product"
                 isActive={activeSidebar === "/dashboard/create-product"}
+                needsAttention={needsPayoutSetup}
                 icon={
                   <SquarePlus
                     size={20}
@@ -155,6 +158,7 @@ export const SidebarWrapper = () => {
                 title="Create Event"
                 href="/dashboard/create-event"
                 isActive={activeSidebar === "/dashboard/create-event"}
+                needsAttention={needsPayoutSetup}
                 icon={
                   <CalendarPlus
                     size={20}

@@ -242,6 +242,12 @@ export const createProduct = async (
       return next(new ValidationError("Missing required fields"));
     }
 
+    if (!req.seller?.paystackSubaccountCode) {
+      throw new ValidationError(
+        "Connect a bank account before adding products.",
+      );
+    }
+
     const slugChecking = await prisma.products.findUnique({
       where: { slug },
     });

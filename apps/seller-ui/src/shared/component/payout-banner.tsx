@@ -29,8 +29,8 @@ export const PayoutBanner = () => {
             Connect your bank account to receive payouts
           </p>
           <p className="mt-0.5 text-xs text-amber-200/70 sm:text-sm">
-            Your share of sales can&apos;t be paid out until your payout account
-            is connected.
+            You can&apos;t list products until your payout account is
+            connected.
           </p>
         </div>
       </div>
