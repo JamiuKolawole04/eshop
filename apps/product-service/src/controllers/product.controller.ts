@@ -692,13 +692,13 @@ export const getFilteredProducts = async (
 
     if (colors && (colors as string[]).length > 0) {
       filters.colors = {
-        hasSome: Array.isArray(colors) ? colors : [colors],
+        hasSome: Array.isArray(colors) ? colors : String(colors).split(","),
       };
     }
 
     if (sizes && (sizes as string[]).length > 0) {
       filters.sizes = {
-        hasSome: Array.isArray(sizes) ? sizes : [sizes],
+        hasSome: Array.isArray(sizes) ? sizes : String(sizes).split(","),
       };
     }
     const [products, total] = await Promise.all([

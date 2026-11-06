@@ -30,6 +30,29 @@ const MIN = 0;
 const MAX = 10000;
 const STEP = 10;
 
+const parseListParam = (value: string) => value.split(",").filter(Boolean);
+
+const parsePriceRangeParam = (value: string): number[] => {
+  const [rawMin, rawMax] = value.split(",").map(Number);
+
+  if (!Number.isFinite(rawMin) || !Number.isFinite(rawMax)) {
+    return [MIN, MAX];
+  }
+
+  const low = Math.min(rawMin, rawMax);
+  const high = Math.max(rawMin, rawMax);
+
+  return [
+    Math.max(MIN, Math.min(MAX, low)),
+    Math.max(MIN, Math.min(MAX, high)),
+  ];
+};
+
+const parsePageParam = (value: string) => {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
+};
+
 // Product grid: 1 col (phones) -> 2 (>=480px) -> 2 (lg, sidebar takes space) -> 3 (xl) -> 4 (2xl)
 const GRID_CLASSES =
   "grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5";
@@ -87,20 +110,115 @@ const ProductsContent = () => {
   const searchParams = useSearchParams();
 
   const q = (searchParams.get("q") ?? "").trim();
+  const categoriesParam = searchParams.get("categories") ?? "";
+  const colorsParam = searchParams.get("colors") ?? "";
+  const sizesParam = searchParams.get("sizes") ?? "";
+  const priceRangeParam = searchParams.get("priceRange") ?? "";
+  const pageParam = searchParams.get("page") ?? "";
 
   const [isProductLoading, setIsProductLoading] = useState(true);
-  const [priceRange, setPriceRange] = useState([MIN, MAX]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [page, setPage] = useState<number>(1);
+  const [priceRange, setPriceRange] = useState<number[]>(() =>
+    parsePriceRangeParam(priceRangeParam),
+  );
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(() =>
+    parseListParam(categoriesParam),
+  );
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(() =>
+    parseListParam(sizesParam),
+  );
+  const [selectedColors, setSelectedColors] = useState<string[]>(() =>
+    parseListParam(colorsParam),
+  );
+  const [page, setPage] = useState<number>(() => parsePageParam(pageParam));
   const [products, setProducts] = useState<ProductWithRelationsType[]>([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [tempPriceRange, setTempPriceRange] = useState([MIN, MAX]);
+  const [tempPriceRange, setTempPriceRange] = useState<number[]>(() =>
+    parsePriceRangeParam(priceRangeParam),
+  );
   const [error, setError] = useState<string | null>(null);
 
   const [showFilters, setShowFilters] = useState(false);
   const lastQRef = useRef(q);
+  const lastCategoriesParamRef = useRef(categoriesParam);
+  const lastColorsParamRef = useRef(colorsParam);
+  const lastSizesParamRef = useRef(sizesParam);
+  const lastPriceRangeParamRef = useRef(priceRangeParam);
+  const lastPageParamRef = useRef(pageParam);
+
+  useEffect(() => {
+    if (lastCategoriesParamRef.current === categoriesParam) {
+      return;
+    }
+
+    lastCategoriesParamRef.current = categoriesParam;
+
+    const fromUrl = parseListParam(categoriesParam);
+
+    if (fromUrl.join(",") !== selectedCategories.join(",")) {
+      setSelectedCategories(fromUrl);
+      setPage(1);
+    }
+  }, [categoriesParam, selectedCategories]);
+
+  useEffect(() => {
+    if (lastColorsParamRef.current === colorsParam) {
+      return;
+    }
+
+    lastColorsParamRef.current = colorsParam;
+
+    const fromUrl = parseListParam(colorsParam);
+
+    if (fromUrl.join(",") !== selectedColors.join(",")) {
+      setSelectedColors(fromUrl);
+      setPage(1);
+    }
+  }, [colorsParam, selectedColors]);
+
+  useEffect(() => {
+    if (lastSizesParamRef.current === sizesParam) {
+      return;
+    }
+
+    lastSizesParamRef.current = sizesParam;
+
+    const fromUrl = parseListParam(sizesParam);
+
+    if (fromUrl.join(",") !== selectedSizes.join(",")) {
+      setSelectedSizes(fromUrl);
+      setPage(1);
+    }
+  }, [sizesParam, selectedSizes]);
+
+  useEffect(() => {
+    if (lastPriceRangeParamRef.current === priceRangeParam) {
+      return;
+    }
+
+    lastPriceRangeParamRef.current = priceRangeParam;
+
+    const fromUrl = parsePriceRangeParam(priceRangeParam);
+
+    if (fromUrl.join(",") !== priceRange.join(",")) {
+      setPriceRange(fromUrl);
+      setTempPriceRange(fromUrl);
+      setPage(1);
+    }
+  }, [priceRangeParam, priceRange]);
+
+  useEffect(() => {
+    if (lastPageParamRef.current === pageParam) {
+      return;
+    }
+
+    lastPageParamRef.current = pageParam;
+
+    const fromUrl = parsePageParam(pageParam);
+
+    if (fromUrl !== page) {
+      setPage(fromUrl);
+    }
+  }, [pageParam, page]);
 
   const updateURL = () => {
     const params = new URLSearchParams();
@@ -120,11 +238,11 @@ const ProductsContent = () => {
 
     params.set("page", page.toString());
 
-    const query = decodeURIComponent(params.toString());
+    if (q) {
+      params.set("q", q);
+    }
 
-    router.replace(
-      q ? `products?${query}&q=${encodeURIComponent(q)}` : `products?${query}`,
-    );
+    router.replace(`products?${params.toString()}`);
   };
 
   const fetchFilteredProducts = async () => {
@@ -184,7 +302,7 @@ const ProductsContent = () => {
   const clearSearch = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("q");
-    const search = decodeURIComponent(params.toString());
+    const search = params.toString();
     router.replace(search ? `products?${search}` : "products");
   };
 
@@ -366,8 +484,8 @@ const ProductsContent = () => {
                     <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
                       <input
                         type="checkbox"
-                        checked={selectedColors.includes(color.name)}
-                        onChange={() => toggleColor(color.name)}
+                        checked={selectedColors.includes(color.code)}
+                        onChange={() => toggleColor(color.code)}
                         className="accent-blue-600"
                       />
                       <span
