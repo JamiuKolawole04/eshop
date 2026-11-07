@@ -39,9 +39,18 @@ export const sendMail = async (
   data: Record<string, any>,
 ) => {
   try {
+    const fromAddress = process.env.SMTP_FROM ?? process.env.SMTP_USER;
+
+    if (!fromAddress) {
+      throw new Error("SMTP_FROM or SMTP_USER must be set");
+    }
+
     const html = await renderTemplate(templateName, data);
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || `<${process.env.SMTP_USER}>`,
+      from: {
+        name: "Eshop",
+        address: fromAddress,
+      },
       to,
       subject,
       html,
