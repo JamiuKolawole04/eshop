@@ -6,14 +6,11 @@ services:
     region: frankfurt
     autoDeploy: true
     healthCheckPath: /gateway-health
-    # One service, one public port. Prisma's generated client is gitignored,
-    # so generate it on Linux before compiling. Builds run sequentially to
-    # stay inside the free plan's memory limit.
     buildCommand: npm ci --include=dev --legacy-peer-deps && npx prisma generate && npx nx run-many -t build -p @eshop/api-gateway @eshop/auth-service @eshop/product-service @eshop/user-service @eshop/order-service @eshop/admin-service @eshop/seller-service @eshop/chatting-service @eshop/kafka-service --parallel=1
     startCommand: node scripts/start-all.mjs
     envVars:
       - key: NODE_VERSION
-        value: 22.14.0
+        value: "26.12.1"
       - key: NODE_ENV
         value: production
       - key: NX_DAEMON
