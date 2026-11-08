@@ -67,3 +67,7 @@ services:
         sync: false
       - key: SELLER_UI_URL
         sync: false
+
+      # cookie
+      - key: COOKIE_DOMAIN
+        value: "eshopstore.com.ng"
