@@ -30,6 +30,8 @@ export const setCookie = (res: Response, name: string, value: string) => {
   });
 };
 
+const sessionCookieDomain = process.env.COOKIE_DOMAIN;
+
 export const setSessionFlag = (res: Response) => {
   res.cookie("has_session", "1", {
     httpOnly: false, // must be readable by JS
@@ -37,9 +39,13 @@ export const setSessionFlag = (res: Response) => {
     sameSite: "none",
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7days
+    ...(sessionCookieDomain ? { domain: sessionCookieDomain } : {}),
   });
 };
 
 export const clearSessionFlag = (res: Response) => {
-  res.clearCookie("has_session", { path: "/" });
+  res.clearCookie("has_session", {
+    path: "/",
+    ...(sessionCookieDomain ? { domain: sessionCookieDomain } : {}),
+  });
 };
