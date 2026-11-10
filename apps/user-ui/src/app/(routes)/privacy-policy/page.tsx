@@ -129,10 +129,10 @@ const Page = () => {
               personal information, or withdraw your consent, by contacting us
               at{" "}
               <a
-                href="mailto:support@eshop.com"
+                href="mailto:eshopstore.support@gmail.com"
                 className="text-gray-900 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-900"
               >
-                support@eshop.com
+                eshopstore.support@gmail.com
               </a>
               .
             </p>
@@ -164,10 +164,10 @@ const Page = () => {
             <p className="mt-3 text-[15px] md:text-base leading-7 text-gray-700">
               Questions about this policy? Email{" "}
               <a
-                href="mailto:support@eshop.com"
+                href="mailto:eshopstore.support@gmail.com"
                 className="text-gray-900 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-900"
               >
-                support@eshop.com
+                eshopstore.support@gmail.com
               </a>
               .
             </p>

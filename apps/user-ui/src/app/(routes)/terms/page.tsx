@@ -94,10 +94,10 @@ const Page = () => {
               If an item arrives damaged, faulty or different from what you
               ordered, contact{" "}
               <a
-                href="mailto:support@eshop.com"
+                href="mailto:eshopstore.support@gmail.com"
                 className="text-gray-900 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-900"
               >
-                support@eshop.com
+                eshopstore.support@gmail.com
               </a>{" "}
               within 48 hours of delivery with your order number and photos.
               Approved refunds are returned to your original payment method.
@@ -164,10 +164,10 @@ const Page = () => {
               We may update these terms. The latest version will always be on
               this page. Questions? Email{" "}
               <a
-                href="mailto:support@eshop.com"
+                href="mailto:eshopstore.support@gmail.com"
                 className="text-gray-900 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-900"
               >
-                support@eshop.com
+                eshopstore.support@gmail.com
               </a>
               .
             </p>

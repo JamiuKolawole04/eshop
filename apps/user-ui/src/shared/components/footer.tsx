@@ -124,11 +124,11 @@ export const Footer = () => {
           </a>
 
           <a
-            href="mailto:support@eshop.com"
+            href="mailto:eshopstore.support@gmail.com"
             className="mt-4 flex items-center gap-2 break-all text-sm text-gray-600 hover:text-gray-900"
           >
             <Mail size={14} className="shrink-0" />
-            support@eshop.com
+            eshopstore.support@gmail.com
           </a>
 
           <p className="mt-2 flex items-start gap-2 text-sm text-gray-600">
