@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUp, MapPin, Mail, X } from "lucide-react";
+import { ArrowUp, Mail, X } from "lucide-react";
 import { FaFacebook, FaLinkedin } from "react-icons/fa";
 
 import { useAuthStore } from "@/store/auth";
@@ -27,7 +27,6 @@ const myAccountLinks: FooterLink[] = [
 const informationLinks: FooterLink[] = [
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms & Conditions", href: "/terms" },
-  { label: "Contact Us", href: "/contact" },
 ];
 
 const socials = [
@@ -115,30 +114,14 @@ export const Footer = () => {
           <h3 className="mb-3 text-base font-semibold text-gray-900 sm:mb-4">
             Talk To Us
           </h3>
-          <p className="text-xs text-gray-500">Got Questions? Call us</p>
-          <a
-            href="tel:+67041390762"
-            className="mt-1 block text-lg font-bold text-gray-900 sm:text-xl"
-          >
-            +670 413 90 762
-          </a>
-
+          <p className="text-xs text-gray-500">Questions? Email us</p>
           <a
             href="mailto:eshopstore.support@gmail.com"
-            className="mt-4 flex items-center gap-2 break-all text-sm text-gray-600 hover:text-gray-900"
+            className="mt-2 flex items-center gap-2 break-all text-sm font-medium text-gray-900 hover:underline"
           >
             <Mail size={14} className="shrink-0" />
             eshopstore.support@gmail.com
           </a>
-
-          <p className="mt-2 flex items-start gap-2 text-sm text-gray-600">
-            <MapPin size={14} className="mt-0.5 shrink-0" />
-            <span>
-              79 Sleepy Hollow St.
-              <br />
-              Jamaica, New York 1432
-            </span>
-          </p>
         </div>
       </div>
 
