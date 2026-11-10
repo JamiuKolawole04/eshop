@@ -117,6 +117,13 @@ const Page = () => {
     );
   }
 
+  const paymentMethod = (
+    order as typeof order & { paymentMethod?: string | null }
+  ).paymentMethod;
+
+  const isCashOnDelivery = paymentMethod === "cash_on_delivery";
+  const isPaid = order.status === "Paid";
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 font-Poppins">
       {/* Back link */}
@@ -155,10 +162,26 @@ const Page = () => {
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
               <dt className="text-gray-500">Payment status</dt>
-              <dd className="text-green-600 font-medium">{order.status}</dd>
+              <dd
+                className={
+                  isPaid
+                    ? "text-green-600 font-medium"
+                    : "text-amber-600 font-medium"
+                }
+              >
+                {order.status}
+              </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500">Total paid</dt>
+              <dt className="text-gray-500">Payment method</dt>
+              <dd className="text-gray-900 font-medium">
+                {isCashOnDelivery ? "Cash on Delivery" : "Online payment"}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-gray-500">
+                {isPaid ? "Total paid" : "Amount due"}
+              </dt>
               <dd className="text-gray-900 font-semibold">
                 {formatCurrency(order.total)}
               </dd>
@@ -195,6 +218,12 @@ const Page = () => {
               </dd>
             </div>
           </dl>
+
+          {isCashOnDelivery && !isPaid && (
+            <p className="text-xs text-gray-500 mt-3">
+              Pay {formatCurrency(order.total)} to the rider on delivery.
+            </p>
+          )}
         </div>
 
         {order.shippingAddress && (

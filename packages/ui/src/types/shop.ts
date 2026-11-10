@@ -21,6 +21,7 @@ export type ShopType = {
   updatedAt: string;
   lowStockThreshold?: number;
   orderNotificationChannel?: NotificationChannel;
+  cashOnDelivery?: "yes" | "no" | null;
 };
 
 export type GetFilteredShopsResponseType = {

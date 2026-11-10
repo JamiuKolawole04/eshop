@@ -21,7 +21,7 @@ type PaystackProps = {
   sessionId: string;
 };
 
-const OrderSummary = ({
+export const OrderSummary = ({
   cartItems,
   coupon,
 }: {

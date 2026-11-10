@@ -1,11 +1,14 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, PackageX } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Banknote, PackageX } from "lucide-react";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 import {
   OrderDetailsResponseType,
+  OrderDetailsType,
   DeliveryProgress,
   ButtonLoader,
   formatCurrency,
@@ -13,22 +16,57 @@ import {
 
 import axiosInstance from "@/utils/axiosInstance";
 
+type AdminOrderDetails = OrderDetailsType & {
+  paymentMethod?: "online" | "cash_on_delivery" | null;
+  paidAt?: string | null;
+};
+
+type CollectCashResponseType = {
+  success: boolean;
+  order: AdminOrderDetails;
+};
+
 const fetchOrder = async (id: string) => {
   const res = await axiosInstance.get<OrderDetailsResponseType>(
     `/api/orders/${id}`,
   );
-  return res.data.order;
+  return res.data.order as AdminOrderDetails;
+};
+
+const collectCash = async (id: string) => {
+  const res = await axiosInstance.patch<CollectCashResponseType>(
+    `/api/orders/admin/${id}/collect-cash`,
+  );
+  return res.data;
 };
 
 const Page = () => {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const orderId = params.id;
+  const queryClient = useQueryClient();
 
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", orderId],
     queryFn: () => fetchOrder(orderId),
     enabled: !!orderId,
+  });
+
+  const { mutate: markCashCollected, isPending: isCollecting } = useMutation<
+    CollectCashResponseType,
+    AxiosError<{ message: string }>
+  >({
+    mutationFn: () => collectCash(orderId),
+    onSuccess: () => {
+      toast.success("Cash payment recorded");
+      queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+    },
+    onError: (err) => {
+      toast.error(
+        err?.response?.data?.message || "Failed to mark cash as collected",
+      );
+    },
   });
 
   if (isLoading) {
@@ -57,6 +95,9 @@ const Page = () => {
       </div>
     );
   }
+
+  const isPaid = order.status === "Paid";
+  const isCashOnDelivery = order.paymentMethod === "cash_on_delivery";
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 font-poppins">
@@ -99,11 +140,27 @@ const Page = () => {
           </h2>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-gray-500">Payment status</dt>
-              <dd className="text-green-400 font-medium">{order.status}</dd>
+              <dt className="text-gray-500">Payment method</dt>
+              <dd className="text-gray-200 font-medium">
+                {isCashOnDelivery ? "Cash on Delivery" : "Online payment"}
+              </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500">Total paid</dt>
+              <dt className="text-gray-500">Payment status</dt>
+              <dd
+                className={
+                  isPaid
+                    ? "text-green-400 font-medium"
+                    : "text-yellow-400 font-medium"
+                }
+              >
+                {isPaid ? "Paid" : order.status || "Pending"}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-gray-500">
+                {isPaid ? "Total paid" : "Amount due"}
+              </dt>
               <dd className="text-gray-200 font-semibold">
                 {formatCurrency(order.total)}
               </dd>
@@ -140,6 +197,21 @@ const Page = () => {
               </dd>
             </div>
           </dl>
+
+          {isCashOnDelivery && !isPaid && (
+            <button
+              onClick={() => markCashCollected()}
+              disabled={isCollecting}
+              className="mt-4 w-full flex items-center justify-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isCollecting ? (
+                <ButtonLoader size={16} className="text-white" />
+              ) : (
+                <Banknote size={16} />
+              )}
+              {isCollecting ? "Marking..." : "Mark cash collected"}
+            </button>
+          )}
         </div>
 
         {order.shippingAddress && (

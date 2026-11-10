@@ -74,24 +74,29 @@
     </style>
   </head>
   <body>
+    <% const isCod = typeof paymentMethod !== "undefined" && paymentMethod === "cash_on_delivery"; const intro = isCod ? "We've received your order and will start processing it shortly. Payment is due when your order is delivered." : "Thank you for your purchase! We've received your order and will start processing it shortly."; %>
     <div class="container">
       <div class="header">
-        <h1>🎉 Order Confirmed!</h1>
+        <h1><%= isCod ? "🧾 Order Placed!" : "🎉 Order Confirmed!" %></h1>
       </div>
       <div class="body">
         <h2>Hi <%= name %>,</h2>
-        <p>
-          Thank you for your purchase! We've received your order and will start
-          processing it shortly.
-        </p>
+        <p><%= intro %></p>
         <div class="order-summary">
           <% cart.forEach(item => { %>
           <p>
-            🛍 <strong><%= item.title %></strong> — <%= item.quantity %> x $<%=
-            item.sale_price.toFixed(2) %>
+            🛍 <strong><%= item.title %></strong> — <%= item.quantity %> x ₦<%=
+            Number(item.sale_price).toFixed(2) %>
           </p>
           <% }) %>
-          <p class="total">Total: $<%= totalAmount.toFixed(2) %></p>
+          <p class="total">Total: ₦<%= Number(totalAmount).toFixed(2) %></p>
+          <p>Payment method: <%= isCod ? "Cash on Delivery" : "Online payment" %></p>
+          <% if (isCod) { %>
+          <p>
+            Please have ₦<%= Number(totalAmount).toFixed(2) %> ready for the
+            rider.
+          </p>
+          <% } %>
         </div>
         <a
           href="<%= trackingUrl %>"

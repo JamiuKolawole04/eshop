@@ -26,21 +26,122 @@ export const createPaymentSession = async (
 ) => {
   type Session = {
     id: string;
-    quantity: string;
-    sale_price: string;
+    quantity: string | number;
+    sale_price: string | number;
     shopId: string;
-    selectedOptions: object;
+    selectedOptions?: object;
   };
   try {
-    const { cart, selectedAddressId, coupon } = req.body;
+    const {
+      cart,
+      selectedAddressId,
+      coupon,
+      paymentMethod: requestedMethod,
+    } = req.body;
     const userId = req.user?.id;
+
+    if (!userId) {
+      throw new ForbiddenError("You must be signed in to check out.");
+    }
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       throw new ValidationError("Cart is empty or invalid.");
     }
 
+    if (!selectedAddressId) {
+      throw new ValidationError("Please choose a delivery address.");
+    }
+
+    const paymentMethod =
+      requestedMethod === "cash_on_delivery" ? "cash_on_delivery" : "online";
+
+    const address = await prisma.address.findFirst({
+      where: { id: selectedAddressId, userId },
+      select: { id: true },
+    });
+
+    if (!address) {
+      throw new ValidationError("The selected delivery address is not yours.");
+    }
+
+    const productIds = [...new Set((cart as Session[]).map((item) => item.id))];
+
+    const products = await prisma.products.findMany({
+      where: { id: { in: productIds }, isDeleted: { not: true } },
+      select: { id: true, sale_price: true, shopId: true, stock: true },
+    });
+
+    const productMap = new Map(
+      products.map((product) => [product.id, product]),
+    );
+
+    if (products.length !== productIds.length) {
+      throw new ValidationError(
+        "One or more items in your cart are no longer available.",
+      );
+    }
+
+    for (const item of cart as Session[]) {
+      const product = productMap.get(item.id) as {
+        stock: number;
+      };
+      const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
+
+      if (quantity > product.stock) {
+        throw new ValidationError(
+          "One or more items in your cart don't have enough stock left.",
+        );
+      }
+    }
+
+    const pricedCart = (cart as Session[]).map((item) => {
+      const product = productMap.get(item.id) as {
+        id: string;
+        sale_price: number;
+        shopId: string;
+      };
+      const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
+
+      return {
+        ...item,
+        id: product.id,
+        quantity,
+        sale_price: product.sale_price,
+        shopId: product.shopId,
+        selectedOptions: item.selectedOptions || {},
+      };
+    });
+
+    const uniqueShopsId = [...new Set(pricedCart.map((item) => item.shopId))];
+
+    const shops = await prisma.shops.findMany({
+      where: { id: { in: uniqueShopsId } },
+      select: {
+        id: true,
+        sellerId: true,
+        cashOnDelivery: true,
+        seller: {
+          select: { stripeId: true, paystackSubaccountCode: true },
+        },
+      },
+    });
+
+    if (shops.length !== uniqueShopsId.length) {
+      throw new ValidationError("One or more shops are no longer available.");
+    }
+
+    const cashOnDeliveryEligible = shops.every(
+      (shop) => shop.cashOnDelivery === "yes",
+    );
+
+    if (paymentMethod === "cash_on_delivery" && !cashOnDeliveryEligible) {
+      throw new ValidationError(
+        "Cash on delivery isn't available for every item in your cart.",
+      );
+    }
+
     const normalizedCart = JSON.stringify(
-      (cart as Session[])
+      [...pricedCart]
         .map((item) => ({
           id: item.id,
           quantity: item.quantity,
@@ -71,33 +172,26 @@ export const createPaymentSession = async (
               .sort((a, b) => a.id.localeCompare(b.id)),
           );
 
-          if (existingCart === normalizedCart) {
+          if (
+            existingCart === normalizedCart &&
+            session.paymentMethod === paymentMethod
+          ) {
             return res.status(200).json({ sessionId: key.split(":")[1] });
-          } else {
-            await redis.del(key);
           }
+
+          await redis.del(key);
         }
       }
     }
 
-    const uniqueShopsId = [...new Set(cart.map((item) => item.shopId))];
-
-    const shopShares = cart.reduce<Record<string, number>>((acc, item) => {
-      acc[item.shopId] =
-        (acc[item.shopId] ?? 0) + item.quantity * item.sale_price;
-      return acc;
-    }, {});
-
-    const shops = await prisma.shops.findMany({
-      where: { id: { in: uniqueShopsId } },
-      select: {
-        id: true,
-        sellerId: true,
-        seller: {
-          select: { stripeId: true, paystackSubaccountCode: true },
-        },
+    const shopShares = pricedCart.reduce<Record<string, number>>(
+      (acc, item) => {
+        acc[item.shopId] =
+          (acc[item.shopId] ?? 0) + item.quantity * item.sale_price;
+        return acc;
       },
-    });
+      {},
+    );
 
     const sellerData = shops.map((shop) => ({
       shopId: shop.id,
@@ -107,7 +201,7 @@ export const createPaymentSession = async (
       amount: shopShares[shop.id] ?? 0,
     }));
 
-    const totalAmount = cart.reduce((total, item) => {
+    const totalAmount = pricedCart.reduce((total, item) => {
       return total + item.quantity * item.sale_price;
     }, 0);
 
@@ -115,11 +209,12 @@ export const createPaymentSession = async (
 
     const sessionData = {
       userId,
-      cart,
+      cart: pricedCart,
       sellers: sellerData,
       totalAmount,
-      shippingAddressId: selectedAddressId || null,
+      shippingAddressId: selectedAddressId,
       coupon: coupon || null,
+      paymentMethod,
     };
 
     await redis.setex(
@@ -145,6 +240,12 @@ export const verifyingPaymentSession = async (
       return res.status(400).json({ message: "Session ID is required." });
     }
 
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new ForbiddenError("You must be signed in to check out.");
+    }
+
     const sessionKey = `payment-session:${sessionId}`;
     const sessionData = await redis.get(sessionKey);
 
@@ -153,6 +254,12 @@ export const verifyingPaymentSession = async (
     }
 
     const session = JSON.parse(sessionData);
+
+    if (session.userId !== userId) {
+      throw new ForbiddenError(
+        "You are not allowed to use this payment session.",
+      );
+    }
 
     return res.status(200).json({
       success: true,
@@ -200,6 +307,12 @@ export const createPaystackPayment = async (
     if (session.userId !== user.id) {
       throw new ForbiddenError(
         "You are not allowed to use this payment session.",
+      );
+    }
+
+    if (session.paymentMethod === "cash_on_delivery") {
+      throw new ValidationError(
+        "This checkout is set up for cash on delivery. Please place the order from the checkout page.",
       );
     }
 
@@ -392,12 +505,13 @@ export const paystackWebhook = async (
           .json({ received: true, note: "amount-mismatch" });
       }
 
-      const outcome = await createOrdersForSession(
+      const result = await materializeOrders(
         sessionId,
         data.metadata.userId,
+        "online",
       );
 
-      return res.status(200).json({ received: true, outcome });
+      return res.status(200).json({ received: true, ...result });
     }
 
     if (event?.event === "refund.created") {
@@ -417,24 +531,48 @@ export const paystackWebhook = async (
   }
 };
 
-const createOrdersForSession = async (
+type PaymentMethod = "online" | "cash_on_delivery";
+
+type MaterializeOutcome = {
+  outcome: "created" | "already-processed" | "session-missing";
+  orderIds: string[];
+};
+
+const PLATFORM_FEE_PERCENTAGE = 10;
+
+const materializeOrders = async (
   sessionId: string,
   userId: string,
-): Promise<"created" | "already-processed" | "session-missing"> => {
+  paymentMethodOverride?: PaymentMethod,
+): Promise<MaterializeOutcome> => {
   const sessionKey = `payment-session:${sessionId}`;
   const sessionData = await redis.get(sessionKey);
 
   if (!sessionData) {
     console.warn("Session data expired or missing for", sessionId);
-    return "session-missing";
+    return { outcome: "session-missing", orderIds: [] };
   }
 
-  const { cart, totalAmount, shippingAddressId, coupon } =
-    JSON.parse(sessionData);
+  const {
+    cart,
+    shippingAddressId,
+    coupon,
+    paymentMethod: sessionPaymentMethod,
+  } = JSON.parse(sessionData);
+
+  const paymentMethod: PaymentMethod =
+    paymentMethodOverride ??
+    (sessionPaymentMethod === "cash_on_delivery"
+      ? "cash_on_delivery"
+      : "online");
 
   const user = await prisma.users.findUnique({ where: { id: userId } });
   const name = user?.name;
   const email = user?.email as string;
+
+  const trackingBaseUrl =
+    process.env.USER_UI_URL?.replace(/\/+$/, "") ||
+    "https://www.eshopstore.com.ng";
 
   const shopGrouped = cart.reduce((acc: any, item: any) => {
     if (!acc[item.shopId]) acc[item.shopId] = [];
@@ -443,6 +581,7 @@ const createOrdersForSession = async (
   }, {});
 
   let createdNewOrder = false;
+  const orderIds: string[] = [];
 
   for (const shopId in shopGrouped) {
     const existing = await prisma.orders.findFirst({
@@ -450,7 +589,10 @@ const createOrdersForSession = async (
       select: { id: true },
     });
 
-    if (existing) continue;
+    if (existing) {
+      orderIds.push(existing.id);
+      continue;
+    }
 
     const orderItems = shopGrouped[shopId];
 
@@ -490,7 +632,10 @@ const createOrdersForSession = async (
           userId,
           shopId,
           total: orderTotal,
-          status: "Paid",
+          status: paymentMethod === "cash_on_delivery" ? "Pending" : "Paid",
+          paymentMethod,
+          paidAt: paymentMethod === "cash_on_delivery" ? null : new Date(),
+          platformFee: Math.round(orderTotal * PLATFORM_FEE_PERCENTAGE) / 100,
           shippingAddressId: shippingAddressId || null,
           couponCode: coupon?.code || null,
           discountAmount: coupon?.discountAmount || 0,
@@ -511,6 +656,8 @@ const createOrdersForSession = async (
       }
       throw err;
     }
+
+    orderIds.push(order.id);
 
     // Update product & analytics
     for (const item of orderItems) {
@@ -571,28 +718,26 @@ const createOrdersForSession = async (
       }
     }
 
-    // Send email for user
+    // Send email for user — only this shop's items and total.
     await orderConfirmationQueue.add(
       "order-confirmation",
       {
         orderId: order.id,
         userEmail: email,
         userName: name as string,
-        cart,
-        totalAmount: coupon?.discountAmount
-          ? totalAmount - coupon?.discountAmount
-          : totalAmount,
-        trackingUrl: `https://eshop.com/order/${order.id}`,
+        cart: orderItems,
+        totalAmount: orderTotal,
+        paymentMethod,
+        trackingUrl: `${trackingBaseUrl}/order/${order.id}`,
       },
       {
         jobId: `order-confirmation-${order.id}`,
       },
     );
 
-    // Create notifications for sellers
-    const createdShopIds = Object.keys(shopGrouped);
-    const sellerShops = await prisma.shops.findMany({
-      where: { id: { in: createdShopIds } },
+    // Create notifications for the seller who owns this order's shop
+    const shop = await prisma.shops.findUnique({
+      where: { id: shopId },
       select: {
         id: true,
         sellerId: true,
@@ -600,7 +745,7 @@ const createOrdersForSession = async (
       },
     });
 
-    for (const shop of sellerShops) {
+    if (shop) {
       const firstProduct = shopGrouped[shop.id][0];
       const productTitle = firstProduct?.title || "new item";
 
@@ -640,7 +785,10 @@ const createOrdersForSession = async (
 
   await redis.del(sessionKey);
 
-  return createdNewOrder ? "created" : "already-processed";
+  return {
+    outcome: createdNewOrder ? "created" : "already-processed",
+    orderIds,
+  };
 };
 
 // create order
@@ -674,9 +822,9 @@ export const createOrder = async (
       const sessionId = paymentIntent.metadata.sessionId;
       const userId = paymentIntent.metadata.userId;
 
-      const outcome = await createOrdersForSession(sessionId, userId);
+      const result = await materializeOrders(sessionId, userId, "online");
 
-      res.status(200).json({ received: true, outcome });
+      res.status(200).json({ received: true, ...result });
     } else {
       return res.status(200).json({ received: true, ignored: event.type });
     }
@@ -759,6 +907,7 @@ export const getSellerRevenue = async (
       where: {
         shopId: shop.id,
         createdAt: { gte: start },
+        status: "Paid",
       },
       select: { total: true, createdAt: true },
     });
@@ -1023,7 +1172,7 @@ export const getAdminRevenue = async (
     const start = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
     const orders = await prisma.orders.findMany({
-      where: { createdAt: { gte: start } },
+      where: { createdAt: { gte: start }, status: "Paid" },
       select: { total: true, createdAt: true },
     });
 
@@ -1049,4 +1198,179 @@ export const getAdminRevenue = async (
   } catch (error) {
     return next(error);
   }
+};
+
+/**
+ * Public helper for the cart: tells the client whether every shop in the
+ * cart accepts cash on delivery. All-or-nothing by design.
+ */
+export const getCashOnDeliveryEligibility = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const raw = req.query.shopIds;
+    const shopIds = (Array.isArray(raw) ? raw : String(raw ?? "").split(","))
+      .map((value) => String(value).trim())
+      .filter(Boolean);
+
+    const uniqueShopIds = [...new Set(shopIds)];
+
+    if (uniqueShopIds.length === 0) {
+      return res.status(200).json({ success: true, cashOnDelivery: false });
+    }
+
+    const shops = await prisma.shops.findMany({
+      where: { id: { in: uniqueShopIds } },
+      select: { id: true, cashOnDelivery: true },
+    });
+
+    const cashOnDelivery =
+      shops.length === uniqueShopIds.length &&
+      shops.every((shop) => shop.cashOnDelivery === "yes");
+
+    return res.status(200).json({ success: true, cashOnDelivery });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const createCashOnDeliveryOrder = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new ForbiddenError("You must be signed in to place an order.");
+    }
+
+    const sessionId = String(req.body?.sessionId || "");
+
+    if (!sessionId) {
+      throw new ValidationError("Payment session is required.");
+    }
+
+    const sessionData = await redis.get(`payment-session:${sessionId}`);
+
+    if (!sessionData) {
+      throw new ValidationError(
+        "Your checkout session has expired. Please try again.",
+      );
+    }
+
+    const session = JSON.parse(sessionData);
+
+    if (session.userId !== userId) {
+      throw new ForbiddenError(
+        "You are not allowed to use this payment session.",
+      );
+    }
+
+    const shopIds = [
+      ...new Set<string>(
+        (session.cart ?? []).map((item: any) => String(item.shopId)),
+      ),
+    ];
+
+    const shops = await prisma.shops.findMany({
+      where: { id: { in: shopIds } },
+      select: { id: true, cashOnDelivery: true },
+    });
+
+    const eligible =
+      shopIds.length > 0 &&
+      shops.length === shopIds.length &&
+      shops.every((shop) => shop.cashOnDelivery === "yes");
+
+    if (!eligible) {
+      throw new ValidationError(
+        "Cash on delivery isn't available for every item in your cart.",
+      );
+    }
+
+    const result = await materializeOrders(
+      sessionId,
+      userId,
+      "cash_on_delivery",
+    );
+
+    if (result.outcome === "session-missing") {
+      throw new ValidationError(
+        "Your checkout session has expired. Please try again.",
+      );
+    }
+
+    return res.status(201).json({
+      success: true,
+      orderIds: result.orderIds,
+      orderId: result.orderIds[0] ?? null,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const collectCashForOrder = async (
+  req: any,
+  res: Response,
+  next: NextFunction,
+  scope: "seller" | "admin",
+) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await prisma.orders.findUnique({ where: { id: orderId } });
+
+    if (!order) {
+      throw new NotFoundError("Order not found.");
+    }
+
+    if (scope === "seller") {
+      const shop = await prisma.shops.findUnique({
+        where: { sellerId: req.seller?.id },
+        select: { id: true },
+      });
+
+      if (!shop || order.shopId !== shop.id) {
+        throw new ForbiddenError("This order doesn't belong to your shop.");
+      }
+    }
+
+    if (order.paymentMethod !== "cash_on_delivery") {
+      throw new ValidationError("This order isn't a cash on delivery order.");
+    }
+
+    if (order.status === "Paid") {
+      return res.status(200).json({ success: true, order });
+    }
+
+    const updated = await prisma.orders.update({
+      where: { id: orderId },
+      data: { status: "Paid", paidAt: new Date() },
+    });
+
+    return res.status(200).json({ success: true, order: updated });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const collectCashPayment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  return collectCashForOrder(req, res, next, "seller");
+};
+
+export const collectCashPaymentAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  return collectCashForOrder(req, res, next, "admin");
 };

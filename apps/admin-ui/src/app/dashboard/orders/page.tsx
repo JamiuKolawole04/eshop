@@ -21,6 +21,10 @@ import {
 import axiosInstance from "@/utils/axiosInstance";
 import { BreadCrumbs } from "@/shared/components/breadcrumbs";
 
+type AdminOrder = OrderWithShop & {
+  paymentMethod?: "online" | "cash_on_delivery" | null;
+};
+
 const fetchOrders = async () => {
   const response = await axiosInstance.get<AdminOrdersResponseType>(
     `/api/orders/admin/all`,
@@ -32,13 +36,13 @@ const fetchOrders = async () => {
 const OrdersTable = () => {
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const { data: orders = [], isLoading } = useQuery<OrderWithShop[]>({
+  const { data: orders = [], isLoading } = useQuery<AdminOrder[]>({
     queryKey: ["admin-orders"],
     queryFn: fetchOrders,
     staleTime: 1000 * 60 * 5,
   });
 
-  const columns = useMemo<ColumnDef<OrderWithShop>[]>(
+  const columns = useMemo<ColumnDef<AdminOrder>[]>(
     () => [
       {
         accessorKey: "id",
@@ -90,6 +94,17 @@ const OrdersTable = () => {
         ),
       },
       {
+        accessorKey: "paymentMethod",
+        header: "Payment",
+        cell: ({ row }) => (
+          <span className="text-white text-sm">
+            {row.original.paymentMethod === "cash_on_delivery"
+              ? "Cash on delivery"
+              : "Online"}
+          </span>
+        ),
+      },
+      {
         accessorKey: "createdAt",
         header: "Date",
         cell: ({ row }) => {
@@ -112,7 +127,7 @@ const OrdersTable = () => {
     [],
   );
 
-  const table = useReactTable<OrderWithShop>({
+  const table = useReactTable<AdminOrder>({
     data: orders,
     columns,
     getCoreRowModel: getCoreRowModel(),

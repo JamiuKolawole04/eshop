@@ -129,6 +129,7 @@ model Shops {
 
   lowStockThreshold        Int                 @default(10)
   orderNotificationChannel NotificationChannel @default(email)
+  cashOnDelivery           String              @default("no")
 }
 
 model Sellers {
@@ -287,6 +288,9 @@ model Orders {
   couponCode        String?
   discountAmount    Float?
   status            String
+  paymentMethod     String    @default("online")
+  paidAt            DateTime?
+  platformFee       Float?
   deliveryStatus    String      @default("Ordered")
   oderItems         OderItems[] @relation("OderItemsRelation")
 

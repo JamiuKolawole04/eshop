@@ -45,8 +45,43 @@ const Page = () => {
   const [error, setError] = useState("");
   const [storedCouponCode, setStoredCouponCode] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
-    "credit_card" | "cash_on_delivery"
-  >("credit_card");
+    "online" | "cash_on_delivery"
+  >("online");
+
+  const shopIdsKey = Array.from(
+    new Set(cart.map((item) => item.shopId).filter(Boolean)),
+  )
+    .sort()
+    .join(",");
+
+  const {
+    data: isCashOnDeliveryEligible = false,
+    isLoading: codEligibilityLoading,
+  } = useQuery({
+    queryKey: ["cod-eligibility", shopIdsKey],
+    queryFn: async () => {
+      const response = await axiosInstance.get<{
+        success: boolean;
+        cashOnDelivery: boolean;
+      }>(
+        `/api/orders/cash-on-delivery/eligibility?shopIds=${encodeURIComponent(
+          shopIdsKey,
+        )}`,
+      );
+
+      return response.data?.cashOnDelivery === true;
+    },
+    enabled: cart.length > 0,
+    staleTime: 60 * 1000,
+  });
+
+  const canPayOnDelivery = !codEligibilityLoading && isCashOnDeliveryEligible;
+
+  useEffect(() => {
+    if (!canPayOnDelivery && selectedPaymentMethod === "cash_on_delivery") {
+      setSelectedPaymentMethod("online");
+    }
+  }, [canPayOnDelivery, selectedPaymentMethod]);
 
   const createPaymentSession = async () => {
     if (!selectedAddressId || addresses?.length === 0) {
@@ -68,6 +103,7 @@ const Page = () => {
               discountPercentage,
               discountedProductId,
             },
+            paymentMethod: selectedPaymentMethod,
           },
         );
 
@@ -415,17 +451,28 @@ const Page = () => {
                   </h4>
 
                   <select
-                    className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:border-blue-500"
+                    className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:border-blue-500 disabled:opacity-70 disabled:cursor-not-allowed"
                     value={selectedPaymentMethod}
                     onChange={(e) =>
                       setSelectedPaymentMethod(
-                        e.target.value as "credit_card" | "cash_on_delivery",
+                        e.target.value as "online" | "cash_on_delivery",
                       )
                     }
+                    disabled={!canPayOnDelivery}
                   >
-                    <option value="credit_card">Online Payment</option>
-                    <option value="cash_on_delivery">Cash on Delivery</option>
+                    <option value="online">Online payment</option>
+                    {canPayOnDelivery && (
+                      <option value="cash_on_delivery">
+                        Cash on delivery
+                      </option>
+                    )}
                   </select>
+
+                  {!codEligibilityLoading && !isCashOnDeliveryEligible && (
+                    <p className="text-xs text-slate-600 pt-1.5">
+                      Some items in your cart are prepaid only.
+                    </p>
+                  )}
                 </div>
 
                 <hr className="my-4 text-slate-200" />

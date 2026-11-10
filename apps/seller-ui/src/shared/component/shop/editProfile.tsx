@@ -46,6 +46,10 @@ export const EditProfile = ({ shop, sellerId }: Props) => {
   const [openingHours, setOpeningHours] = useState(shop?.opening_hours ?? "");
   const [address, setAddress] = useState(shop?.address ?? "");
   const [website, setWebsite] = useState(shop?.website ?? "");
+  const [cashOnDelivery, setCashOnDelivery] = useState<"yes" | "no">(
+    (shop as ShopType & { cashOnDelivery?: "yes" | "no" | null })
+      ?.cashOnDelivery ?? "no",
+  );
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(
     (shop?.socialLinks as SocialLink[] | undefined) ?? [],
   );
@@ -72,6 +76,7 @@ export const EditProfile = ({ shop, sellerId }: Props) => {
         opening_hours: openingHours.trim(),
         address: address.trim(),
         website: website.trim(),
+        cash_on_delivery: cashOnDelivery,
         socialLinks: socialLinks
           .map((l) => ({ ...l, url: l.url.trim() }))
           .filter((l) => l.url),
@@ -212,6 +217,31 @@ export const EditProfile = ({ shop, sellerId }: Props) => {
               disabled={isSaving}
               className={INPUT}
             />
+          </div>
+
+          <div>
+            <label htmlFor="shop-cash-on-delivery" className={LABEL}>
+              Cash on Delivery
+            </label>
+            <select
+              id="shop-cash-on-delivery"
+              value={cashOnDelivery}
+              onChange={(e) =>
+                setCashOnDelivery(e.target.value as "yes" | "no")
+              }
+              disabled={isSaving}
+              className={INPUT}
+            >
+              <option value="no" className="bg-slate-900">
+                No
+              </option>
+              <option value="yes" className="bg-slate-900">
+                Yes
+              </option>
+            </select>
+            <p className="mt-1 text-xs text-slate-500">
+              Allow customers to pay in cash when their order is delivered.
+            </p>
           </div>
 
           {/* Social links */}

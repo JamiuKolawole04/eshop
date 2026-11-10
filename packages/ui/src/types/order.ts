@@ -27,6 +27,9 @@ export interface Order {
   couponCode: string | null;
   discountAmount: number;
   status: string; // "Paid" | "Pending" | "Failed"
+  paymentMethod?: "online" | "cash_on_delivery" | null;
+  paidAt?: string | null;
+  platformFee?: number | null;
   deliveryStatus: DeliveryStatus;
   createdAt: string;
   updatedAt: string;
@@ -74,6 +77,9 @@ export interface OrderDetailsType {
   couponCode: Coupon | null;
   discountAmount: number;
   status: string;
+  paymentMethod?: "online" | "cash_on_delivery" | null;
+  paidAt?: string | null;
+  platformFee?: number | null;
   deliveryStatus: DeliveryStatus;
   createdAt: string;
   updatedAt: string;

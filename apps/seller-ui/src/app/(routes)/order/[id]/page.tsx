@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, PackageX, ChevronDown } from "lucide-react";
+import toast from "react-hot-toast";
 
 import {
   OrderDetailsResponseType,
@@ -27,13 +28,18 @@ const fetchOrder = async (id: string) => {
   return res.data.order;
 };
 
+type OrderDetails = OrderDetailsResponseType["order"] & {
+  paymentMethod?: "online" | "cash_on_delivery" | null;
+  paidAt?: string | null;
+};
+
 const Page = () => {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const orderId = params.id;
   const queryClient = useQueryClient();
 
-  const { data: order, isLoading } = useQuery({
+  const { data: order, isLoading } = useQuery<OrderDetails>({
     queryKey: ["order", orderId],
     queryFn: () => fetchOrder(orderId),
     enabled: !!orderId,
@@ -47,6 +53,19 @@ const Page = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+    },
+  });
+
+  const { mutate: collectCash, isPending: collectingCash } = useMutation({
+    mutationFn: async () => {
+      await axiosInstance.patch(`/api/orders/${orderId}/collect-cash`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+      toast.success("Cash marked as collected");
+    },
+    onError: () => {
+      toast.error("Could not mark cash as collected");
     },
   });
 
@@ -156,11 +175,35 @@ const Page = () => {
           </h2>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-gray-500">Payment status</dt>
-              <dd className="text-green-400 font-medium">{order.status}</dd>
+              <dt className="text-gray-500">Payment method</dt>
+              <dd className="text-gray-200 font-medium">
+                {order.paymentMethod === "cash_on_delivery"
+                  ? "Cash on Delivery"
+                  : "Online payment"}
+              </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500">Total paid</dt>
+              <dt className="text-gray-500">Payment status</dt>
+              <dd
+                className={`font-medium ${
+                  order.status === "Paid" ? "text-green-400" : "text-amber-400"
+                }`}
+              >
+                {order.status}
+              </dd>
+            </div>
+            {order.paidAt && (
+              <div className="flex justify-between">
+                <dt className="text-gray-500">Cash collected on</dt>
+                <dd className="text-gray-300">
+                  {new Date(order.paidAt).toLocaleDateString()}
+                </dd>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <dt className="text-gray-500">
+                {order.status === "Paid" ? "Total paid" : "Amount due"}
+              </dt>
               <dd className="text-gray-200 font-semibold">
                 {formatCurrency(order.total)}
               </dd>
@@ -197,6 +240,25 @@ const Page = () => {
               </dd>
             </div>
           </dl>
+
+          {order.paymentMethod === "cash_on_delivery" &&
+            order.status !== "Paid" && (
+              <button
+                type="button"
+                onClick={() => collectCash()}
+                disabled={collectingCash}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-green-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {collectingCash ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Marking...
+                  </>
+                ) : (
+                  "Mark cash collected"
+                )}
+              </button>
+            )}
         </div>
 
         {order.shippingAddress && (

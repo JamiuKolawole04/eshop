@@ -25,8 +25,15 @@ export const orderConfirmationQueue = new Queue<OrderConfirmationJob>(
 export const processOrderConfirmationEmail = async (
   job: Job<OrderConfirmationJob>,
 ): Promise<void> => {
-  const { orderId, userEmail, userName, cart, totalAmount, trackingUrl } =
-    job.data;
+  const {
+    orderId,
+    userEmail,
+    userName,
+    cart,
+    totalAmount,
+    trackingUrl,
+    paymentMethod,
+  } = job.data;
 
   // Send order confirmation  email
   await sendMail(
@@ -38,6 +45,7 @@ export const processOrderConfirmationEmail = async (
       cart,
       totalAmount,
       trackingUrl,
+      paymentMethod: paymentMethod ?? "online",
     },
   );
 

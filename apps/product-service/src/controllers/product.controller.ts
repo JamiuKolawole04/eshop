@@ -208,7 +208,6 @@ export const createProduct = async (
       custom_specifications,
       slug,
       tags,
-      cash_on_delivery,
       brand,
       video_url,
       category,
@@ -232,7 +231,6 @@ export const createProduct = async (
       !warranty ||
       !slug ||
       !tags ||
-      !cash_on_delivery ||
       !category ||
       !subCategory ||
       !sale_price ||
@@ -264,7 +262,6 @@ export const createProduct = async (
         short_description,
         detailed_description,
         warranty,
-        cashOnDelivery: cash_on_delivery,
         slug,
         shopId: req.seller?.shop?.id as string,
         tags: Array.isArray(tags) ? tags : tags.split(","),
@@ -319,7 +316,6 @@ export const updateProduct = async (
       custom_specifications,
       slug,
       tags,
-      cash_on_delivery,
       brand,
       video_url,
       category,
@@ -356,7 +352,6 @@ export const updateProduct = async (
       !warranty ||
       !slug ||
       !tags ||
-      !cash_on_delivery ||
       !category ||
       !subCategory ||
       !sale_price ||
@@ -385,7 +380,6 @@ export const updateProduct = async (
       short_description,
       detailed_description,
       warranty,
-      cashOnDelivery: cash_on_delivery,
       slug,
       tags: Array.isArray(tags) ? tags : tags.split(","),
       brand,

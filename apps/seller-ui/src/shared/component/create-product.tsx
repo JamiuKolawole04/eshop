@@ -82,7 +82,6 @@ const ProductForm = ({
       slug: product?.slug ?? "",
       tags: Array.isArray(product?.tags) ? product.tags.join(", ") : "",
       brand: product?.brand ?? "",
-      cash_on_delivery: product?.cashOnDelivery ?? "yes",
       video_url: product?.video_url ?? "",
       category: product?.category ?? "",
       subCategory: product?.subCategory ?? "",
@@ -524,30 +523,6 @@ const ProductForm = ({
                     }[]) || []
                   }
                 />
-              </div>
-
-              <div className="mt-2">
-                <label className="block font-semibold text-gray-300 mb-1">
-                  Cash on Delivery *
-                </label>
-                <select
-                  {...register("cash_on_delivery", {
-                    required: "Cash on Delivery is required",
-                  })}
-                  className="w-full border outline-none border-gray-700 bg-transparent p-2 rounded-md text-white"
-                >
-                  <option value="yes" className="bg-black">
-                    Yes
-                  </option>
-                  <option value="no" className="bg-black">
-                    No
-                  </option>
-                </select>
-                {errors.cash_on_delivery && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {String(errors.cash_on_delivery.message)}
-                  </p>
-                )}
               </div>
             </div>
 

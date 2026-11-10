@@ -7,6 +7,7 @@ import { XCircle } from "lucide-react";
 
 import axiosInstance from "@/utils/axiosInstance";
 import { PaystackCheckout } from "@/shared/components/checkOutForm";
+import { CashOnDeliveryCheckout } from "@/shared/components/cashOnDeliveryCheckout";
 
 const CheckoutLoading = () => (
   <div className="flex justify-center items-center min-h-[70vh]">
@@ -22,6 +23,9 @@ const Page = () => {
   const [coupon, setCoupon] = useState<{
     discountAmount: number;
   } | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<
+    "online" | "cash_on_delivery"
+  >("online");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,6 +49,7 @@ const Page = () => {
           sellers,
           cart,
           coupon: sessionCoupon,
+          paymentMethod: sessionPaymentMethod,
         } = verifyRes.data.session;
 
         if (
@@ -58,6 +63,11 @@ const Page = () => {
 
         setCartItems(cart);
         setCoupon(sessionCoupon);
+        setPaymentMethod(
+          sessionPaymentMethod === "cash_on_delivery"
+            ? "cash_on_delivery"
+            : "online",
+        );
       } catch (err) {
         console.error(err);
         setError("Something went wrong while preparing your payment.");
@@ -81,7 +91,7 @@ const Page = () => {
             <XCircle className="text-red-500 w-10 h-10" />
           </div>
           <h2 className="text-xl font-semibold text-red-600 mb-2">
-            Payment Failed
+            Checkout failed
           </h2>
           <p className="text-sm text-gray-600 mb-6">
             {error} <br className="hidden sm:block" /> Please go back and try
@@ -98,8 +108,14 @@ const Page = () => {
     );
   }
 
-  return (
+  return paymentMethod === "online" ? (
     <PaystackCheckout
+      cartItems={cartItems}
+      coupon={coupon}
+      sessionId={sessionId}
+    />
+  ) : (
+    <CashOnDeliveryCheckout
       cartItems={cartItems}
       coupon={coupon}
       sessionId={sessionId}

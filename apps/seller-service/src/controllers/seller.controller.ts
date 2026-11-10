@@ -47,6 +47,15 @@ export const updateShopProfile = async (
     const address = cleanString(req.body.address);
     const website = cleanString(req.body.website);
     const rawLinks = req.body.socialLinks ?? [];
+    const rawCashOnDelivery = cleanString(req.body.cash_on_delivery);
+
+    if (
+      rawCashOnDelivery &&
+      rawCashOnDelivery !== "yes" &&
+      rawCashOnDelivery !== "no"
+    ) {
+      throw new ValidationError("cash_on_delivery must be 'yes' or 'no'");
+    }
 
     if (!name) {
       throw new ValidationError("Shop name is required");
@@ -103,6 +112,9 @@ export const updateShopProfile = async (
         address: address || null,
         website: website || null,
         socialLinks,
+        ...(rawCashOnDelivery
+          ? { cashOnDelivery: rawCashOnDelivery as "yes" | "no" }
+          : {}),
       },
     });
 

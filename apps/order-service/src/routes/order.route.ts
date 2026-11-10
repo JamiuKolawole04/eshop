@@ -1,11 +1,15 @@
 import express, { Router } from "express";
 
 import {
+  collectCashPayment,
+  collectCashPaymentAdmin,
+  createCashOnDeliveryOrder,
   createPaymentIntent,
   createPaymentSession,
   createPaystackPayment,
   getAdminRevenue,
   getAllOrdersForAdmin,
+  getCashOnDeliveryEligibility,
   getOrderDetails,
   getSellerOrders,
   getSellerRevenue,
@@ -56,6 +60,27 @@ router.get(
   getSellerRevenue,
 );
 router.get("/user", isAuthenticated("user"), isUser, getUserOrders);
+
+router.get("/cash-on-delivery/eligibility", getCashOnDeliveryEligibility);
+router.post(
+  "/cash-on-delivery",
+  isAuthenticated("user"),
+  isUser,
+  createCashOnDeliveryOrder,
+);
+
+router.patch(
+  "/admin/:orderId/collect-cash",
+  isAuthenticated("admin"),
+  isAdmin,
+  collectCashPaymentAdmin,
+);
+router.patch(
+  "/:orderId/collect-cash",
+  isAuthenticated("seller"),
+  isSeller,
+  collectCashPayment,
+);
 router.patch(
   "/:orderId/status",
   isAuthenticated("seller"),

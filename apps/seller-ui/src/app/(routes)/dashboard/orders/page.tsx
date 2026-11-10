@@ -28,6 +28,10 @@ const fetchOrders = async () => {
   return response.data.orders;
 };
 
+const getPaymentMethod = (order: Order) =>
+  (order as Order & { paymentMethod?: "online" | "cash_on_delivery" | null })
+    .paymentMethod;
+
 const OrdersTable = () => {
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -74,6 +78,17 @@ const OrdersTable = () => {
             }`}
           >
             {row.original.status}
+          </span>
+        ),
+      },
+      {
+        id: "payment",
+        header: "Payment",
+        cell: ({ row }) => (
+          <span className="text-white text-sm">
+            {getPaymentMethod(row.original) === "cash_on_delivery"
+              ? "Cash on delivery"
+              : "Online"}
           </span>
         ),
       },
