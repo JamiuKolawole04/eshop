@@ -130,7 +130,15 @@ const Page = () => {
   const increaseQuantity = (id: string) => {
     useStore.setState((state) => ({
       cart: state.cart.map((item) =>
-        item.id === id ? { ...item, quantity: (item.quantity ?? 1) + 1 } : item,
+        item.id === id
+          ? {
+              ...item,
+              quantity: Math.min(
+                (item.quantity ?? 1) + 1,
+                item.stock ?? (item.quantity ?? 1) + 1,
+              ),
+            }
+          : item,
       ),
     }));
   };
@@ -142,6 +150,17 @@ const Page = () => {
   const subTotal = cart.reduce(
     (total, item) => total + (item.quantity as number) * item.sale_price,
     0,
+  );
+
+  const isOutOfStock = (item: (typeof cart)[number]) =>
+    typeof item.stock === "number" && item.stock <= 0;
+
+  const isOverStock = (item: (typeof cart)[number]) =>
+    typeof item.stock === "number" &&
+    (item.quantity ?? 1) > item.stock;
+
+  const hasStockIssue = cart.some(
+    (item) => isOutOfStock(item) || isOverStock(item),
   );
 
   const applyCouponMutation = useMutation({
@@ -279,6 +298,18 @@ const Page = () => {
                               )}
                             </div>
                           )}
+
+                          {isOutOfStock(item) && (
+                            <span className="text-xs text-red-600 mt-1">
+                              Out of stock — remove to continue.
+                            </span>
+                          )}
+
+                          {!isOutOfStock(item) && isOverStock(item) && (
+                            <span className="text-xs text-red-600 mt-1">
+                              Only {item.stock} left — reduce quantity.
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -328,7 +359,10 @@ const Page = () => {
                           <button
                             type="button"
                             aria-label="Increase quantity"
-                            className="text-black cursor-pointer text-xl px-1"
+                            disabled={
+                              (item.quantity ?? 1) >= (item.stock ?? 0)
+                            }
+                            className="text-black cursor-pointer text-xl px-1 disabled:opacity-40 disabled:cursor-not-allowed"
                             onClick={() => increaseQuantity(item?.id)}
                           >
                             +
@@ -485,14 +519,22 @@ const Page = () => {
                 </div>
 
                 {isAuthenticated ? (
-                  <button
-                    disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
-                    onClick={createPaymentSession}
-                  >
-                    {isLoading && <ButtonLoader />}
-                    {isLoading ? "Redirecting..." : "Proceed to checkout"}
-                  </button>
+                  <>
+                    {hasStockIssue && (
+                      <p className="text-xs text-red-600 mt-4">
+                        Some items are no longer available. Adjust your cart to
+                        continue.
+                      </p>
+                    )}
+                    <button
+                      disabled={isLoading || hasStockIssue}
+                      className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg disabled:opacity-60 disabled:cursor-not-allowed"
+                      onClick={createPaymentSession}
+                    >
+                      {isLoading && <ButtonLoader />}
+                      {isLoading ? "Redirecting..." : "Proceed to checkout"}
+                    </button>
+                  </>
                 ) : (
                   <Fragment>
                     <button

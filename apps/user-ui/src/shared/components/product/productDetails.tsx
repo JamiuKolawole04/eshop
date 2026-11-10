@@ -315,9 +315,13 @@ export const ProductDetails = ({ product }: Props) => {
                   <span className="px-4 bg-gray-100 py-1">{quantity}</span>
 
                   <button
-                    className="px-3 cursor-pointer py-1 bg-gray-300 hover:bg-gray-400 text-black font-semibold rounded-r-md"
-
-                    onClick={() => setQuantity((prev) => prev + 1)}
+                    className="px-3 cursor-pointer py-1 bg-gray-300 hover:bg-gray-400 text-black font-semibold rounded-r-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={quantity >= (product?.stock ?? 0)}
+                    onClick={() =>
+                      setQuantity((prev) =>
+                        Math.min(prev + 1, product?.stock ?? prev + 1),
+                      )
+                    }
                   >
                     +
                   </button>
@@ -338,8 +342,12 @@ export const ProductDetails = ({ product }: Props) => {
               </div>
 
               <button
-                className={`flex mt-6 items-center gap-2 px-5 py-[10px] bg-[#ff5722] hover:bg-[#e64a19] text-white font-medium rounded-lg transition ${isInCart ? "cursor-not-allowed" : "cursor-pointer"}`}
-                disabled={isInCart}
+                className={`flex mt-6 items-center gap-2 px-5 py-[10px] text-white font-medium rounded-lg transition ${
+                  isInCart || product?.stock <= 0
+                    ? "bg-[#ff5722] opacity-50 cursor-not-allowed"
+                    : "bg-[#ff5722] hover:bg-[#e64a19] cursor-pointer"
+                }`}
+                disabled={isInCart || product?.stock <= 0}
                 onClick={() =>
                   addToCart(
                     {
@@ -357,7 +365,7 @@ export const ProductDetails = ({ product }: Props) => {
                 }
               >
                 <ShoppingCartIcon size={18} />
-                Add to cart
+                {product?.stock <= 0 ? "Out of stock" : "Add to cart"}
               </button>
             </div>
           </div>

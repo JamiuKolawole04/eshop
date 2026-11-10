@@ -28,7 +28,7 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
   const [activeImage, setActiveImage] = useState(0);
   const [isSelected, setIsSelected] = useState(data?.colors?.[0] || "");
   const [isSizeSelected, setIsSizeSelected] = useState(data?.sizes?.[0] || "");
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
   const { user } = useUser();
   const { addToWishlist, addToCart, removeFromWishlist, wishlist, cart } =
@@ -219,15 +219,20 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
                 <span className="px-4 bg-gray-100 py-1">{quantity}</span>
 
                 <button
-                  className="px-3 cursor-pointer py-1 bg-gray-300 hover:bg-gray-400 text-black font-semibold rounded-r-md"
-                  onClick={() => setQuantity((prev) => prev + 1)}
+                  className="px-3 cursor-pointer py-1 bg-gray-300 hover:bg-gray-400 text-black font-semibold rounded-r-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={quantity >= (data?.stock ?? 0)}
+                  onClick={() =>
+                    setQuantity((prev) =>
+                      Math.min(prev + 1, data?.stock ?? prev + 1),
+                    )
+                  }
                 >
                   +
                 </button>
               </div>
 
               <button
-                disabled={isInCart}
+                disabled={isInCart || data?.stock <= 0}
                 onClick={() =>
                   addToCart(
                     {
@@ -243,10 +248,14 @@ export const ProductDetailsCard = ({ data, setIsOpen }: Props) => {
                     deviceInfo,
                   )
                 }
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base whitespace-nowrap bg-[#ff5722] hover:bg-[#e64a19] text-white font-medium rounded-lg transition ${isInCart ? "cursor-not-allowed" : "cursor-pointer"}`}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base whitespace-nowrap text-white font-medium rounded-lg transition ${
+                  isInCart || data?.stock <= 0
+                    ? "bg-[#ff5722] opacity-50 cursor-not-allowed"
+                    : "bg-[#ff5722] hover:bg-[#e64a19] cursor-pointer"
+                }`}
               >
                 <ShoppingCartIcon size={18} />
-                Add to cart
+                {data?.stock <= 0 ? "Out of stock" : "Add to cart"}
               </button>
 
               <button className={`opacity-[.7] cursor-pointer`}>

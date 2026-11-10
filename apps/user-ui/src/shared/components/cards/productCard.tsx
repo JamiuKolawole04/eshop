@@ -65,11 +65,15 @@ export const ProductCard = ({ product, isEvent }: Props) => {
         </div>
       )}
 
-      {product?.stock <= 5 && (
+      {product?.stock <= 0 ? (
+        <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-[9px] sm:text-[10px] font-semibold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-sm shadow-md">
+          OUT OF STOCK
+        </div>
+      ) : product?.stock <= 5 ? (
         <div className="absolute top-2 right-2 z-10 bg-yellow-400 text-slate-700 text-[9px] sm:text-[10px] font-semibold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-sm shadow-md">
           LIMITED STOCK
         </div>
-      )}
+      ) : null}
 
       <Link href={`/product/${product?.slug}`}>
         <img
@@ -151,9 +155,14 @@ export const ProductCard = ({ product, isEvent }: Props) => {
 
         <div className="bg-white rounded-full p-1 sm:p-1.5 shadow-md">
           <ShoppingBag
-            className="cursor-pointer text-[#4b5563] hover:scale-110 transition w-4 h-4 sm:w-5 sm:h-5"
+            className={`w-4 h-4 sm:w-5 sm:h-5 ${
+              product?.stock <= 0
+                ? "text-gray-300 cursor-not-allowed"
+                : "cursor-pointer text-[#4b5563] hover:scale-110 transition"
+            }`}
             size={20}
             onClick={() =>
+              product?.stock > 0 &&
               !isInCart &&
               addToCart({ ...product, quantity: 1 }, user, location, deviceInfo)
             }

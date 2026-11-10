@@ -28,7 +28,15 @@ const Page = () => {
   const increaseQuantity = (id: string) => {
     useStore.setState((state) => ({
       wishlist: state.wishlist.map((item) =>
-        item.id === id ? { ...item, quantity: (item.quantity ?? 1) + 1 } : item,
+        item.id === id
+          ? {
+              ...item,
+              quantity: Math.min(
+                (item.quantity ?? 1) + 1,
+                item.stock ?? (item.quantity ?? 1) + 1,
+              ),
+            }
+          : item,
       ),
     }));
   };
@@ -122,7 +130,10 @@ const Page = () => {
                         <button
                           type="button"
                           aria-label="Increase quantity"
-                          className="text-black cursor-pointer text-xl px-1"
+                          disabled={
+                            (item.quantity ?? 1) >= (item.stock ?? 0)
+                          }
+                          className="text-black cursor-pointer text-xl px-1 disabled:opacity-40 disabled:cursor-not-allowed"
                           onClick={() => increaseQuantity(item?.id)}
                         >
                           +
@@ -134,12 +145,17 @@ const Page = () => {
                     <td className="flex items-center justify-between gap-3 px-2 pt-2 md:p-0 md:table-cell">
                       <button
                         type="button"
-                        className="flex-1 md:flex-none bg-[#2295ff] text-sm cursor-pointer text-white px-5 py-2 rounded-md hover:bg-[#007bff] transition-all"
+                        disabled={item?.stock <= 0}
+                        className={`flex-1 md:flex-none bg-[#2295ff] text-sm text-white px-5 py-2 rounded-md transition-all ${
+                          item?.stock <= 0
+                            ? "opacity-50 cursor-not-allowed"
+                            : "cursor-pointer hover:bg-[#007bff]"
+                        }`}
                         onClick={() =>
                           addToCart(item, user, location, deviceInfo)
                         }
                       >
-                        Add To Cart
+                        {item?.stock <= 0 ? "Out of stock" : "Add To Cart"}
                       </button>
 
                       <button
