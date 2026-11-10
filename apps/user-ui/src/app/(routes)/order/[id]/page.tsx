@@ -9,6 +9,7 @@ import {
   ButtonLoader,
   DeliveryStatus,
   formatCurrency,
+  formatPhoneForDisplay,
 } from "@packages/ui";
 
 import axiosInstance from "@/utils/axiosInstance";
@@ -123,6 +124,7 @@ const Page = () => {
 
   const isCashOnDelivery = paymentMethod === "cash_on_delivery";
   const isPaid = order.status === "Paid";
+  const deliveryPhone = order.contactPhone || order.shippingAddress?.phone;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 font-Poppins">
@@ -235,6 +237,11 @@ const Page = () => {
               <p className="font-medium text-gray-900">
                 {order.shippingAddress.name}
               </p>
+              {deliveryPhone && (
+                <p className="text-gray-500">
+                  Phone: {formatPhoneForDisplay(deliveryPhone)}
+                </p>
+              )}
               <p className="text-gray-500">
                 {order.shippingAddress.street}, {order.shippingAddress.city},{" "}
                 {order.shippingAddress.zip}

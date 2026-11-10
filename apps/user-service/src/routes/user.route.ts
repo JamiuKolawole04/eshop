@@ -9,6 +9,7 @@ import {
   getUserAddresses,
   notifications,
   updateUserPassword,
+  updateUserPhone,
 } from "../controllers/user.controller";
 
 const router: Router = express.Router();
@@ -34,6 +35,7 @@ router.delete(
 
 router.get("/profile", isAuthenticated("user"), isUser, getUser);
 router.patch("/password", isAuthenticated("user"), isUser, updateUserPassword);
+router.patch("/phone", isAuthenticated("user"), isUser, updateUserPhone);
 router.get("/notifications", isAuthenticated("user"), isUser, notifications);
 router.get("/layouts", getLayoutData);
 

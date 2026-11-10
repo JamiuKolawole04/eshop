@@ -8,11 +8,12 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 
-import { ButtonLoader } from "@packages/ui";
+import { ButtonLoader, normalizeNigerianPhone } from "@packages/ui";
 
 type FormData = {
   name: string;
   email: string;
+  phone_number: string;
   password: string;
 };
 
@@ -179,6 +180,32 @@ const Page = () => {
               {errors.email && (
                 <p className="text-red-500 text-sm">
                   {String(errors.email.message)}
+                </p>
+              )}
+
+              <label htmlFor="phone" className="block text-gray-700 mb-1">
+                Phone number
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="0801 234 5678"
+                className="w-full p-2 border border-gray-300 outline-0 !rounded mb-1"
+                {...register("phone_number", {
+                  required: "Phone number is required",
+                  validate: (value) =>
+                    normalizeNigerianPhone(value) !== null ||
+                    "Enter a valid Nigerian mobile number.",
+                })}
+              />
+              <p className="text-xs text-gray-500 mb-1">
+                We&apos;ll only use this to contact you about your orders.
+              </p>
+              {errors.phone_number && (
+                <p className="text-red-500 text-sm mt-1">
+                  {String(errors.phone_number.message)}
                 </p>
               )}
 

@@ -57,11 +57,24 @@ export const createPaymentSession = async (
 
     const address = await prisma.address.findFirst({
       where: { id: selectedAddressId, userId },
-      select: { id: true },
+      select: { id: true, phone: true },
     });
 
     if (!address) {
       throw new ValidationError("The selected delivery address is not yours.");
+    }
+
+    const account = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { phone_number: true },
+    });
+
+    const contactPhone = address.phone || account?.phone_number || null;
+
+    if (!contactPhone) {
+      throw new ValidationError(
+        "Add a phone number to your delivery address before checking out.",
+      );
     }
 
     const productIds = [...new Set((cart as Session[]).map((item) => item.id))];
@@ -174,7 +187,9 @@ export const createPaymentSession = async (
 
           if (
             existingCart === normalizedCart &&
-            session.paymentMethod === paymentMethod
+            session.paymentMethod === paymentMethod &&
+            session.shippingAddressId === selectedAddressId &&
+            session.contactPhone === contactPhone
           ) {
             return res.status(200).json({ sessionId: key.split(":")[1] });
           }
@@ -215,6 +230,7 @@ export const createPaymentSession = async (
       shippingAddressId: selectedAddressId,
       coupon: coupon || null,
       paymentMethod,
+      contactPhone,
     };
 
     await redis.setex(
@@ -558,6 +574,7 @@ const materializeOrders = async (
     shippingAddressId,
     coupon,
     paymentMethod: sessionPaymentMethod,
+    contactPhone,
   } = JSON.parse(sessionData);
 
   const paymentMethod: PaymentMethod =
@@ -637,6 +654,7 @@ const materializeOrders = async (
           paidAt: paymentMethod === "cash_on_delivery" ? null : new Date(),
           platformFee: Math.round(orderTotal * PLATFORM_FEE_PERCENTAGE) / 100,
           shippingAddressId: shippingAddressId || null,
+          contactPhone: contactPhone ?? null,
           couponCode: coupon?.code || null,
           discountAmount: coupon?.discountAmount || 0,
           oderItems: {
@@ -728,6 +746,7 @@ const materializeOrders = async (
         cart: orderItems,
         totalAmount: orderTotal,
         paymentMethod,
+        contactPhone: contactPhone ?? null,
         trackingUrl: `${trackingBaseUrl}/order/${order.id}`,
       },
       {

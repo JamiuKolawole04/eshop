@@ -53,6 +53,7 @@ model Users {
   role      String   @default("user")
   banned    Boolean? @default(false)
   password  String?
+  phone_number String?
   following String[]
   avatar    Images?
 
@@ -291,6 +292,7 @@ model Orders {
   paymentMethod     String    @default("online")
   paidAt            DateTime?
   platformFee       Float?
+  contactPhone      String?
   deliveryStatus    String      @default("Ordered")
   oderItems         OderItems[] @relation("OderItemsRelation")
 
@@ -319,6 +321,7 @@ model Address {
   userId    String      @db.ObjectId
   label     AddressType
   name      String
+  phone     String?
   street    String
   landmark  String?
   city      String

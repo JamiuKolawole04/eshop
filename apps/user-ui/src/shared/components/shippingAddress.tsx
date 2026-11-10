@@ -6,17 +6,21 @@ import { Fragment, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import axiosInstance from "@/utils/axiosInstance";
+import { useUser } from "@/hooks/use-user";
 import {
   CreateUserAddressResponseType,
   DeleteUserAddressResponseType,
   GetUserAddressResponseType,
   ButtonLoader,
   countries,
+  formatPhoneForDisplay,
+  normalizeNigerianPhone,
 } from "@packages/ui";
 
 type FormData = {
   label: string;
   name: string;
+  phone: string;
   street: string;
   landmark: string;
   city: string;
@@ -49,6 +53,7 @@ const deleteUserAddress = async (id: string) => {
 
 export const ShippingAddress = () => {
   const queryClient = useQueryClient();
+  const { user } = useUser();
 
   const [showModal, setShowModal] = useState(false);
 
@@ -61,6 +66,7 @@ export const ShippingAddress = () => {
     defaultValues: {
       label: "Home",
       name: "",
+      phone: "",
       street: "",
       landmark: "",
       city: "",
@@ -101,6 +107,21 @@ export const ShippingAddress = () => {
     });
   };
 
+  const openModal = () => {
+    reset({
+      label: "Home",
+      name: "",
+      phone: user?.phone_number ?? "",
+      street: "",
+      landmark: "",
+      city: "",
+      zip: "",
+      country: "Nigeria",
+      isDefault: "false",
+    });
+    setShowModal(true);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -108,7 +129,7 @@ export const ShippingAddress = () => {
 
         <button
           className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:underline"
-          onClick={() => setShowModal(true)}
+          onClick={openModal}
         >
           <Plus className="w-4 h-4" /> Add New Address
         </button>
@@ -139,6 +160,12 @@ export const ShippingAddress = () => {
                     <p className="font-medium">
                       {address?.label} - {address?.name}
                     </p>
+
+                    {address?.phone && (
+                      <p className="text-gray-500">
+                        Phone: {formatPhoneForDisplay(address.phone)}
+                      </p>
+                    )}
 
                     <p>
                       {address?.street}, {address?.city}, {address?.zip},{" "}
@@ -198,6 +225,30 @@ export const ShippingAddress = () => {
                 {errors.name && (
                   <p className="text-red-500 text-xs mt-1">
                     {errors.name.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="0801 234 5678"
+                  {...register("phone", {
+                    required: "Phone number is required",
+                    validate: (value) =>
+                      normalizeNigerianPhone(value) !== null ||
+                      "Enter a valid Nigerian mobile number.",
+                  })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  The rider will call this number.
+                </p>
+                {errors.phone && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.phone.message}
                   </p>
                 )}
               </div>

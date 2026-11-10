@@ -3,6 +3,7 @@ export type AddressType = {
   id: string;
   country: string;
   label: string;
+  phone?: string | null;
   street: string;
   landmark?: string | null;
   city: string;

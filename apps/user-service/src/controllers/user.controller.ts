@@ -8,6 +8,7 @@ import {
 } from "@packages/error-handler";
 import { prisma } from "@packages/prisma";
 import { sendLog } from "@packages/logs";
+import { normalizeNigerianPhone } from "../utils/phone";
 
 export const addUserAddress = async (
   req: Request,
@@ -16,11 +17,30 @@ export const addUserAddress = async (
 ) => {
   try {
     const userId = req.user?.id as string;
-    const { label, name, street, landmark, city, zip, country, isDefault } =
-      req.body;
+    const {
+      label,
+      name,
+      street,
+      landmark,
+      city,
+      zip,
+      country,
+      isDefault,
+      phone,
+    } = req.body;
 
     if (!label || !name || !street || !landmark || !city || !zip || !country) {
       throw new ValidationError("All fields are required");
+    }
+
+    if (!phone) {
+      throw new ValidationError("Phone number is required.");
+    }
+
+    const normalizedPhone = normalizeNigerianPhone(phone);
+
+    if (!normalizedPhone) {
+      throw new ValidationError("Enter a valid Nigerian mobile number.");
     }
 
     if (isDefault) {
@@ -46,6 +66,7 @@ export const addUserAddress = async (
         zip,
         country,
         isDefault,
+        phone: normalizedPhone,
       },
     });
 
@@ -198,6 +219,40 @@ export const updateUserPassword = async (
     res.status(200).json({
       success: true,
       message: "password updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserPhone = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id;
+    const { phone_number } = req.body;
+
+    if (!phone_number) {
+      throw new ValidationError("Phone number is required.");
+    }
+
+    const normalized = normalizeNigerianPhone(phone_number);
+
+    if (!normalized) {
+      throw new ValidationError("Enter a valid Nigerian mobile number.");
+    }
+
+    await prisma.users.update({
+      where: { id: userId },
+      data: { phone_number: normalized },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Phone number updated",
+      phone_number: normalized,
     });
   } catch (error) {
     next(error);

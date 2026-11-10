@@ -33,6 +33,7 @@ export const processOrderConfirmationEmail = async (
     totalAmount,
     trackingUrl,
     paymentMethod,
+    contactPhone,
   } = job.data;
 
   // Send order confirmation  email
@@ -46,6 +47,7 @@ export const processOrderConfirmationEmail = async (
       totalAmount,
       trackingUrl,
       paymentMethod: paymentMethod ?? "online",
+      contactPhone: contactPhone ?? null,
     },
   );
 

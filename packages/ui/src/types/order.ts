@@ -30,6 +30,7 @@ export interface Order {
   paymentMethod?: "online" | "cash_on_delivery" | null;
   paidAt?: string | null;
   platformFee?: number | null;
+  contactPhone?: string | null;
   deliveryStatus: DeliveryStatus;
   createdAt: string;
   updatedAt: string;
@@ -80,6 +81,7 @@ export interface OrderDetailsType {
   paymentMethod?: "online" | "cash_on_delivery" | null;
   paidAt?: string | null;
   platformFee?: number | null;
+  contactPhone?: string | null;
   deliveryStatus: DeliveryStatus;
   createdAt: string;
   updatedAt: string;

@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { NotFoundError, ValidationError } from "@packages/error-handler";
 import { sendMail } from "./sendMail";
+import { normalizeNigerianPhone } from "./phone";
 import { redis } from "@packages/redis";
 import { prisma } from "@packages/prisma";
 import {
@@ -28,6 +29,16 @@ export const validateRegistrationData = (
     (userType === "seller" && (!phone_number || !country))
   ) {
     throw new ValidationError("Missing required fields.");
+  }
+
+  if (userType === "user") {
+    if (!phone_number) {
+      throw new ValidationError("Phone number is required.");
+    }
+
+    if (!normalizeNigerianPhone(phone_number)) {
+      throw new ValidationError("Enter a valid Nigerian mobile number.");
+    }
   }
 
   if (!emailRegex.test(email)) {

@@ -24,6 +24,7 @@ export * from "./utils/size";
 export * from "./utils/color";
 export * from "./utils/currency";
 export * from "./utils/countries";
+export * from "./utils/phone";
 export * from "./lib/ratings";
 export * from "./lib/box";
 export * from "./lib/geographical-map";

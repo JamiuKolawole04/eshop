@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import {
   Bell,
   CheckCircle,
@@ -20,6 +20,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 import { useUser } from "@/hooks/use-user";
 import { StatCard } from "@/shared/components/cards/statCard";
@@ -28,6 +30,8 @@ import { ShippingAddress } from "@/shared/components/shippingAddress";
 import { ChangePassword } from "@/shared/components/changePassword";
 import { OrdersTable } from "@/shared/components/tables/ordersTable";
 import {
+  formatPhoneForDisplay,
+  normalizeNigerianPhone,
   NotificationsResponseType,
   UserOrdersResponseType,
 } from "@packages/ui";
@@ -74,6 +78,11 @@ const ProfileContent = () => {
   const { isLoading, user } = useUser();
   const { setIsLoggedIn } = useAuthStore();
 
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
+
   const activeTab = searchParams.get("active") || "Profile";
 
   const setActiveTab = (tab: string) => {
@@ -116,6 +125,41 @@ const ProfileContent = () => {
 
   const markAsNotificationAsRead = async (notificationId: string) => {
     await axiosInstance.patch(`/api/sellers/notifications/${notificationId}`);
+  };
+
+  const togglePhoneEditor = () => {
+    if (!isEditingPhone) {
+      setPhoneInput(user?.phone_number ?? "");
+    }
+
+    setPhoneError("");
+    setIsEditingPhone((open) => !open);
+  };
+
+  const savePhone = async () => {
+    const phone_number = normalizeNigerianPhone(phoneInput);
+
+    if (!phone_number) {
+      setPhoneError("Enter a valid Nigerian mobile number.");
+      return;
+    }
+
+    setPhoneError("");
+    setIsSavingPhone(true);
+
+    try {
+      await axiosInstance.patch("/api/users/phone", { phone_number });
+      await queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+      toast.success("Phone number updated");
+      setIsEditingPhone(false);
+    } catch (err) {
+      const message = axios.isAxiosError<{ message?: string }>(err)
+        ? err.response?.data?.message
+        : undefined;
+      toast.error(message ?? "Could not update phone number");
+    } finally {
+      setIsSavingPhone(false);
+    }
   };
 
   return (
@@ -273,6 +317,79 @@ const ProfileContent = () => {
                 <p>
                   <span className="font-semibold">Email:</span> {user?.email}
                 </p>
+
+                <div>
+                  <p>
+                    <span className="font-semibold">Phone number:</span>{" "}
+                    {user?.phone_number ? (
+                      formatPhoneForDisplay(user.phone_number)
+                    ) : (
+                      <span className="text-gray-400">Not set</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={togglePhoneEditor}
+                      aria-expanded={isEditingPhone}
+                      className="ml-2 inline-flex items-center gap-1 align-middle text-blue-500 text-xs font-medium hover:text-blue-600"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      {user?.phone_number ? "Edit" : "Add"}
+                    </button>
+                  </p>
+
+                  {isEditingPhone && (
+                    <div className="mt-2 max-w-sm">
+                      <input
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        aria-label="Phone number"
+                        value={phoneInput}
+                        onChange={({ target: { value } }) => {
+                          setPhoneInput(value);
+
+                          if (phoneError) {
+                            setPhoneError("");
+                          }
+                        }}
+                        placeholder="0801 234 5678"
+                        className="w-full p-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
+                      />
+
+                      <p className="text-xs text-gray-500 pt-1.5">
+                        Riders will call this number about your orders.
+                      </p>
+
+                      {phoneError && (
+                        <p className="text-xs text-red-600 pt-1.5">
+                          {phoneError}
+                        </p>
+                      )}
+
+                      <div className="mt-2.5 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={savePhone}
+                          disabled={isSavingPhone}
+                          className="px-3 py-1.5 rounded-md bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {isSavingPhone ? "Saving..." : "Save"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsEditingPhone(false);
+                            setPhoneError("");
+                          }}
+                          className="px-3 py-1.5 rounded-md border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <p>
                   <span className="font-semibold">Joined:</span>{" "}

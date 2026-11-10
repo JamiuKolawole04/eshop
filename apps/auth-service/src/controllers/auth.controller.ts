@@ -20,6 +20,7 @@ import {
   verifyForgotPasswordOtp,
   verifyOtp,
 } from "../utils/auth.helper";
+import { normalizeNigerianPhone } from "../utils/phone";
 import { Prisma, prisma, Sellers, Shops, Users } from "@packages/prisma";
 import {
   AuthError,
@@ -108,10 +109,20 @@ export const verifyUser = async (
   next: NextFunction,
 ) => {
   try {
-    const { email, otp, password, name } = req.body;
+    const { email, otp, password, name, phone_number } = req.body;
 
     if (!email || !otp || !password || !name) {
       throw new ValidationError("All fields are required.");
+    }
+
+    if (!phone_number) {
+      throw new ValidationError("Phone number is required.");
+    }
+
+    const normalizedPhoneNumber = normalizeNigerianPhone(phone_number);
+
+    if (!normalizedPhoneNumber) {
+      throw new ValidationError("Enter a valid Nigerian mobile number.");
     }
 
     const existingUser = await prisma.users.findUnique({
@@ -132,6 +143,7 @@ export const verifyUser = async (
         name,
         email,
         password: hashedPassword,
+        phone_number: normalizedPhoneNumber,
         avatar: {
           create: {
             file_id: "6a8fa06d5c7cd75eb89fd2e8",

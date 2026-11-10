@@ -9,6 +9,7 @@ import {
   OrderDetailsResponseType,
   DeliveryProgress,
   formatCurrency,
+  formatPhoneForDisplay,
 } from "@packages/ui";
 
 import axiosInstance from "@/utils/axiosInstance";
@@ -270,6 +271,17 @@ const Page = () => {
               <p className="font-medium text-gray-200">
                 {order.shippingAddress.name}
               </p>
+              {(order.contactPhone || order.shippingAddress.phone) && (
+                <a
+                  href={`tel:${order.contactPhone || order.shippingAddress.phone}`}
+                  className="inline-block text-blue-400 hover:text-blue-300"
+                >
+                  📞{" "}
+                  {formatPhoneForDisplay(
+                    order.contactPhone || order.shippingAddress.phone,
+                  )}
+                </a>
+              )}
               <p className="text-gray-400">
                 {order.shippingAddress.street}, {order.shippingAddress.city},{" "}
                 {order.shippingAddress.zip}

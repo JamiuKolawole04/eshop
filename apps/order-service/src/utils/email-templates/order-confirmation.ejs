@@ -91,6 +91,9 @@
           <% }) %>
           <p class="total">Total: ₦<%= Number(totalAmount).toFixed(2) %></p>
           <p>Payment method: <%= isCod ? "Cash on Delivery" : "Online payment" %></p>
+          <% if (typeof contactPhone !== "undefined" && contactPhone) { %>
+          <p>We'll call <%= contactPhone %> about this delivery.</p>
+          <% } %>
           <% if (isCod) { %>
           <p>
             Please have ₦<%= Number(totalAmount).toFixed(2) %> ready for the

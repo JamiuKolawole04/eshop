@@ -6,7 +6,7 @@ import { Fragment, useEffect, useState } from "react";
 import Image from "next/image";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 import { useStore } from "@/store";
 import { useUser } from "@/hooks/use-user";
@@ -16,6 +16,7 @@ import {
   ButtonLoader,
   CreatePaymentSessionResponseType,
   formatCurrency,
+  formatPhoneForDisplay,
   GetUserAddressResponseType,
   VerifyCouponCodeResponseType,
 } from "@packages/ui";
@@ -88,6 +89,12 @@ const Page = () => {
       toast.error("Please set your delivery address to create an order!");
       return;
     }
+
+    if (!deliveryPhone) {
+      toast.error("Add a phone number before checking out.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -111,7 +118,10 @@ const Page = () => {
       router.push(`/checkout?sessionId=${sessionId}`);
     } catch (err) {
       console.error(err);
-      toast.error(`Something went wrong. Please try again.`);
+      const message = axios.isAxiosError<{ message?: string }>(err)
+        ? err.response?.data?.message
+        : undefined;
+      toast.error(message ?? "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -222,6 +232,9 @@ const Page = () => {
       setSelectedAddressId(defaultAddress?.id ?? addresses[0].id);
     }
   }, [addresses, selectedAddressId]);
+
+  const selectedAddress = addresses?.find((a) => a.id === selectedAddressId);
+  const deliveryPhone = selectedAddress?.phone || user?.phone_number || null;
 
   return (
     <div className="w-full bg-white font-Poppins">
@@ -457,9 +470,32 @@ const Page = () => {
                     </select>
                   )}
 
+                  {selectedAddress &&
+                    (deliveryPhone ? (
+                      <p className="text-xs text-slate-600 pt-1.5">
+                        Rider will call {formatPhoneForDisplay(deliveryPhone)}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-red-600 pt-1.5">
+                        Add a phone number before checking out.{" "}
+                        <Link
+                          href="/profile?active=Shipping%20Address"
+                          className="underline font-medium"
+                        >
+                          Go to profile
+                        </Link>
+                      </p>
+                    ))}
+
                   {isAuthenticated && addresses?.length === 0 && (
                     <p className="text-sm text-slate-800">
-                      Please add an address from profile to create an order!
+                      Please add an address from profile to create an order!{" "}
+                      <Link
+                        href="/profile?active=Shipping%20Address"
+                        className="underline font-medium"
+                      >
+                        Go to profile
+                      </Link>
                     </p>
                   )}
 
@@ -527,7 +563,7 @@ const Page = () => {
                       </p>
                     )}
                     <button
-                      disabled={isLoading || hasStockIssue}
+                      disabled={isLoading || hasStockIssue || !deliveryPhone}
                       className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg disabled:opacity-60 disabled:cursor-not-allowed"
                       onClick={createPaymentSession}
                     >

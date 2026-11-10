@@ -7,4 +7,5 @@ export type OrderConfirmationJob = {
   totalAmount: number;
   trackingUrl: string;
   paymentMethod?: "online" | "cash_on_delivery";
+  contactPhone?: string | null;
 };
