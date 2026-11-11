@@ -1,5 +1,6 @@
 import { kafka } from "@packages/kafka";
 import {
+  updatePageAnalytics,
   updateProductAnalytics,
   updateShopAnalytics,
   updateUserAnalytics,
@@ -31,6 +32,12 @@ const processQueue = async () => {
     eventQueue.length = 0;
 
     for (const event of events) {
+      if (event.action === "page_view") {
+        await updatePageAnalytics(event);
+
+        continue;
+      }
+
       if (event.action === "shop_visit") {
         await updateShopAnalytics(event);
 

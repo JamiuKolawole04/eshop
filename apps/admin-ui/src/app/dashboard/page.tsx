@@ -13,6 +13,7 @@ import {
   AdminDeviceUsageResponseType,
   AdminGeoStatsResponseType,
   AdminOrdersResponseType,
+  AdminPageViewsResponseType,
   AdminRevenueData,
   ButtonLoader,
   DeviceStat,
@@ -51,6 +52,14 @@ const fetchAdminGeo = async () => {
     await axiosInstance.get<AdminGeoStatsResponseType>(`/api/admin/geo`);
 
   return response.data.data;
+};
+
+const fetchAdminPageViews = async () => {
+  const response = await axiosInstance.get<AdminPageViewsResponseType>(
+    `/api/admin/page-views`,
+  );
+
+  return response.data;
 };
 
 const OrdersTable = () => {
@@ -160,6 +169,179 @@ const OrdersTable = () => {
   );
 };
 
+const ADMIN_TIME_ZONE = "Africa/Lagos";
+
+const lagosDayKey = () =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: ADMIN_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
+// Decorative sparkline geometry. Empty, single-point and flat series all fall
+// back to a straight baseline instead of breaking the path.
+const buildSparklinePoints = (values: number[], width = 100, height = 28) => {
+  const mid = height / 2;
+  const baseline = `0,${mid} ${width},${mid}`;
+
+  if (values.length < 2) return baseline;
+
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const range = max - min;
+
+  if (range === 0) return baseline;
+
+  return values
+    .map((value, index) => {
+      const x = (index / (values.length - 1)) * width;
+      const y = height - 2 - ((value - min) / range) * (height - 4);
+
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    })
+    .join(" ");
+};
+
+const formatLastVisit = (value: string | null) => {
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "—";
+
+  const day = new Intl.DateTimeFormat("en-GB", {
+    timeZone: ADMIN_TIME_ZONE,
+    day: "numeric",
+    month: "short",
+  }).format(date);
+
+  const time = new Intl.DateTimeFormat("en-GB", {
+    timeZone: ADMIN_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(date);
+
+  return `${day}, ${time}`;
+};
+
+const Sparkline = ({ points }: { points: string }) => (
+  <svg
+    viewBox="0 0 100 28"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    className="h-7 w-full text-slate-500"
+  >
+    <polyline
+      points={points}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      vectorEffect="non-scaling-stroke"
+    />
+  </svg>
+);
+
+const StripStat = ({
+  label,
+  value,
+  detail,
+}: {
+  label: string;
+  value: React.ReactNode;
+  detail?: React.ReactNode;
+}) => (
+  <div className="bg-slate-900/60 px-4 py-3.5 sm:px-5 sm:py-4">
+    <p className="text-xs text-slate-400">{label}</p>
+    <div className="mt-1.5">
+      <p className="text-xl font-semibold leading-none text-white tabular-nums sm:text-2xl">
+        {value}
+      </p>
+      {detail ? <div className="mt-2">{detail}</div> : null}
+    </div>
+  </div>
+);
+
+const PageViewsStrip = () => {
+  const { data, isLoading } = useQuery<AdminPageViewsResponseType>({
+    queryKey: ["admin-page-views"],
+    queryFn: fetchAdminPageViews,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { viewsToday, visitorsToday, totalViews, sparklinePoints } =
+    useMemo(() => {
+      const days = data?.days ?? [];
+      const today = days.find((day) => day.date === lagosDayKey());
+      const values = days.map((day) => day.views);
+
+      return {
+        viewsToday: today?.views ?? 0,
+        visitorsToday: today?.visitors ?? 0,
+        totalViews: values.reduce((sum, views) => sum + views, 0),
+        sparklinePoints: buildSparklinePoints(values),
+      };
+    }, [data]);
+
+  const lastVisit = formatLastVisit(data?.lastVisit ?? null);
+  const hasTraffic = totalViews > 0;
+
+  return (
+    <section
+      aria-label="Landing page traffic"
+      className="relative mb-6 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl lg:mb-8"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-600/60 to-transparent"
+      />
+
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-4 pt-3.5 pb-3 sm:px-5">
+        <h2 className="text-sm font-semibold text-white">
+          Landing page traffic
+        </h2>
+        <span className="text-xs text-slate-400">
+          Last 7 days &middot; Africa/Lagos
+        </span>
+      </div>
+
+      {isLoading ? (
+        <div className="flex min-h-[104px] items-center justify-center border-t border-slate-800/80">
+          <ButtonLoader className="text-white" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-px border-t border-slate-800/80 bg-slate-800/70 lg:grid-cols-4">
+          <StripStat
+            label="Views today"
+            value={viewsToday.toLocaleString("en-US")}
+          />
+          <StripStat
+            label="Visitors today"
+            value={visitorsToday.toLocaleString("en-US")}
+          />
+          <StripStat
+            label="Views · 7 days"
+            value={totalViews.toLocaleString("en-US")}
+            detail={
+              hasTraffic ? (
+                <Sparkline points={sparklinePoints} />
+              ) : (
+                <p className="text-xs text-slate-500">
+                  No landing page traffic yet.
+                </p>
+              )
+            }
+          />
+          <StripStat label="Last visit" value={lastVisit} />
+        </div>
+      )}
+    </section>
+  );
+};
+
 // Dashboard Layout
 const DashboardPage = () => {
   const { data: revenueData = [], isLoading: isRevenueLoading } = useQuery({
@@ -182,6 +364,8 @@ const DashboardPage = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 font-poppins">
+      <PageViewsStrip />
+
       {/* Top Charts */}
       <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Revenue Chart */}

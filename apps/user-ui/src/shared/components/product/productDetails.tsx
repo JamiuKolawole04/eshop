@@ -132,23 +132,22 @@ export const ProductDetails = ({ product }: Props) => {
 
   useEffect(() => {
     if (!product?.id || !product?.shop?.id) return;
-    if (!location?.country || !location?.city || !deviceInfo) return;
+    if (location === undefined || !deviceInfo) return;
 
     sendKafkaEvents({
       userId: user?.id,
       productId: product.id,
       shopId: product.shop.id,
       action: "product_view",
-      country: location.country,
-      city: location.city,
+      country: location?.country || "Unknown",
+      city: location?.city || "Unknown",
       device: deviceInfo,
     });
   }, [
     product?.id,
     product?.shop?.id,
     user?.id,
-    location?.country,
-    location?.city,
+    location,
     deviceInfo,
   ]);
 
@@ -378,7 +377,7 @@ export const ProductDetails = ({ product }: Props) => {
               <MapPin size={16} className="ml-[-5px]" />
 
               <span className="font-normal text-sm">
-                {location?.city + ", " + location?.country}
+                {location?.city ? `${location.city}, ${location.country}` : "Nigeria"}
               </span>
             </div>
           </div>

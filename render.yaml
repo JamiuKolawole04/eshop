@@ -40,6 +40,10 @@ services:
       - key: IMAGEKIT_PRIVATE_KEY
         sync: false
 
+      # Geo (ipdata)
+      - key: IPDATA_API_KEY
+        sync: false
+
       # Kafka (Aiven)
       - key: KAFKA_BROKER_URI
         sync: false

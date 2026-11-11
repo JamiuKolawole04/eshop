@@ -16,6 +16,7 @@ import {
   getAllProductsForAdmin,
   getAllSellers,
   getAllUsers,
+  getPageViews,
   toggleUserBan,
   uploadSiteBanner,
   uploadSiteLogo,
@@ -56,6 +57,7 @@ router.get(
 );
 
 router.get("/geo", isAuthenticated("admin"), isAdmin, getAdminGeo);
+router.get("/page-views", isAuthenticated("admin"), isAdmin, getPageViews);
 router.post(
   "/add-category",
   isAuthenticated("admin"),

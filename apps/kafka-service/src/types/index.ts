@@ -1,13 +1,15 @@
 export type Actions = {
-  shopId: string;
+  shopId?: string;
   action: string;
-  productId: string;
+  productId?: string;
   timestamp?: Date;
 };
 
 export type EventData = Actions & {
-  userId: string;
+  userId?: string;
   country?: string;
   city?: string;
   device?: string;
+  page?: string;
+  visitorId?: string;
 };

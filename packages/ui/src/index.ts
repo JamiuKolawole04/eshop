@@ -32,3 +32,4 @@ export * from "./lib/sale-chart";
 export * from "./lib/device-stat";
 export * from "./types/device";
 export * from "./types/geo";
+export * from "./types/page-view";

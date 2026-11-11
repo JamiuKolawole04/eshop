@@ -19,34 +19,25 @@ type Store = {
   addToCart: (
     product: Product,
     user: any,
-    location: {
-      country: string;
-      city: string;
-    } | null,
+    location: { country: string; city: string } | null | undefined,
     deviceInfo: string,
   ) => void;
   removeFromCart: (
     id: string,
     user: any,
-    location: {
-      country: string;
-      city: string;
-    } | null,
+    location: { country: string; city: string } | null | undefined,
     deviceInfo: string,
   ) => void;
   addToWishlist: (
     product: Product,
     user: any,
-    location: {
-      country: string;
-      city: string;
-    } | null,
+    location: { country: string; city: string } | null | undefined,
     deviceInfo: string,
   ) => void;
   removeFromWishlist: (
     id: string,
     user: any,
-    location: any,
+    location: { country: string; city: string } | null | undefined,
     deviceInfo: string,
   ) => void;
 };
@@ -83,7 +74,7 @@ export const useStore = create<Store>()(
         });
 
         //
-        if (user?.id && location && deviceInfo) {
+        if (user?.id && location !== undefined && deviceInfo) {
           sendKafkaEvents({
             userId: user?.id,
             productId: product?.id,
@@ -103,7 +94,7 @@ export const useStore = create<Store>()(
           cart: state.cart?.filter((item) => item.id !== id),
         }));
 
-        if (user?.id && location && deviceInfo && removedProduct) {
+        if (user?.id && location !== undefined && deviceInfo && removedProduct) {
           sendKafkaEvents({
             userId: user?.id,
             productId: removedProduct?.id,
@@ -125,7 +116,7 @@ export const useStore = create<Store>()(
           return { wishlist: [...state.wishlist, product] };
         });
 
-        if (user?.id && location && deviceInfo) {
+        if (user?.id && location !== undefined && deviceInfo) {
           sendKafkaEvents({
             userId: user?.id,
             productId: product?.id,
@@ -144,7 +135,7 @@ export const useStore = create<Store>()(
           wishlist: state.wishlist?.filter((item) => item.id !== id),
         }));
 
-        if (user?.id && location && deviceInfo && removedProduct) {
+        if (user?.id && location !== undefined && deviceInfo && removedProduct) {
           sendKafkaEvents({
             userId: user?.id,
             productId: removedProduct?.id,

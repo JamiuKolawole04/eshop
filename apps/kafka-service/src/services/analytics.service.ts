@@ -2,6 +2,8 @@ import { prisma } from "@packages/prisma";
 import { Actions, EventData } from "../types";
 
 export const updateUserAnalytics = async (event: EventData) => {
+  if (!event.userId) return;
+
   try {
     const existingData = await prisma.userAnalytics.findUnique({
       where: {
@@ -134,7 +136,7 @@ export const updateProductAnalytics = async (event: EventData) => {
       },
       create: {
         productId: event.productId,
-        shopId: event?.shopId,
+        shopId: event?.shopId as string,
         views: event.action === "product_view" ? 1 : 0,
         cartAdds: event.action === "add_to_cart" ? 1 : 0,
         wishListAdds: event.action === "add_to_wishlist" ? 1 : 0,
@@ -217,5 +219,61 @@ export const updateShopAnalytics = async (event: EventData) => {
     );
   } catch (err) {
     console.error("Error storing shop analytics", err);
+  }
+};
+
+const lagosDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Africa/Lagos",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+let visitorDate = "";
+const seenVisitors = new Set<string>();
+
+export const updatePageAnalytics = async (event: EventData) => {
+  if (!event.page) return;
+
+  try {
+    const date = lagosDateFormatter.format(new Date());
+
+    if (date !== visitorDate) {
+      seenVisitors.clear();
+      visitorDate = date;
+    }
+
+    const visitorKey = event.userId ?? event.visitorId;
+    let isNewVisitor = false;
+
+    if (visitorKey) {
+      isNewVisitor = !seenVisitors.has(visitorKey);
+      seenVisitors.add(visitorKey);
+    }
+
+    // Cap memory usage; dedupe is best-effort per day.
+    if (seenVisitors.size > 100_000) {
+      seenVisitors.clear();
+    }
+
+    await prisma.pageAnalytics.upsert({
+      where: { page_date: { page: event.page, date } },
+      update: {
+        views: { increment: 1 },
+        lastVisitedAt: new Date(),
+        ...(isNewVisitor ? { visitors: { increment: 1 } } : {}),
+      },
+      create: {
+        page: event.page,
+        date,
+        views: 1,
+        visitors: isNewVisitor ? 1 : 0,
+        lastVisitedAt: new Date(),
+      },
+    });
+
+    console.log(`[PageAnalytics] Updated for page=${event.page}, date=${date}`);
+  } catch (err) {
+    console.error("Error storing page analytics", err);
   }
 };

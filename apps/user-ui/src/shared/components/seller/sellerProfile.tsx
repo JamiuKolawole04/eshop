@@ -108,7 +108,6 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
       }
     },
     onSuccess: () => {
-      // Flip state only after successful request
       if (isFollowing) {
         setFollowers(followers - 1);
       } else {
@@ -126,7 +125,7 @@ const SellerProfile = ({ shop, followersCount }: Props) => {
 
   useEffect(() => {
     if (!isLoading) {
-      if (!location || !deviceInfo) return;
+      if (location === undefined || !deviceInfo) return;
       sendKafkaEvents({
         userId: user?.id,
         shopId: shop?.id,

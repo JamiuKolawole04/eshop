@@ -564,6 +564,42 @@ export const getAdminGeo = async (
   }
 };
 
+export const getPageViews = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const requested = parseInt(req.query.days as string) || 7;
+    const days = Math.min(Math.max(requested, 1), 30);
+
+    const rows = await prisma.pageAnalytics.findMany({
+      where: { page: "/" },
+      orderBy: { date: "desc" },
+      take: days,
+    });
+
+    const latest = await prisma.pageAnalytics.findFirst({
+      where: { page: "/" },
+      orderBy: { lastVisitedAt: "desc" },
+      select: { lastVisitedAt: true },
+    });
+
+    return res.status(200).json({
+      success: true,
+      page: "/",
+      days: rows.reverse().map((row) => ({
+        date: row.date,
+        views: row.views,
+        visitors: row.visitors,
+      })),
+      lastVisit: latest?.lastVisitedAt?.toISOString() ?? null,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const IMAGE_EXTENSIONS: Record<string, string> = {

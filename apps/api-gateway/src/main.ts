@@ -7,7 +7,11 @@ import httpProxy from "http-proxy";
 
 import { initializeConfig } from "./libs/initializeSiteConfig";
 import { corsMiddleware } from "./shared/middlewares/cors";
-import { globalLimiter } from "@packages/middleware/rate-limit";
+import {
+  createRateLimiter,
+  globalLimiter,
+} from "@packages/middleware/rate-limit";
+import { getGeo } from "./shared/geo";
 
 const app = express();
 
@@ -18,6 +22,12 @@ type ProxyError = Error & {
   code?: string;
   errors?: Array<{ code?: string }>;
 };
+
+const geoLimiter = createRateLimiter({
+  prefix: "rl:geo:",
+  limit: 60,
+  windowMs: 60_000,
+});
 
 const markProxyStart: RequestHandler = (req, res, next) => {
   res.locals.proxyStartedAt = Date.now();
@@ -93,6 +103,8 @@ app.use(globalLimiter);
 app.get("/gateway-health", (req, res) => {
   res.send({ message: "Welcome to api-gateway!" });
 });
+
+app.get("/api/geo", geoLimiter, getGeo);
 
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 

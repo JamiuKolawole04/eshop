@@ -13,6 +13,7 @@ import {
 import { ProductCard } from "@/shared/components/cards/productCard";
 import { ShopCard } from "@/shared/components/cards/ShopCard";
 import { isPublic } from "@/utils/protected";
+import { usePageView } from "@/hooks/use-page-view";
 
 const fetchAllProducts = async () => {
   const response = await axiosInstance.get<GetAllProductsResponseType>(
@@ -54,6 +55,8 @@ const GRID =
   "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5";
 
 export default function Page() {
+  usePageView("/");
+
   const {
     data: products,
     isLoading,

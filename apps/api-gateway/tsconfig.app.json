@@ -14,6 +14,9 @@
     },
     {
       "path": "../../packages/prisma/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/redis/tsconfig.lib.json"
     }
   ]
 }

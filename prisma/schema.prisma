@@ -260,6 +260,20 @@ model ShopAnalytics {
   updatedAt DateTime @updatedAt
 }
 
+model PageAnalytics {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  page          String
+  date          String // YYYY-MM-DD in Africa/Lagos
+  views         Int      @default(0)
+  visitors      Int      @default(0)
+  lastVisitedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([page, date])
+}
+
 model UniqueShopVisitors {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   shopId    String   @db.ObjectId
