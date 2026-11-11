@@ -6,7 +6,7 @@ services:
     region: frankfurt
     autoDeploy: true
     healthCheckPath: /gateway-health
-    buildCommand: npm ci --include=dev --legacy-peer-deps && npx prisma generate && npx nx run-many -t build -p @eshop/api-gateway @eshop/auth-service @eshop/product-service @eshop/user-service @eshop/order-service @eshop/admin-service @eshop/seller-service @eshop/chatting-service @eshop/kafka-service --parallel=1
+    buildCommand: npm ci --include=dev --legacy-peer-deps && npx prisma generate && npx nx run-many -t build -p @eshop/api-gateway @eshop/auth-service @eshop/product-service @eshop/user-service @eshop/order-service @eshop/admin-service @eshop/seller-service @eshop/chatting-service @eshop/kafka-service @eshop/logger-service --parallel=1
     startCommand: node scripts/start-all.mjs
     envVars:
       - key: NODE_VERSION

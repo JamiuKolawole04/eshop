@@ -129,23 +129,30 @@ app.use(gatewayErrorHandler);
 
 const port = process.env.PORT || 8080;
 
-const wsProxy = httpProxy.createProxyServer({
-  target: "http://localhost:6006",
-  ws: true,
-  xfwd: true,
-});
+const createWsProxy = (target: string) => {
+  const wsProxy = httpProxy.createProxyServer({
+    target,
+    ws: true,
+    xfwd: true,
+  });
 
-wsProxy.on("error", (err, _req, socket) => {
-  console.error(
-    `[gateway] websocket upstream unavailable (${
-      (err as NodeJS.ErrnoException).code ?? err.message
-    })`,
-  );
+  wsProxy.on("error", (err, _req, socket) => {
+    console.error(
+      `[gateway] websocket upstream unavailable (${target}) (${
+        (err as NodeJS.ErrnoException).code ?? err.message
+      })`,
+    );
 
-  if (socket && "destroy" in socket) {
-    socket.destroy();
-  }
-});
+    if (socket && "destroy" in socket) {
+      socket.destroy();
+    }
+  });
+
+  return wsProxy;
+};
+
+const chattingWsProxy = createWsProxy("http://localhost:6006");
+const loggerWsProxy = createWsProxy("http://localhost:6008");
 
 const server = app.listen(port, async () => {
   console.log(`Listening at http://localhost:${port}/api`);
@@ -158,7 +165,20 @@ const server = app.listen(port, async () => {
 });
 
 server.on("upgrade", (req, socket, head) => {
-  wsProxy.ws(req, socket, head);
+  let pathname = "/";
+
+  try {
+    pathname = new URL(req.url ?? "/", "http://localhost").pathname;
+  } catch {
+    pathname = "/";
+  }
+
+  if (pathname === "/logger") {
+    loggerWsProxy.ws(req, socket, head);
+    return;
+  }
+
+  chattingWsProxy.ws(req, socket, head);
 });
 
 server.on("error", console.error);

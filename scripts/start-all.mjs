@@ -1,16 +1,3 @@
-#!/usr/bin/env node
-/**
- * Runs the whole backend in one container (Render free tier exposes a single
- * port and bills per service, so eight services are not an option).
- *
- * - every HTTP service gets its own PORT on 127.0.0.1
- * - the gateway is started last and inherits the platform's $PORT
- * - each child gets a log prefix so Render's log stream stays readable
- * - if a critical child dies the container exits, letting Render restart it
- *
- * Run `npx nx run-many -t build -p <services>` and `npx prisma generate`
- * before this script; it only runs the compiled `apps/<name>/dist/main.js`.
- */
 import "dotenv/config";
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -27,6 +14,12 @@ const HTTP_SERVICES = [
   { name: "admin-service", port: 6005, health: "/health" },
   { name: "chatting-service", port: 6006, health: "/health" },
   { name: "seller-service", port: 6007, health: "/health" },
+  {
+    name: "logger-service",
+    port: 6008,
+    health: "/health",
+    optional: true,
+  },
 ];
 
 const WORKERS = [
@@ -97,6 +90,14 @@ const start = (service, env = {}) => {
     console.error(
       `[bootstrap] missing build output for ${service.name}: ${path.relative(root, entry)}`,
     );
+
+    if (service.optional) {
+      console.error(
+        `[bootstrap] ${service.name} is optional, continuing without it`,
+      );
+      return null;
+    }
+
     shutdown(1);
     return null;
   }
@@ -182,8 +183,9 @@ for (const worker of WORKERS) {
   start(worker);
 }
 
+const requiredServices = HTTP_SERVICES.filter((service) => !service.optional);
 const healthChecks = await Promise.all(
-  HTTP_SERVICES.map((service) => waitForHealth(service)),
+  requiredServices.map((service) => waitForHealth(service)),
 );
 
 if (healthChecks.some((healthy) => !healthy)) {
