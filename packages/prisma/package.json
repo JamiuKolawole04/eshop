@@ -20,6 +20,7 @@
     "targets": {
       "build": {
         "executor": "@nx/js:swc",
+        "cache": false,
         "outputs": [
           "{options.outputPath}"
         ],

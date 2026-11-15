@@ -5,6 +5,7 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
+      "{workspaceRoot}/prisma/schema.prisma",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/jest.config.[jt]s",
