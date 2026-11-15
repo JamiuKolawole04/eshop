@@ -11,7 +11,7 @@ const BOT_UA =
 const IPDATA_BASE_URL = "https://api.ipdata.co";
 const CACHE_PREFIX = "geo:v1:ip:";
 const CACHE_TTL_SECONDS = 86_400;
-const LOOKUP_TIMEOUT_MS = 1_000;
+const LOOKUP_TIMEOUT_MS = 2_000;
 const CIRCUIT_OPEN_AUTH_STATUS_MS = 10 * 60 * 1_000;
 const CIRCUIT_OPEN_OTHER_MS = 60 * 1_000;
 

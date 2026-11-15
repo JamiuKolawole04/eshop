@@ -11,7 +11,7 @@ import {
   createRateLimiter,
   globalLimiter,
 } from "@packages/middleware/rate-limit";
-import { getGeo } from "./shared/geo";
+import { getGeo, isPrivateIp } from "./shared/geo";
 
 const app = express();
 
@@ -96,7 +96,7 @@ app.use(corsMiddleware);
 
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(cookieParser());
-app.set("trust proxy", 1);
+app.set("trust proxy", (ip: string) => isPrivateIp(ip));
 
 app.use(globalLimiter);
 
