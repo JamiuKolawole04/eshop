@@ -33,9 +33,9 @@ import {
   ProductType,
 } from "@packages/ui";
 
-const fetchEvents = async (shopId: string) => {
+const fetchEvents = async () => {
   const response = await axiosInstance.get<GetSellerEventsByUserResponseType>(
-    `/api/sellers/shops/${shopId}/events?page=1&limit=20`,
+    `/api/products/shop-events?page=1&limit=20`,
   );
 
   return response.data.products;
@@ -60,7 +60,7 @@ const Page = () => {
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["shop-events", shopId, 20],
-    queryFn: () => fetchEvents(shopId),
+    queryFn: fetchEvents,
     enabled: !!shopId,
     staleTime: 1000 * 60 * 5,
   });

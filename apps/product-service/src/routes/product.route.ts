@@ -16,6 +16,7 @@ import {
   getFilteredProducts,
   getFilteredShops,
   getProductDetails,
+  getShopEvents,
   getShopProducts,
   restoreProduct,
   searchProducts,
@@ -41,6 +42,13 @@ router.get(
   isAuthenticated("seller"),
   isSeller,
   getShopProducts,
+);
+
+router.get(
+  "/shop-events",
+  isAuthenticated("seller"),
+  isSeller,
+  getShopEvents,
 );
 
 router.delete(
