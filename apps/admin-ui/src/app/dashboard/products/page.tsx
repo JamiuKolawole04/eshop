@@ -105,7 +105,7 @@ const Products = () => {
         cell: ({ row }) => (
           <div className="flex items-center gap-1 text-yellow-400">
             <Star fill="#fde047" size={18} />
-            <span className="text-white">{row.original.ratings || 5}</span>
+            <span className="text-white">{row.original.ratings}</span>
           </div>
         ),
       },
