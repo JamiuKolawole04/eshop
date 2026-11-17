@@ -20,6 +20,7 @@ import {
   CreateConversationResponseType,
   formatCurrency,
   GetFilteredProductsResponseType,
+  PRICE_RANGE_MAX,
   ProductWithRelationsType,
 } from "@packages/ui";
 import Ratings from "../ratings";
@@ -48,7 +49,7 @@ export const ProductDetails = ({ product }: Props) => {
     product?.sizes?.[0] || "",
   );
   const [quantity, setQuantity] = useState(1);
-  const [priceRange] = useState([product?.sale_price, 1199]);
+  const [priceRange] = useState([product?.sale_price, PRICE_RANGE_MAX]);
   const [recommendedProducts, setRecommendedProducts] = useState<
     ProductWithRelationsType[]
   >([]);

@@ -23,6 +23,7 @@ export * from "./types/notifications";
 export * from "./utils/size";
 export * from "./utils/color";
 export * from "./utils/currency";
+export * from "./utils/price-range";
 export * from "./utils/countries";
 export * from "./utils/phone";
 export * from "./lib/ratings";

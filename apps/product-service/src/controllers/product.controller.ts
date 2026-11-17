@@ -12,6 +12,7 @@ import { imageKit } from "@packages/imagekit";
 
 const MAX_SEARCH_LENGTH = 80;
 const SEARCH_RESULT_LIMIT = 10;
+const DEFAULT_PRICE_RANGE: [number, number] = [0, 5_000_000];
 
 const escapeRegex = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -633,7 +634,7 @@ export const getFilteredProducts = async (
   try {
     const {
       q,
-      priceRange = [0, 10000],
+      priceRange = DEFAULT_PRICE_RANGE,
       categories = [],
       colors = [],
       sizes = [],
@@ -644,7 +645,7 @@ export const getFilteredProducts = async (
     const parsedPriceRange =
       typeof priceRange === "string"
         ? priceRange.split(",").map(Number)
-        : [0, 10000];
+        : DEFAULT_PRICE_RANGE;
     const parsedPage = Number(page);
     const parsedLimit = Number(limit);
     const skip = (parsedPage - 1) * parsedLimit;
@@ -787,7 +788,7 @@ export const getFilteredEvents = async (
 ) => {
   try {
     const {
-      priceRange = [0, 10000],
+      priceRange = DEFAULT_PRICE_RANGE,
       categories = [],
       colors = [],
       sizes = [],
@@ -798,7 +799,7 @@ export const getFilteredEvents = async (
     const parsedPriceRange =
       typeof priceRange === "string"
         ? priceRange.split(",").map(Number)
-        : [0, 10000];
+        : DEFAULT_PRICE_RANGE;
     const parsedPage = Number(page);
     const parsedLimit = Number(limit);
     const skip = (parsedPage - 1) * parsedLimit;

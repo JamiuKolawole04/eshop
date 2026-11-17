@@ -13,6 +13,9 @@ import {
   GetFilteredProductsResponseType,
   ProductCategoriesTypes,
   ProductWithRelationsType,
+  PRICE_RANGE_MAX,
+  PRICE_RANGE_MIN,
+  PRICE_RANGE_STEP,
   productColorOptions,
   sizes,
 } from "@packages/ui";
@@ -26,25 +29,21 @@ async function fetchProductCategories() {
   return response.data;
 }
 
-const MIN = 0;
-const MAX = 10000;
-const STEP = 10;
-
 const parseListParam = (value: string) => value.split(",").filter(Boolean);
 
 const parsePriceRangeParam = (value: string): number[] => {
   const [rawMin, rawMax] = value.split(",").map(Number);
 
   if (!Number.isFinite(rawMin) || !Number.isFinite(rawMax)) {
-    return [MIN, MAX];
+    return [PRICE_RANGE_MIN, PRICE_RANGE_MAX];
   }
 
   const low = Math.min(rawMin, rawMax);
   const high = Math.max(rawMin, rawMax);
 
   return [
-    Math.max(MIN, Math.min(MAX, low)),
-    Math.max(MIN, Math.min(MAX, high)),
+    Math.max(PRICE_RANGE_MIN, Math.min(PRICE_RANGE_MAX, low)),
+    Math.max(PRICE_RANGE_MIN, Math.min(PRICE_RANGE_MAX, high)),
   ];
 };
 
@@ -392,15 +391,21 @@ const ProductsContent = () => {
               <h3 className="text-xl font-medium">Price Filter</h3>
               <div className="mx-2">
                 <Range
-                  step={STEP}
-                  min={MIN}
-                  max={MAX}
+                  step={PRICE_RANGE_STEP}
+                  min={PRICE_RANGE_MIN}
+                  max={PRICE_RANGE_MAX}
                   values={tempPriceRange}
                   onChange={(values) => setTempPriceRange(values)}
                   renderTrack={({ props, children }) => {
                     const [min, max] = tempPriceRange;
-                    const percentageLeft = ((min - MIN) / (MAX - MIN)) * 100;
-                    const percentageRight = ((max - MIN) / (MAX - MIN)) * 100;
+                    const percentageLeft =
+                      ((min - PRICE_RANGE_MIN) /
+                        (PRICE_RANGE_MAX - PRICE_RANGE_MIN)) *
+                      100;
+                    const percentageRight =
+                      ((max - PRICE_RANGE_MIN) /
+                        (PRICE_RANGE_MAX - PRICE_RANGE_MIN)) *
+                      100;
 
                     return (
                       <div

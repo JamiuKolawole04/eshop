@@ -12,6 +12,9 @@ import {
   GetFilteredEventOffersResponseType,
   ProductCategoriesTypes,
   ProductWithRelationsType,
+  PRICE_RANGE_MAX,
+  PRICE_RANGE_MIN,
+  PRICE_RANGE_STEP,
   sizes,
   productColorOptions,
 } from "@packages/ui";
@@ -25,9 +28,6 @@ async function fetchProductCategories() {
   return response.data;
 }
 
-const MIN = 0;
-const MAX = 1199;
-
 // Product grid: 1 col (phones) -> 2 (>=480px) -> 3 (lg) -> 5 (2xl)
 const GRID_CLASSES =
   "grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4 sm:gap-5";
@@ -37,14 +37,20 @@ const SECTION_TITLE = "text-xl font-medium border-b border-b-slate-300 pb-1";
 const Page = () => {
   const router = useRouter();
   const [isProductLoading, setIsProductLoading] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1199]);
+  const [priceRange, setPriceRange] = useState([
+    PRICE_RANGE_MIN,
+    PRICE_RANGE_MAX,
+  ]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [page, setPage] = useState<number>(1);
   const [products, setProducts] = useState<ProductWithRelationsType[]>([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [tempPriceRange, setTempPriceRange] = useState([0, 1199]);
+  const [tempPriceRange, setTempPriceRange] = useState([
+    PRICE_RANGE_MIN,
+    PRICE_RANGE_MAX,
+  ]);
   // UI only: opens/closes the filter panel on screens smaller than lg
   const [showFilters, setShowFilters] = useState(false);
 
@@ -172,15 +178,21 @@ const Page = () => {
               <h3 className="text-xl font-medium">Price Filter</h3>
               <div className="mx-2">
                 <Range
-                  step={1}
-                  min={MIN}
-                  max={MAX}
+                  step={PRICE_RANGE_STEP}
+                  min={PRICE_RANGE_MIN}
+                  max={PRICE_RANGE_MAX}
                   values={tempPriceRange}
                   onChange={(values) => setTempPriceRange(values)}
                   renderTrack={({ props, children }) => {
                     const [min, max] = tempPriceRange;
-                    const percentageLeft = ((min - MIN) / (MAX - MIN)) * 100;
-                    const percentageRight = ((max - MIN) / (MAX - MIN)) * 100;
+                    const percentageLeft =
+                      ((min - PRICE_RANGE_MIN) /
+                        (PRICE_RANGE_MAX - PRICE_RANGE_MIN)) *
+                      100;
+                    const percentageRight =
+                      ((max - PRICE_RANGE_MIN) /
+                        (PRICE_RANGE_MAX - PRICE_RANGE_MIN)) *
+                      100;
 
                     return (
                       <div
