@@ -19,6 +19,7 @@ import {
   SizeSelector,
   AllDiscountCodeResponseType,
   ProductType,
+  formatCurrency,
 } from "@packages/ui";
 import axiosInstance from "@/utils/axiosInstance";
 import { ImagePlaceholder } from "@/shared/component/image-placeholder";
@@ -674,7 +675,7 @@ const ProductForm = ({
               <div className="mt-2">
                 <Input
                   label="Regular Price"
-                  placeholder="20$"
+                  placeholder={formatCurrency(20, { decimals: false })}
                   {...register("regular_price", {
                     valueAsNumber: true,
                     min: { value: 1, message: "Price must be at least 1" },
@@ -692,7 +693,7 @@ const ProductForm = ({
               <div className="mt-2">
                 <Input
                   label="Sale Price *"
-                  placeholder="15$"
+                  placeholder={formatCurrency(15, { decimals: false })}
                   {...register("sale_price", {
                     required: "Sale Price is required",
                     valueAsNumber: true,
