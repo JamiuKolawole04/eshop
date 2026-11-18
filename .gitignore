@@ -62,3 +62,6 @@ packages/kafka/src/certs/*.pem
 .nx/polygraph
 .nx/self-healing
 .nx/migrate-runs
+
+# Playwright MCP
+.playwright-mcp/
