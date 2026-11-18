@@ -25,6 +25,7 @@ export const emailWorker = new Worker(
   {
     connection: bullmqRedis,
     concurrency: 1,
+    drainDelay: 30,
   },
 );
 
