@@ -18,6 +18,18 @@ type Props = {
   isEvent?: boolean;
 };
 
+const formatTimeLeft = (endingDate: string) => {
+  const diff = new Date(endingDate).getTime() - Date.now();
+
+  if (diff <= 0) return "Expired";
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+
+  return `${days}d ${hours}h ${minutes}m left with this price`;
+};
+
 export const ProductCard = ({ product, isEvent }: Props) => {
   const { user } = useUser();
   const { addToWishlist, addToCart, removeFromWishlist, wishlist, cart } =
@@ -32,29 +44,15 @@ export const ProductCard = ({ product, isEvent }: Props) => {
   const isInCart = cart.some((item) => item.id === product.id);
 
   useEffect(() => {
-    if (isEvent && product?.ending_date) {
-      const interval = setInterval(() => {
-        const endTime = new Date(product.ending_date as string).getTime();
-        const now = Date.now();
-        const diff = endTime - now;
+    if (!isEvent || !product?.ending_date) return;
 
-        if (diff <= 0) {
-          setTimeLeft("Expired");
-          clearInterval(interval);
-          return;
-        }
+    const update = () =>
+      setTimeLeft(formatTimeLeft(product.ending_date as string));
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    update();
+    const interval = setInterval(update, 60000);
 
-        setTimeLeft(`${days}d ${hours}h ${minutes}m left with this price`);
-      }, 60000);
-
-      return () => clearInterval(interval);
-    }
-
-    return;
+    return () => clearInterval(interval);
   }, [isEvent, product?.ending_date]);
 
   return (
