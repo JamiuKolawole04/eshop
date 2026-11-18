@@ -11,7 +11,6 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import {
-  BarChart,
   ChevronRight,
   Eye,
   Pencil,
@@ -108,6 +107,8 @@ const Page = () => {
           return (
             <Link
               href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/product/${row.original.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-blue-400 hover:underline max-w-[220px] truncate"
               title={row.original.title}
             >
@@ -164,12 +165,6 @@ const Page = () => {
             >
               <Pencil size={18} />
             </Link>
-            <button
-              className="text-green-400 hover:text-green-300 transition"
-              // onClick={() => openAnalytics(row.original)}
-            >
-              <BarChart size={18} />
-            </button>
             <button
               className="text-red-400 hover:text-red-300 transition"
               onClick={() => openDeleteModal(row.original)}
