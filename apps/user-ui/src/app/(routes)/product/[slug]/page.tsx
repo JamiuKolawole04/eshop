@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import axiosInstance from "@/utils/axiosInstance";
 import { GetProductBySlugResponseType } from "@packages/ui";
 import { ProductDetails } from "@/shared/components/product/productDetails";
+import { SITE_NAME } from "@/shared/constants/site";
 import { isPublic } from "@/utils/protected";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -19,14 +20,18 @@ async function fetchProductDetails(slug: string) {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const product = await fetchProductDetails(slug);
+  const productTitle = product?.title;
+  const brandedTitle = productTitle
+    ? `${productTitle} | ${SITE_NAME}`
+    : SITE_NAME;
 
   return {
-    title: `${product?.title} | "Eshop Marketplace`,
+    title: productTitle,
     description:
       product?.short_description ||
       "Discover high-quality products on Eshop Marketplace.",
     openGraph: {
-      title: product?.title,
+      title: brandedTitle,
       description: product?.short_description || "",
       images: [
         product?.images?.[0]?.url ||
@@ -36,7 +41,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: product?.title,
+      title: brandedTitle,
       description: product?.short_description || "",
       images: [
         product?.images?.[0]?.url ||

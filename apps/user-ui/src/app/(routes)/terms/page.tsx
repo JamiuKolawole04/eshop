@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | eshop",
+  title: "Terms & Conditions",
   description:
     "The terms that apply when you buy and sell on eshop, the marketplace for independent sellers in Nigeria.",
 };

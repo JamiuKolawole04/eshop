@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import axiosInstance from "@/utils/axiosInstance";
 import { FetchSellerDetailsResponseType } from "@packages/ui";
 import SellerProfile from "@/shared/components/seller/sellerProfile";
+import { SITE_NAME } from "@/shared/constants/site";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -17,14 +18,16 @@ async function fetchSellerDetails(id: string) {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
   const data = await fetchSellerDetails(id);
+  const shopTitle = data?.shop?.name;
+  const brandedTitle = shopTitle ? `${shopTitle} | ${SITE_NAME}` : SITE_NAME;
 
   return {
-    title: `${data?.shop?.name} | Eshop Marketplace`,
+    title: shopTitle,
     description:
       data?.shop?.bio ||
       "Explore products and services from trusted sellers on Eshop.",
     openGraph: {
-      title: `${data?.shop?.name} | Eshop Marketplace`,
+      title: brandedTitle,
       description:
         data?.shop?.bio ||
         "Explore products and services from trusted sellers on Eshop.",
@@ -42,7 +45,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${data?.shop?.name} | Eshop Marketplace`,
+      title: brandedTitle,
       description:
         data?.shop?.bio ||
         "Explore products and services from trusted sellers on Eshop.",
