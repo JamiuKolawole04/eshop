@@ -12,7 +12,11 @@ import {
 } from "@packages/error-handler";
 import { redis } from "@packages/redis";
 import { paystack } from "@packages/payment";
-import { orderConfirmationQueue } from "../bullmq/email.queue";
+import {
+  SELLER_ORDER_ALERT_JOB,
+  orderConfirmationQueue,
+  sellerOrderAlertQueue,
+} from "../bullmq/email.queue";
 import { sendLog } from "@packages/logs";
 
 const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY), {
@@ -591,6 +595,10 @@ const materializeOrders = async (
     process.env.USER_UI_URL?.replace(/\/+$/, "") ||
     "https://www.eshopstore.com.ng";
 
+  const sellerBaseUrl =
+    process.env.SELLER_UI_URL?.replace(/\/+$/, "") ||
+    "http://localhost:3001";
+
   const shopGrouped = cart.reduce((acc: any, item: any) => {
     if (!acc[item.shopId]) acc[item.shopId] = [];
     acc[item.shopId].push(item);
@@ -761,6 +769,8 @@ const materializeOrders = async (
         id: true,
         sellerId: true,
         name: true,
+        orderNotificationChannel: true,
+        seller: { select: { name: true, email: true } },
       },
     });
 
@@ -777,6 +787,30 @@ const materializeOrders = async (
           redirectLink: `/order/${order.id}`,
         },
       });
+
+      // Email the seller when their shop is configured for email alerts
+      if (
+        shop.seller?.email &&
+        (shop.orderNotificationChannel === "email" ||
+          shop.orderNotificationChannel === "all")
+      ) {
+        await sellerOrderAlertQueue.add(
+          SELLER_ORDER_ALERT_JOB,
+          {
+            orderId: order.id,
+            sellerEmail: shop.seller.email,
+            sellerName: shop.seller.name,
+            shopName: shop.name,
+            buyerName: name ?? "A customer",
+            cart: orderItems,
+            totalAmount: orderTotal,
+            paymentMethod,
+            contactPhone: contactPhone ?? null,
+            orderUrl: `${sellerBaseUrl}/order/${order.id}`,
+          },
+          { jobId: `seller-order-alert-${order.id}` },
+        );
+      }
 
       // user notification
       await prisma.notifications.create({

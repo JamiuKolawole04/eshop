@@ -1,15 +1,26 @@
-import { Worker } from "bullmq";
+import { Job, Worker } from "bullmq";
 
 import { bullmqRedis } from "@packages/redis";
 import {
   ORDER_CONFIRMATION_QUEUE,
+  SELLER_ORDER_ALERT_JOB,
   processOrderConfirmationEmail,
+  processSellerOrderAlertEmail,
 } from "./email.queue";
+import { OrderConfirmationJob, SellerOrderAlertJob } from "./job-types";
 
 export const emailWorker = new Worker(
   ORDER_CONFIRMATION_QUEUE,
   async (job) => {
-    return await processOrderConfirmationEmail(job);
+    if (job.name === SELLER_ORDER_ALERT_JOB) {
+      return await processSellerOrderAlertEmail(
+        job as unknown as Job<SellerOrderAlertJob>,
+      );
+    }
+
+    return await processOrderConfirmationEmail(
+      job as unknown as Job<OrderConfirmationJob>,
+    );
   },
   {
     connection: bullmqRedis,
