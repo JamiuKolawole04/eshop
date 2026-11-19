@@ -8,6 +8,7 @@ type Opts = {
   limit: number;
   windowMs?: number;
   passOnStoreError?: boolean;
+  storeType?: "redis" | "memory";
 };
 
 export const createRateLimiter = ({
@@ -15,6 +16,7 @@ export const createRateLimiter = ({
   limit,
   windowMs = 15 * 60 * 1000,
   passOnStoreError = true,
+  storeType = "redis",
 }: Opts) =>
   rateLimit({
     windowMs,
@@ -23,11 +25,14 @@ export const createRateLimiter = ({
     legacyHeaders: false,
     ipv6Subnet: 56,
     passOnStoreError,
-    store: new RedisStore({
-      prefix,
-      sendCommand: (command: string, ...args: string[]) =>
-        redis.call(command, ...args) as Promise<RedisReply>,
-    }),
+    store:
+      storeType === "redis"
+        ? new RedisStore({
+            prefix,
+            sendCommand: (command: string, ...args: string[]) =>
+              redis.call(command, ...args) as Promise<RedisReply>,
+          })
+        : undefined,
     handler: (_req, res) =>
       res.status(429).json({
         success: false,
@@ -38,6 +43,7 @@ export const createRateLimiter = ({
 export const globalLimiter = createRateLimiter({
   prefix: "rl:global:",
   limit: 1000,
+  storeType: "memory",
 });
 export const authLimiter = createRateLimiter({ prefix: "rl:auth:", limit: 20 });
 export const refreshLimiter = createRateLimiter({

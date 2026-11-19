@@ -99,11 +99,11 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(cookieParser());
 app.set("trust proxy", (ip: string) => isTrustedProxy(ip));
 
-app.use(globalLimiter);
-
 app.get("/gateway-health", (req, res) => {
   res.send({ message: "Welcome to api-gateway!" });
 });
+
+app.use(globalLimiter);
 
 app.get("/api/geo", geoLimiter, getGeo);
 
