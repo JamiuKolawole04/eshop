@@ -188,6 +188,9 @@ const HeaderBottom = () => {
               <Link
                 key={index + 1}
                 href={item.href}
+                {...(item.external
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
                 className="px-3 md:px-5 font-medium font-Poppins text-sm whitespace-nowrap"
               >
                 {item.title}
