@@ -45,8 +45,20 @@ export const globalLimiter = createRateLimiter({
   limit: 1000,
   storeType: "memory",
 });
-export const authLimiter = createRateLimiter({ prefix: "rl:auth:", limit: 20 });
+export const authLimiter = createRateLimiter({
+  prefix: "rl:auth:",
+  limit: 20,
+  storeType: "memory",
+});
 export const refreshLimiter = createRateLimiter({
   prefix: "rl:refresh:",
   limit: 60,
+  storeType: "memory",
+});
+
+export const geoLimiter = createRateLimiter({
+  prefix: "rl:geo:",
+  limit: 60,
+  windowMs: 60_000,
+  storeType: "memory",
 });

@@ -7,10 +7,7 @@ import httpProxy from "http-proxy";
 
 import { initializeConfig } from "./libs/initializeSiteConfig";
 import { corsMiddleware } from "./shared/middlewares/cors";
-import {
-  createRateLimiter,
-  globalLimiter,
-} from "@packages/middleware/rate-limit";
+import { geoLimiter, globalLimiter } from "@packages/middleware/rate-limit";
 import { getGeo } from "./shared/geo";
 import { isTrustedProxy } from "./shared/ip-trust";
 
@@ -23,12 +20,6 @@ type ProxyError = Error & {
   code?: string;
   errors?: Array<{ code?: string }>;
 };
-
-const geoLimiter = createRateLimiter({
-  prefix: "rl:geo:",
-  limit: 60,
-  windowMs: 60_000,
-});
 
 const markProxyStart: RequestHandler = (req, res, next) => {
   res.locals.proxyStartedAt = Date.now();
