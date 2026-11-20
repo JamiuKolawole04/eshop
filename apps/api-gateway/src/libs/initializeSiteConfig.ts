@@ -25,7 +25,7 @@ export const initializeConfig = async () => {
             ],
           },
           logo: "https://ik.imagekit.io/jnven3dnh3/eshop-products/E-shop-logo.png",
-          logoFileId: "6a9fc3aeead997d09aa64a77",
+          logoFileId: "6afffabaead997d09a577505",
 
           banner: "https://ik.imagekit.io/jnven3dnh3/eshop-products/watch.png",
           bannerFileId: "6a7ee25b5c7cd75eb87f86ba",
