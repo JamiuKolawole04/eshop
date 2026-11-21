@@ -2,8 +2,8 @@ export const ProductCategories = {
   categories: ["Electronics", "Fashion", "Home & Kitchen", "Sports & Fitness"],
   subCategories: {
     Electronics: ["Mobiles", "Laptops", "Accessories", "Gaming"],
-    Fashion: ["Men", "Women", "Kids", "Footwear"],
-    "Home & Kitchen": ["Furniture", "Appliances", "Decor"],
+    Fashion: ["Men", "Women", "Kids", "Footwear", "Bags & Accessories"],
+    "Home & Kitchen": ["Kitchen & Dining", "Storage & Organisation"],
     "Sports & Fitness": ["Gym Equipment", "Outdoor Sports", "Wearables"],
   },
 } as const;
